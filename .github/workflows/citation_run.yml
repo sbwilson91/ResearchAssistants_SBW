@@ -1,29 +1,22 @@
 name: Citation Bot
-
 on:
   # Wednesday 07:00 UTC — mid-week citation check
   schedule:
     - cron: "0 7 * * 3"
   workflow_dispatch:
-
 permissions:
   contents: write
-
 jobs:
   citation-bot:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: pip
-
       - name: Install dependencies
         run: pip install -r requirements.txt
-
       - name: Run Citation Bot
         env:
           PYTHONPATH:      citation_bot
@@ -33,7 +26,6 @@ jobs:
           EMAIL_PASSWORD:  ${{ secrets.EMAIL_PASSWORD }}
           LOOKBACK_PERIOD: week
         run: python citation_bot/citation_bot.py
-
       - name: Write bot status
         if: success()
         run: |
@@ -46,12 +38,11 @@ jobs:
           status["citation_bot"] = {"last_run": datetime.date.today().isoformat(), "status": "success"}
           f.write_text(json.dumps(status, indent=2))
           EOF
-
-      - name: Commit status
+      - name: Commit reports and status
         if: success()
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add citation_bot/reports/ add docs/status.json
-          git diff --staged --quiet || git commit -m "status: citation $(date +%Y-%m-%d) [skip ci]"
+          git add citation_bot/reports/ docs/status.json
+          git diff --staged --quiet || git commit -m "citation: $(date +%Y-%m-%d) [skip ci]"
           git push
