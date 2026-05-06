@@ -11,7 +11,6 @@ Also called locally with: python build_dashboard.py
 
 import re
 import json
-import glob
 import shutil
 from pathlib import Path
 from datetime import datetime, timezone
@@ -39,6 +38,19 @@ def fmt_age(date_str: str) -> tuple[str, str]:
 
 def strip_tags(html: str) -> str:
     return re.sub(r"<[^>]+>", "", html).strip()
+
+
+def _copy_archive(src_files: list[Path], dest_subdir: str, limit: int = 12) -> list[dict]:
+    """Copy the latest N files into docs/<dest_subdir>/ and return archive entries."""
+    arc_dir = DOCS / dest_subdir
+    arc_dir.mkdir(exist_ok=True)
+    entries = []
+    for f in src_files[:limit]:
+        shutil.copy2(f, arc_dir / f.name)
+        # Use the leading YYYY-MM-DD if present, else the stem
+        date_label = f.stem[:10] if re.match(r"\d{4}-\d{2}-\d{2}", f.stem) else f.stem
+        entries.append({"date": date_label, "file": f"{dest_subdir}/{f.name}"})
+    return entries
 
 
 # ── per-bot extractors ────────────────────────────────────────────────────────
@@ -71,19 +83,8 @@ def extract_running_bot() -> dict:
             stats[k] = v
 
     # Copy latest report to docs/ for Pages serving
-    dest = DOCS / "running.html"
-    shutil.copy(f, dest)
-
-    # Also copy archive
-    archive_dir = DOCS / "running_archive"
-    archive_dir.mkdir(exist_ok=True)
-    shutil.copy(f, archive_dir / f.name)
-
-    # Build archive list
-    archive = [
-        {"date": p.stem.replace("report_", ""), "file": f"running_archive/{p.name}"}
-        for p in sorted(reports, reverse=True)[:12]
-    ]
+    shutil.copy(f, DOCS / "running.html")
+    archive = _copy_archive(reports, "running_archive")
 
     return {
         "available": True,
@@ -107,34 +108,20 @@ def extract_journal_digest() -> dict:
     date = f.stem[:10] if len(f.stem) >= 10 else f.stem
     text = f.read_text(encoding="utf-8")
 
-    # Count papers (## headings that look like paper titles)
     paper_count = len(re.findall(r"^## ", text, re.MULTILINE))
 
-    # First H1 or first non-empty line as title
     title_m = re.search(r"^# (.+)$", text, re.MULTILINE)
     title   = title_m.group(1).strip() if title_m else "Weekly Digest"
 
-    # Extract first meaningful paragraph as preview
     paras   = [p.strip() for p in text.split("\n\n") if p.strip() and not p.startswith("#")]
     preview = paras[0][:200] + "…" if paras else ""
 
-    # Copy latest HTML if it exists in docs/
-    html_src = DOCS / "index.html"   # existing Pages output from digest
-    dest     = DOCS / "journal.html"
-    if html_src.exists() and html_src != dest:
-        shutil.copy(html_src, dest)
+    # If journal_digest writes a same-named .html alongside the .md, prefer that
+    html_candidate = f.with_suffix(".html")
+    if html_candidate.exists():
+        shutil.copy(html_candidate, DOCS / "journal.html")
 
-    # Archive list
-    archive = [
-        {"date": p.stem[:10], "file": f"journal_digests/{p.name}"}
-        for p in sorted(digests, reverse=True)[:12]
-    ]
-
-    # Copy markdown files for archive browsing
-    arc_dir = DOCS / "journal_digests"
-    arc_dir.mkdir(exist_ok=True)
-    for d in digests[:12]:
-        shutil.copy(d, arc_dir / d.name)
+    archive = _copy_archive(digests, "journal_digests")
 
     return {
         "available":   True,
@@ -148,38 +135,116 @@ def extract_journal_digest() -> dict:
 
 
 def extract_preprint_digest() -> dict:
-    digests = sorted(
-        (REPO_ROOT / "preprint_digest").glob("*.md"),
-        reverse=True
-    )
-    if not digests:
-        # Check for any other output format
-        digests = sorted(
-            (REPO_ROOT / "preprint_digest").glob("*.html"),
-            reverse=True
-        )
-    if not digests:
+    """Look in preprint_digest/digests/ for both .md (count, title) and .html (link)."""
+    digest_dir = REPO_ROOT / "preprint_digest" / "digests"
+
+    md_files   = sorted(digest_dir.glob("*-preprint-digest.md"), reverse=True)
+    html_files = sorted(digest_dir.glob("*-preprint-digest.html"), reverse=True)
+
+    if not md_files and not html_files:
         return {"available": False}
 
-    f    = digests[0]
-    date = f.stem[:10] if len(f.stem) >= 10 else f.stem
-    text = f.read_text(encoding="utf-8")
+    # Date and metadata come from the markdown if available
+    if md_files:
+        f    = md_files[0]
+        date = f.stem[:10] if len(f.stem) >= 10 else f.stem
+        text = f.read_text(encoding="utf-8")
 
-    paper_count = len(re.findall(r"^## ", text, re.MULTILINE))
-    title_m     = re.search(r"^# (.+)$", text, re.MULTILINE)
-    title       = title_m.group(1).strip() if title_m else "Preprint Digest"
+        # Papers are ### headings; ## are organ section headings
+        paper_count = len(re.findall(r"^### ", text, re.MULTILINE))
+
+        title_m = re.search(r"^# (.+)$", text, re.MULTILINE)
+        title   = title_m.group(1).strip() if title_m else "Preprint Digest"
+    else:
+        f    = html_files[0]
+        date = f.stem[:10] if len(f.stem) >= 10 else f.stem
+        title = "Preprint Digest"
+        paper_count = 0
+
+    # Prefer the HTML version for the dashboard link
+    link = None
+    if html_files:
+        shutil.copy(html_files[0], DOCS / "preprint.html")
+        link = "preprint.html"
+
+    archive = _copy_archive(html_files or md_files, "preprint_digests")
 
     return {
         "available":   True,
         "date":        date,
         "title":       title,
         "paper_count": paper_count,
-        "link":        None,   # email only unless HTML output found
+        "link":        link,
+        "archive":     archive,
+    }
+
+
+def extract_zenodo_bot() -> dict:
+    reports = sorted(
+        (REPO_ROOT / "zenodo_bot" / "reports").glob("*-zenodo.html"),
+        reverse=True
+    )
+    if not reports:
+        return {"available": False}
+
+    f    = reports[0]
+    date = f.stem[:10] if len(f.stem) >= 10 else f.stem
+    text = f.read_text(encoding="utf-8")
+
+    # Extract dataset count from the "<b>N</b> new dataset" pattern we write
+    n = 0
+    m = re.search(r"<b>\s*(\d+)\s*</b>\s*new dataset", text)
+    if m:
+        n = int(m.group(1))
+    else:
+        # Fallback: count <h3> tags (one per dataset)
+        n = len(re.findall(r"<h3>", text))
+
+    shutil.copy(f, DOCS / "zenodo.html")
+    archive = _copy_archive(reports, "zenodo_archive")
+
+    return {
+        "available":    True,
+        "date":         date,
+        "dataset_count": n,
+        "link":         "zenodo.html",
+        "archive":      archive,
+    }
+
+
+def extract_citation_bot() -> dict:
+    reports = sorted(
+        (REPO_ROOT / "citation_bot" / "reports").glob("*-citation.html"),
+        reverse=True
+    )
+    if not reports:
+        return {"available": False}
+
+    f    = reports[0]
+    date = f.stem[:10] if len(f.stem) >= 10 else f.stem
+    text = f.read_text(encoding="utf-8")
+
+    # Extract citation count from "(<b>N</b> found)" pattern we write
+    n = 0
+    m = re.search(r"\(\s*<b>\s*(\d+)\s*</b>\s*found\s*\)", text)
+    if m:
+        n = int(m.group(1))
+    else:
+        n = len(re.findall(r"<h3>", text))
+
+    shutil.copy(f, DOCS / "citation.html")
+    archive = _copy_archive(reports, "citation_archive")
+
+    return {
+        "available":      True,
+        "date":           date,
+        "citation_count": n,
+        "link":           "citation.html",
+        "archive":        archive,
     }
 
 
 def read_status_file(bot_name: str) -> dict:
-    """Read the simple status JSON each bot writes on success."""
     status_file = DOCS / "status.json"
     if status_file.exists():
         try:
@@ -207,7 +272,7 @@ def bot_card(
     link_btn = (
         f'<a href="{link}" class="card-btn">View latest report →</a>'
         if link else
-        '<span class="card-btn-disabled">Email delivery only</span>'
+        '<span class="card-btn-disabled">No report yet</span>'
     )
 
     return f"""
@@ -242,7 +307,8 @@ def archive_dropdown(items: list[dict], label: str = "Archive") -> str:
     </select>"""
 
 
-def build_html(running: dict, journal: dict, preprint: dict, generated_at: str) -> str:
+def build_html(running: dict, journal: dict, preprint: dict,
+               zenodo: dict, citation: dict, generated_at: str) -> str:
 
     # ── Running Bot card ─────────────────────────────────────────
     if running["available"]:
@@ -283,35 +349,44 @@ def build_html(running: dict, journal: dict, preprint: dict, generated_at: str) 
         p_content = f"""
         <div class="digest-title">{preprint['title']}</div>
         <div class="paper-count">{preprint['paper_count']} preprints reviewed</div>"""
-        p_card = bot_card("📄", "Preprint Digest", "Thursday · bioRxiv + arXiv",
+        p_archive = archive_dropdown(preprint.get("archive", []), "Past digests")
+        p_card = bot_card("📄", "Preprint Digest", "Thursday · bioRxiv + Gemini",
                           preprint["date"], p_content, preprint.get("link"),
-                          "#8b5cf6")
+                          "#8b5cf6", p_archive)
     else:
-        p_card = bot_card("📄", "Preprint Digest", "Thursday · bioRxiv + arXiv",
+        p_card = bot_card("📄", "Preprint Digest", "Thursday · bioRxiv + Gemini",
                           "", "<p class='no-data'>No digests yet.</p>",
                           None, "#8b5cf6")
 
-    # ── Email-only bots ──────────────────────────────────────────
-    zenodo_status  = read_status_file("zenodo_bot")
-    citation_status = read_status_file("citation_bot")
+    # ── Zenodo Bot card ──────────────────────────────────────────
+    if zenodo["available"]:
+        z_content = f"""
+        <div class="digest-title">scRNA-seq dataset alert</div>
+        <div class="paper-count">{zenodo['dataset_count']} new dataset{'s' if zenodo['dataset_count'] != 1 else ''}</div>
+        <div class="preview">Recent Zenodo deposits matching single-cell RNA-seq, with AI summaries and metadata stats.</div>"""
+        z_archive = archive_dropdown(zenodo.get("archive", []), "Past reports")
+        z_card = bot_card("🔬", "Zenodo Bot", "Monday · Zenodo API + Gemini",
+                          zenodo["date"], z_content, zenodo["link"],
+                          "#3b82f6", z_archive)
+    else:
+        z_card = bot_card("🔬", "Zenodo Bot", "Monday · Zenodo API + Gemini",
+                          "", "<p class='no-data'>No reports yet.</p>",
+                          None, "#3b82f6")
 
-    z_date = zenodo_status.get("last_run", "")
-    c_date = citation_status.get("last_run", "")
-
-    z_content = f"""
-    <div class="email-note">Queries Zenodo for new scRNA-seq datasets published this week.
-    Generates AI summaries and sends a formatted HTML report by email.</div>
-    {"<div class='last-run'>Last run: "+z_date+"</div>" if z_date else ""}"""
-
-    c_content = f"""
-    <div class="email-note">Tracks papers citing your research via OpenAlex
-    (ORCID 0000-0002-8994-0781). Tags by Microscopy / Transcriptomics and sends by email.</div>
-    {"<div class='last-run'>Last run: "+c_date+"</div>" if c_date else ""}"""
-
-    z_card = bot_card("🔬", "Zenodo Bot", "Monday · Zenodo API + Gemini",
-                      z_date, z_content, None, "#3b82f6")
-    c_card = bot_card("📚", "Citation Bot", "Wednesday · OpenAlex + Gemini",
-                      c_date, c_content, None, "#f59e0b")
+    # ── Citation Bot card ────────────────────────────────────────
+    if citation["available"]:
+        c_content = f"""
+        <div class="digest-title">Citation intelligence</div>
+        <div class="paper-count">{citation['citation_count']} new citation{'s' if citation['citation_count'] != 1 else ''}</div>
+        <div class="preview">Papers citing your work via OpenAlex (ORCID 0000-0002-8994-0781), tagged by Microscopy / Transcriptomics.</div>"""
+        c_archive = archive_dropdown(citation.get("archive", []), "Past reports")
+        c_card = bot_card("📚", "Citation Bot", "Wednesday · OpenAlex + Gemini",
+                          citation["date"], c_content, citation["link"],
+                          "#f59e0b", c_archive)
+    else:
+        c_card = bot_card("📚", "Citation Bot", "Wednesday · OpenAlex + Gemini",
+                          "", "<p class='no-data'>No reports yet.</p>",
+                          None, "#f59e0b")
 
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -363,8 +438,6 @@ def build_html(running: dict, journal: dict, preprint: dict, generated_at: str) 
   .digest-title{{font-size:14px;font-weight:600;color:var(--tx);margin-bottom:6px;}}
   .paper-count{{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--accent,#14b8a6);margin-bottom:10px;}}
   .preview{{font-size:13px;color:var(--mu);line-height:1.65;}}
-  .email-note{{font-size:13px;color:var(--mu);line-height:1.65;margin-bottom:8px;}}
-  .last-run{{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mu);}}
   .no-data{{font-size:13px;color:var(--mu);font-style:italic;}}
 
   /* FOOTER ELEMENTS */
@@ -412,13 +485,17 @@ def main():
     running  = extract_running_bot()
     journal  = extract_journal_digest()
     preprint = extract_preprint_digest()
+    zenodo   = extract_zenodo_bot()
+    citation = extract_citation_bot()
 
-    print(f"  Running bot:      {'✓ ' + running['date'] if running['available'] else '✗ no reports'}")
-    print(f"  Journal digest:   {'✓ ' + journal['date'] if journal['available'] else '✗ no digests'}")
+    print(f"  Running bot:      {'✓ ' + running['date']  if running['available']  else '✗ no reports'}")
+    print(f"  Journal digest:   {'✓ ' + journal['date']  if journal['available']  else '✗ no digests'}")
     print(f"  Preprint digest:  {'✓ ' + preprint['date'] if preprint['available'] else '✗ no digests'}")
+    print(f"  Zenodo bot:       {'✓ ' + zenodo['date']   if zenodo['available']   else '✗ no reports'}")
+    print(f"  Citation bot:     {'✓ ' + citation['date'] if citation['available'] else '✗ no reports'}")
 
     generated_at = datetime.now(timezone.utc).strftime("%A %d %B %Y, %H:%M UTC")
-    html = build_html(running, journal, preprint, generated_at)
+    html = build_html(running, journal, preprint, zenodo, citation, generated_at)
 
     out = DOCS / "index.html"
     out.write_text(html, encoding="utf-8")
