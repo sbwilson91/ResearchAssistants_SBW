@@ -2,12 +2,15 @@
 
 Fetches recent bioRxiv preprints, filters by a user-defined watchlist,
 generates AI summaries, groups papers by primary organ/tissue system,
-writes a Markdown digest, and converts it to HTML for email delivery.
+writes a Markdown digest, converts it to HTML, and emails the result.
 """
 import os
+import smtplib
 import subprocess
 import sys
 from datetime import date
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from pathlib import Path
 
 from fetcher import fetch_recent, filter_by_watchlist
@@ -18,6 +21,7 @@ HERE        = Path(__file__).parent
 DIGESTS_DIR = HERE / "digests"
 WATCHLIST   = HERE / "watchlist.txt"
 DAYS_BACK   = int(os.environ.get("DAYS_BACK", 7))
+EMAIL_HTML  = Path("/tmp/digest_email.html")
 
 
 def load_watchlist(path=WATCHLIST) -> list:
@@ -51,16 +55,13 @@ def _format_paper(p) -> str:
 
 def build_digest(all_papers: list, today: str, total_fetched: int) -> str:
     """Build a Markdown digest grouped by organ/tissue system."""
-    # Group papers by organ
     by_organ: dict = {}
     for p in all_papers:
         by_organ.setdefault(p.organ, []).append(p)
 
-    # Sort within each organ newest-first
     for papers in by_organ.values():
         papers.sort(key=lambda p: p.date, reverse=True)
 
-    # Render organs in ORGAN_KEYWORDS order, "General" last
     organ_order = list(ORGAN_KEYWORDS.keys()) + ["General"]
     organ_count = len(by_organ)
 
@@ -89,6 +90,28 @@ def build_digest(all_papers: list, today: str, total_fetched: int) -> str:
     return "\n".join(lines)
 
 
+def send_email(html_body: str, subject: str) -> None:
+    """Send the digest via Gmail SMTP.
+
+    Requires EMAIL_SENDER, EMAIL_RECEIVER, EMAIL_PASSWORD env vars.
+    Fails loudly so workflow surfaces the problem.
+    """
+    sender   = os.environ["EMAIL_SENDER"]
+    receiver = os.environ["EMAIL_RECEIVER"]
+    password = os.environ["EMAIL_PASSWORD"]
+
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = subject
+    msg["From"]    = sender
+    msg["To"]      = receiver
+    msg.attach(MIMEText(html_body, "html", "utf-8"))
+
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=30) as smtp:
+        smtp.login(sender, password)
+        smtp.send_message(msg)
+    print(f"Email sent → {receiver}")
+
+
 def run():
     topics = load_watchlist()
     if not topics:
@@ -97,7 +120,6 @@ def run():
 
     print(f"Watchlist: {topics}")
 
-    # Fetch and filter
     preprints = fetch_recent(days_back=DAYS_BACK)
     matched   = filter_by_watchlist(preprints, topics)
 
@@ -111,8 +133,8 @@ def run():
             f"_No preprints matched any watchlist topic this week "
             f"({len(preprints)} scanned)._\n"
         )
+        n_papers = 0
     else:
-        # Flatten {topic: [papers]} → flat list, tagging each paper's matched_topic
         all_papers = []
         for topic, papers in matched.items():
             for p in papers:
@@ -121,12 +143,10 @@ def run():
 
         print(f"Matched {len(all_papers)} preprints. Summarising...")
 
-        # AI summarise
         for p in all_papers:
             if len(p.abstract) >= 50:
                 p.summary = get_ai_summary(p.abstract)
 
-        # Classify organ/tissue
         for p in all_papers:
             p.organ = classify_organ(p.title, p.abstract)
 
@@ -134,7 +154,8 @@ def run():
         organ_dist = Counter(p.organ for p in all_papers)
         print(f"Organ distribution: {dict(organ_dist)}")
 
-        content = build_digest(all_papers, today, len(preprints))
+        content  = build_digest(all_papers, today, len(preprints))
+        n_papers = len(all_papers)
 
     # Save Markdown digest
     digest_path = DIGESTS_DIR / f"{today}-preprint-digest.md"
@@ -142,15 +163,34 @@ def run():
     print(f"Digest saved → {digest_path}")
 
     # Convert to HTML for email
-    html_script = Path(__file__).parent / "utils" / "md_to_html_email.py"
+    html_script = HERE / "utils" / "md_to_html_email.py"
     result = subprocess.run(
         [sys.executable, str(html_script), str(digest_path)],
         capture_output=True, text=True
     )
     if result.returncode != 0:
         print(f"HTML conversion failed: {result.stderr}")
-    else:
-        print(result.stdout.strip())
+        return
+    print(result.stdout.strip())
+
+    # Email the digest
+    if not EMAIL_HTML.exists():
+        print(f"Expected HTML at {EMAIL_HTML} but file not found — skipping email.")
+        return
+
+    html_body = EMAIL_HTML.read_text(encoding="utf-8")
+    subject = (
+        f"Preprint Digest — {today} ({n_papers} paper{'s' if n_papers != 1 else ''})"
+        if n_papers else f"Preprint Digest — {today} (no matches)"
+    )
+
+    try:
+        send_email(html_body, subject)
+    except KeyError as e:
+        print(f"Email skipped — missing env var: {e}")
+    except Exception as e:
+        # Don't crash the workflow; the digest is still committed.
+        print(f"Email send failed: {e}")
 
 
 if __name__ == "__main__":
