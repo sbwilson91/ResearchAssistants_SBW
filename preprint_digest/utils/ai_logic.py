@@ -1,15 +1,25 @@
-"""Local Ollama AI summarization utility (OpenAI-compatible API)."""
+"""Gemini 2.5 Flash AI summarisation utility.
+
+Drop-in replacement for the previous Ollama backend. The public function
+`get_ai_summary(text, hf_token=None, model_url=None)` is unchanged so the
+rest of the preprint_digest package continues to work without modification.
+
+Secret required: GOOGLE_API_KEY (free — aistudio.google.com)
+"""
+import os
 import re
 import time
 import requests
 
-OLLAMA_URL    = "http://localhost:11434/v1/chat/completions"
-DEFAULT_MODEL = "llama3.1"
-MAX_RETRIES   = 3
+_GEMINI_URL = (
+    "https://generativelanguage.googleapis.com/v1beta/models/"
+    "gemini-2.5-flash:generateContent"
+)
+MAX_RETRIES = 3
 
 SYSTEM_PROMPT = (
     "You are a scientific literature analyst. "
-    "Summarize the provided abstract in 4-5 plain-English sentences. "
+    "Summarise the provided abstract in 4-5 plain-English sentences. "
     "Cover: (1) the biological or scientific question addressed, "
     "(2) the key methods or approach used, "
     "(3) the main findings, and "
@@ -18,37 +28,66 @@ SYSTEM_PROMPT = (
 )
 
 
-def _call_chat(text, model_id):
-    headers = {"Content-Type": "application/json"}
+def _call_gemini(text: str) -> str:
+    """Call Gemini 2.5 Flash with retry on transient errors."""
+    api_key = os.environ.get("GOOGLE_API_KEY")
+    if not api_key:
+        raise RuntimeError("GOOGLE_API_KEY environment variable is not set.")
+
+    prompt = f"{SYSTEM_PROMPT}\n\nAbstract:\n{text[:1500]}"
     payload = {
-        "model": model_id,
-        "messages": [
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user",   "content": text[:1500]},
-        ],
-        "max_tokens": 1024,
-        "temperature": 0.2,
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {
+            "maxOutputTokens": 1024,
+            "temperature": 0.2,
+        },
     }
+
+    last_error = None
     for attempt in range(1, MAX_RETRIES + 1):
         try:
-            resp = requests.post(OLLAMA_URL, headers=headers, json=payload, timeout=120)
-        except requests.exceptions.ConnectionError:
-            raise RuntimeError("Ollama is not running — start it with: ollama serve")
-        if resp.status_code == 200:
-            return resp.json()["choices"][0]["message"]["content"].strip()
-        elif resp.status_code == 429:
-            wait = 30 * attempt
-            print(f"Ollama busy — waiting {wait}s (attempt {attempt}/{MAX_RETRIES})...")
-            time.sleep(wait)
-        else:
-            raise RuntimeError(
-                f"Ollama error {resp.status_code} for model '{model_id}': {resp.text[:200]}"
+            resp = requests.post(
+                _GEMINI_URL,
+                params={"key": api_key},
+                json=payload,
+                timeout=60,
             )
-    raise RuntimeError(f"Ollama failed after {MAX_RETRIES} attempts.")
+        except requests.exceptions.RequestException as e:
+            last_error = f"Network error: {e}"
+            wait = 5 * attempt
+            print(f"  Gemini network error — waiting {wait}s (attempt {attempt}/{MAX_RETRIES})...")
+            time.sleep(wait)
+            continue
+
+        if resp.status_code == 200:
+            data = resp.json()
+            candidates = data.get("candidates", [])
+            if not candidates:
+                # Often a safety-filter block; surface it instead of silently failing.
+                feedback = data.get("promptFeedback", {})
+                raise RuntimeError(f"Gemini returned no candidates. Feedback: {feedback}")
+            parts = candidates[0].get("content", {}).get("parts", [])
+            if not parts:
+                finish_reason = candidates[0].get("finishReason", "unknown")
+                raise RuntimeError(f"Gemini returned empty content (finishReason={finish_reason}).")
+            return parts[0].get("text", "").strip()
+
+        if resp.status_code in (429, 503):
+            wait = 5 * (2 ** (attempt - 1))  # 5s, 10s, 20s
+            print(f"  Gemini rate-limited ({resp.status_code}) — waiting {wait}s "
+                  f"(attempt {attempt}/{MAX_RETRIES})...")
+            time.sleep(wait)
+            last_error = f"HTTP {resp.status_code}: {resp.text[:200]}"
+            continue
+
+        # Non-retryable error
+        raise RuntimeError(f"Gemini error {resp.status_code}: {resp.text[:200]}")
+
+    raise RuntimeError(f"Gemini failed after {MAX_RETRIES} attempts. Last error: {last_error}")
 
 
 def get_ai_summary(text, hf_token=None, model_url=None):
-    """Summarize text using local Ollama (llama3.1).
+    """Summarise text using Gemini 2.5 Flash.
 
     Args:
         text:      Raw text (HTML tags will be stripped). Truncated to 1500 chars.
@@ -56,15 +95,15 @@ def get_ai_summary(text, hf_token=None, model_url=None):
         model_url: Ignored (kept for backwards-compatible signature).
 
     Returns:
-        Summary string, or a descriptive fallback message.
+        Summary string, or a descriptive fallback message on failure.
     """
     clean_text = re.sub(r"<[^<]+?>", "", text).strip()
     if len(clean_text) < 50:
         return "Description too short for summary."
 
     try:
-        return _call_chat(clean_text, DEFAULT_MODEL)
+        return _call_gemini(clean_text)
     except RuntimeError as e:
-        print(f"  Ollama summary failed: {e}")
+        print(f"  Gemini summary failed: {e}")
 
     return "AI summary unavailable."
