@@ -14,8 +14,9 @@ from fetcher import fetch_recent, filter_by_watchlist
 from organ_classifier import ORGAN_KEYWORDS, classify_organ
 from utils.ai_logic import get_ai_summary
 
-DIGESTS_DIR = Path("digests")
-WATCHLIST   = Path("watchlist.txt")
+HERE        = Path(__file__).parent
+DIGESTS_DIR = HERE / "digests"
+WATCHLIST   = HERE / "watchlist.txt"
 DAYS_BACK   = int(os.environ.get("DAYS_BACK", 7))
 
 
