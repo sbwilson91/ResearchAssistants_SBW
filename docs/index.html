@@ -48,8 +48,6 @@
   .digest-title{font-size:14px;font-weight:600;color:var(--tx);margin-bottom:6px;}
   .paper-count{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--accent,#14b8a6);margin-bottom:10px;}
   .preview{font-size:13px;color:var(--mu);line-height:1.65;}
-  .email-note{font-size:13px;color:var(--mu);line-height:1.65;margin-bottom:8px;}
-  .last-run{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mu);}
   .no-data{font-size:13px;color:var(--mu);font-style:italic;}
 
   /* FOOTER ELEMENTS */
@@ -73,7 +71,7 @@
       <div class="sched-item"><span class="sched-day">FRI</span><span class="sched-bot">Journal Digest</span></div>
       <div class="sched-item"><span class="sched-day">1st</span><span class="sched-bot">Athlete Context Update</span></div>
     </div>
-    <div class="generated">Dashboard generated Wednesday 06 May 2026, 11:58 UTC</div>
+    <div class="generated">Dashboard generated Wednesday 06 May 2026, 12:29 UTC</div>
   </div>
 </div>
 
@@ -96,12 +94,12 @@
         
     <select class="archive-select" onchange="if(this.value)window.open(this.value,'_blank')">
       <option value="">Past reports ▾</option>
-      <option value="running_archive/report_2026-05-03.html">2026-05-03</option>
-<option value="running_archive/report_2026-04-26.html">2026-04-26</option>
-<option value="running_archive/report_2026-04-19.html">2026-04-19</option>
-<option value="running_archive/report_2026-04-13.html">2026-04-13</option>
-<option value="running_archive/report_2026-04-12.html">2026-04-12</option>
-<option value="running_archive/report_2026-04-11.html">2026-04-11</option>
+      <option value="running_archive/report_2026-05-03.html">report_2026-05-03</option>
+<option value="running_archive/report_2026-04-26.html">report_2026-04-26</option>
+<option value="running_archive/report_2026-04-19.html">report_2026-04-19</option>
+<option value="running_archive/report_2026-04-13.html">report_2026-04-13</option>
+<option value="running_archive/report_2026-04-12.html">report_2026-04-12</option>
+<option value="running_archive/report_2026-04-11.html">report_2026-04-11</option>
     </select>
       </div>
     </div>
@@ -142,14 +140,25 @@
         <div class="card-icon">📄</div>
         <div>
           <div class="card-title">Preprint Digest</div>
-          <div class="card-schedule">Thursday · bioRxiv + arXiv</div>
+          <div class="card-schedule">Thursday · bioRxiv + Gemini</div>
         </div>
-        <div class="card-badge" style="color:#ef4444">never</div>
+        <div class="card-badge" style="color:#22c55e">today</div>
       </div>
-      <div class="card-body"><p class='no-data'>No digests yet.</p></div>
+      <div class="card-body">
+        <div class="digest-title">Preprint Digest — 2026-05-06</div>
+        <div class="paper-count">4 preprints reviewed</div></div>
       <div class="card-footer">
-        <span class="card-btn-disabled">Email delivery only</span>
+        <span class="card-btn-disabled">No report yet</span>
         
+    <select class="archive-select" onchange="if(this.value)window.open(this.value,'_blank')">
+      <option value="">Past digests ▾</option>
+      <option value="preprint_digests/2026-05-06-preprint-digest.md">2026-05-06</option>
+<option value="preprint_digests/2026-04-02-preprint-digest.md">2026-04-02</option>
+<option value="preprint_digests/2026-03-26-preprint-digest.md">2026-03-26</option>
+<option value="preprint_digests/2026-03-19-preprint-digest.md">2026-03-19</option>
+<option value="preprint_digests/2026-03-12-preprint-digest.md">2026-03-12</option>
+<option value="preprint_digests/2026-03-09-preprint-digest.md">2026-03-09</option>
+    </select>
       </div>
     </div>
   
@@ -160,15 +169,19 @@
           <div class="card-title">Zenodo Bot</div>
           <div class="card-schedule">Monday · Zenodo API + Gemini</div>
         </div>
-        <div class="card-badge" style="color:#22c55e">2 days ago</div>
+        <div class="card-badge" style="color:#22c55e">today</div>
       </div>
       <div class="card-body">
-    <div class="email-note">Queries Zenodo for new scRNA-seq datasets published this week.
-    Generates AI summaries and sends a formatted HTML report by email.</div>
-    <div class='last-run'>Last run: 2026-05-04</div></div>
+        <div class="digest-title">scRNA-seq dataset alert</div>
+        <div class="paper-count">10 new datasets</div>
+        <div class="preview">Recent Zenodo deposits matching single-cell RNA-seq, with AI summaries and metadata stats.</div></div>
       <div class="card-footer">
-        <span class="card-btn-disabled">Email delivery only</span>
+        <a href="zenodo.html" class="card-btn">View latest report →</a>
         
+    <select class="archive-select" onchange="if(this.value)window.open(this.value,'_blank')">
+      <option value="">Past reports ▾</option>
+      <option value="zenodo_archive/2026-05-06-zenodo.html">2026-05-06</option>
+    </select>
       </div>
     </div>
   
@@ -179,14 +192,11 @@
           <div class="card-title">Citation Bot</div>
           <div class="card-schedule">Wednesday · OpenAlex + Gemini</div>
         </div>
-        <div class="card-badge" style="color:#22c55e">today</div>
+        <div class="card-badge" style="color:#ef4444">never</div>
       </div>
-      <div class="card-body">
-    <div class="email-note">Tracks papers citing your research via OpenAlex
-    (ORCID 0000-0002-8994-0781). Tags by Microscopy / Transcriptomics and sends by email.</div>
-    <div class='last-run'>Last run: 2026-05-06</div></div>
+      <div class="card-body"><p class='no-data'>No reports yet.</p></div>
       <div class="card-footer">
-        <span class="card-btn-disabled">Email delivery only</span>
+        <span class="card-btn-disabled">No report yet</span>
         
       </div>
     </div>
