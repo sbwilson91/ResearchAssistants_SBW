@@ -2,9 +2,11 @@
 
 Fetches recent bioRxiv preprints, filters by a user-defined watchlist,
 generates AI summaries, groups papers by primary organ/tissue system,
-writes a Markdown digest, converts it to HTML, and emails the result.
+writes a Markdown digest, converts it to HTML (persisted in digests/ for
+the dashboard, plus /tmp for email), and emails the result.
 """
 import os
+import shutil
 import smtplib
 import subprocess
 import sys
@@ -38,7 +40,6 @@ def load_watchlist(path=WATCHLIST) -> list:
 
 
 def _format_paper(p) -> str:
-    """Format a single Preprint as a Markdown paper card."""
     date_str   = p.date.strftime("%Y-%m-%d") if p.date.year > 1970 else "Date unknown"
     title_link = f"[{p.title}]({p.url})" if p.url else p.title
     authors_short = p.authors[:120] + "..." if len(p.authors) > 120 else p.authors
@@ -54,7 +55,6 @@ def _format_paper(p) -> str:
 
 
 def build_digest(all_papers: list, today: str, total_fetched: int) -> str:
-    """Build a Markdown digest grouped by organ/tissue system."""
     by_organ: dict = {}
     for p in all_papers:
         by_organ.setdefault(p.organ, []).append(p)
@@ -91,11 +91,7 @@ def build_digest(all_papers: list, today: str, total_fetched: int) -> str:
 
 
 def send_email(html_body: str, subject: str) -> None:
-    """Send the digest via Gmail SMTP.
-
-    Requires EMAIL_SENDER, EMAIL_RECEIVER, EMAIL_PASSWORD env vars.
-    Fails loudly so workflow surfaces the problem.
-    """
+    """Send the digest via Gmail SMTP."""
     sender   = os.environ["EMAIL_SENDER"]
     receiver = os.environ["EMAIL_RECEIVER"]
     password = os.environ["EMAIL_PASSWORD"]
@@ -162,7 +158,7 @@ def run():
     digest_path.write_text(content, encoding="utf-8")
     print(f"Digest saved → {digest_path}")
 
-    # Convert to HTML for email
+    # Convert to HTML (writes to /tmp/digest_email.html)
     html_script = HERE / "utils" / "md_to_html_email.py"
     result = subprocess.run(
         [sys.executable, str(html_script), str(digest_path)],
@@ -173,11 +169,16 @@ def run():
         return
     print(result.stdout.strip())
 
-    # Email the digest
-    if not EMAIL_HTML.exists():
+    # Persist HTML alongside the markdown so the dashboard can link to it
+    if EMAIL_HTML.exists():
+        html_archive = DIGESTS_DIR / f"{today}-preprint-digest.html"
+        shutil.copy2(EMAIL_HTML, html_archive)
+        print(f"HTML archived → {html_archive}")
+    else:
         print(f"Expected HTML at {EMAIL_HTML} but file not found — skipping email.")
         return
 
+    # Email the digest
     html_body = EMAIL_HTML.read_text(encoding="utf-8")
     subject = (
         f"Preprint Digest — {today} ({n_papers} paper{'s' if n_papers != 1 else ''})"
@@ -189,7 +190,6 @@ def run():
     except KeyError as e:
         print(f"Email skipped — missing env var: {e}")
     except Exception as e:
-        # Don't crash the workflow; the digest is still committed.
         print(f"Email send failed: {e}")
 
 
