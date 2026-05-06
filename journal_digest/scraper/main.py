@@ -24,7 +24,7 @@ def main():
     print("\nStep 2/4: Extracting repository links from abstracts...")
     extract_all_repos(papers)
 
-    print("\nStep 3/4: Generating summaries via Local LLM...")
+    print("\nStep 3/4: Generating summaries via GEMINI...")
     papers = summarise_papers(papers)
 
     # E1 — semantic clustering
