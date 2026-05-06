@@ -63,7 +63,6 @@ def _call_gemini(text: str) -> str:
             data = resp.json()
             candidates = data.get("candidates", [])
             if not candidates:
-                # Often a safety-filter block; surface it instead of silently failing.
                 feedback = data.get("promptFeedback", {})
                 raise RuntimeError(f"Gemini returned no candidates. Feedback: {feedback}")
             parts = candidates[0].get("content", {}).get("parts", [])
@@ -73,14 +72,13 @@ def _call_gemini(text: str) -> str:
             return parts[0].get("text", "").strip()
 
         if resp.status_code in (429, 503):
-            wait = 5 * (2 ** (attempt - 1))  # 5s, 10s, 20s
+            wait = 5 * (2 ** (attempt - 1))
             print(f"  Gemini rate-limited ({resp.status_code}) — waiting {wait}s "
                   f"(attempt {attempt}/{MAX_RETRIES})...")
             time.sleep(wait)
             last_error = f"HTTP {resp.status_code}: {resp.text[:200]}"
             continue
 
-        # Non-retryable error
         raise RuntimeError(f"Gemini error {resp.status_code}: {resp.text[:200]}")
 
     raise RuntimeError(f"Gemini failed after {MAX_RETRIES} attempts. Last error: {last_error}")
