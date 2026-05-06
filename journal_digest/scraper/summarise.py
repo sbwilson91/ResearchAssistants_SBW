@@ -1,7 +1,6 @@
 """
 journal_digest/scraper/summarise.py
 
-Drop-in replacement for the HuggingFace summarisation backend.
 Swaps to Gemini 2.5 Flash. The public interface is unchanged — all other
 scraper modules (main.py, report.py, etc.) continue to work without modification.
 
