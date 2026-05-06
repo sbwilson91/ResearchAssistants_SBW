@@ -1,6 +1,8 @@
 """Citation intelligence bot using OpenAlex API."""
 import os
 import datetime
+from pathlib import Path
+
 import requests
 
 from utils.email_logic import send_email
@@ -11,19 +13,16 @@ LOOKBACK_PERIOD = os.environ.get("LOOKBACK_PERIOD", "week")
 OPENALEX_BASE = "https://api.openalex.org"
 OPENALEX_EMAIL = os.environ.get("EMAIL_SENDER", "")
 
+HERE        = Path(__file__).parent
+REPORTS_DIR = HERE / "reports"
+
 
 def get_lookback_date(period):
-    """Return ISO date string for the lookback window start."""
     days = {"week": 7, "month": 30, "6months": 180}.get(period, 7)
     return (datetime.datetime.now() - datetime.timedelta(days=days)).strftime("%Y-%m-%d")
 
 
 def reconstruct_abstract(inverted_index):
-    """Reconstruct plain text from an OpenAlex abstract_inverted_index.
-
-    The inverted index maps each word to a list of integer positions.
-    Example: {"Directed": [0], "differentiation": [1], "of": [2, 13]}
-    """
     if not inverted_index:
         return ""
     words = []
@@ -35,11 +34,6 @@ def reconstruct_abstract(inverted_index):
 
 
 def get_author_work_ids():
-    """Fetch all OpenAlex work IDs for the target ORCID.
-
-    Returns:
-        dict mapping OpenAlex work ID (e.g. "W3109860230") to display_name.
-    """
     params = {
         "filter": f"author.orcid:{ORCID}",
         "select": "id,display_name",
@@ -63,10 +57,6 @@ def get_author_work_ids():
 
 
 def get_recent_citations(work_ids, since_date):
-    """Fetch works that cite any of the given work IDs, published since since_date.
-
-    Uses pipe-separated OR filter for efficient single-request batching.
-    """
     if not work_ids:
         return []
 
@@ -92,10 +82,6 @@ def get_recent_citations(work_ids, since_date):
 
 
 def tag_work(work, abstract_text):
-    """Assign domain tags (Microscopy / Transcriptomics) based on metadata.
-
-    Checks concepts, topics, keywords, and the abstract text.
-    """
     searchable_parts = [abstract_text.lower()]
     for concept in work.get("concepts", []):
         searchable_parts.append(concept.get("display_name", "").lower())
@@ -120,7 +106,6 @@ def tag_work(work, abstract_text):
 
 
 def format_authors(authorships, max_authors=3):
-    """Format a short author string from OpenAlex authorships."""
     names = []
     for auth in authorships[:max_authors]:
         name = auth.get("author", {}).get("display_name", "Unknown")
@@ -131,11 +116,33 @@ def format_authors(authorships, max_authors=3):
     return author_str
 
 
+def _wrap_standalone_html(body: str, title: str) -> str:
+    return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{title}</title>
+<style>
+  body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         max-width: 820px; margin: 32px auto; padding: 0 20px;
+         color: #1f2937; background: #f9fafb; line-height: 1.55; }}
+  h2 {{ color: #92400e; border-bottom: 2px solid #f59e0b; padding-bottom: 8px; }}
+  h3 {{ color: #111827; margin: 6px 0; }}
+  a  {{ color: #d97706; text-decoration: none; }}
+  a:hover {{ text-decoration: underline; }}
+</style>
+</head>
+<body>
+{body}
+</body>
+</html>
+"""
+
+
 def run():
-    """Find recent citations of the author's works and send an intelligence report."""
     since_date = get_lookback_date(LOOKBACK_PERIOD)
 
-    # Step 1: Get all works by the target author
     author_works = get_author_work_ids()
     if not author_works:
         print("No works found for the target ORCID.")
@@ -143,7 +150,6 @@ def run():
 
     print(f"Tracking {len(author_works)} works by ORCID {ORCID}")
 
-    # Step 2: Find recent citing works (single batched API call)
     work_ids = list(author_works.keys())
     citations = get_recent_citations(work_ids, since_date)
 
@@ -151,11 +157,11 @@ def run():
         print("No new citations found.")
         return
 
-    # Step 3: Build HTML report
+    n_citations = len(citations)
     html_content = (
         f"<h2>Citation Intelligence Report</h2>"
         f"<p>New citations of your work since {since_date} "
-        f"({len(citations)} found)</p>"
+        f"(<b>{n_citations}</b> found)</p>"
         f"<hr>"
     )
 
@@ -166,14 +172,12 @@ def run():
         pub_date = work.get("publication_date", "Unknown date")
         authors = format_authors(work.get("authorships", []))
 
-        # Reconstruct abstract and summarize
         abstract = reconstruct_abstract(work.get("abstract_inverted_index"))
         if abstract:
             summary = get_ai_summary(abstract)
         else:
             summary = "No abstract available."
 
-        # Domain tagging
         tags = tag_work(work, abstract)
         tag_html = ""
         if tags:
@@ -192,8 +196,21 @@ def run():
             <p><b>AI Summary:</b> {summary}</p>
         </div>"""
 
-    subject = f"Citation Intelligence Report: {datetime.date.today()}"
-    send_email(subject, html_content)
+    today = datetime.date.today().isoformat()
+
+    # Persist HTML report so the dashboard can link to it
+    REPORTS_DIR.mkdir(exist_ok=True)
+    report_path = REPORTS_DIR / f"{today}-citation.html"
+    page = _wrap_standalone_html(html_content, f"Citation Report — {today}")
+    report_path.write_text(page, encoding="utf-8")
+    print(f"Report saved → {report_path}")
+
+    # Email
+    subject = f"Citation Intelligence Report: {today}"
+    try:
+        send_email(subject, html_content)
+    except Exception as e:
+        print(f"Email send failed: {e}")
 
 
 if __name__ == "__main__":
