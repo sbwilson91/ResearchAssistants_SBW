@@ -2,12 +2,17 @@
 import os
 import re
 import datetime
+from pathlib import Path
+
 import requests
 
 from utils.email_logic import send_email
 from utils.ai_logic import get_ai_summary
 
 LOOKBACK_PERIOD = os.environ.get("LOOKBACK_PERIOD", "week")
+
+HERE        = Path(__file__).parent
+REPORTS_DIR = HERE / "reports"
 
 
 def get_date_query(period):
@@ -23,7 +28,6 @@ def get_quick_stats(meta, files):
     desc = re.sub(r"<[^<]+?>", "", meta.get("description", "")).lower()
     keywords = [k.lower() for k in meta.get("keywords", [])]
 
-    # Species detection
     species_patterns = {
         "Human": r"\b(human|homo sapiens|patient|hg38|grch38|pbmc)\b",
         "Mouse": r"\b(mouse|mus musculus|murine|mm10|mm39)\b",
@@ -36,14 +40,12 @@ def get_quick_stats(meta, files):
             stats.append(f"Species: {species}")
             break
 
-    # Cell/nuclei count from description
     cell_match = re.search(
         r"([\d,\.]+)\s*(million|thousand|k)?\s*(cells|nuclei|transcriptomes|samples)", desc
     )
     if cell_match:
         stats.append(f"Scale: ~{cell_match.group(0).strip()}")
 
-    # Tissue detection
     tissues = [
         "bone marrow", "brain", "lung", "liver", "kidney", "blood",
         "tumor", "skin", "heart", "intestine", "pbmc", "retina",
@@ -54,7 +56,6 @@ def get_quick_stats(meta, files):
             stats.append(f"Tissue: {tissue.title()}")
             break
 
-    # File type summary
     extensions = {}
     for f in files:
         ext = "." + f.get("key", "").rsplit(".", 1)[-1] if "." in f.get("key", "") else "other"
@@ -65,12 +66,36 @@ def get_quick_stats(meta, files):
         )
         stats.append(f"Files: {file_summary}")
 
-    # Keywords
     raw_keywords = meta.get("keywords", [])
     if raw_keywords:
         stats.append(f"Tags: {', '.join(raw_keywords[:5])}")
 
     return " | ".join(stats) if stats else "No metadata stats found."
+
+
+def _wrap_standalone_html(body: str, title: str) -> str:
+    """Wrap an email-style HTML fragment in a self-contained page for the dashboard."""
+    return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{title}</title>
+<style>
+  body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         max-width: 820px; margin: 32px auto; padding: 0 20px;
+         color: #1f2937; background: #f9fafb; line-height: 1.55; }}
+  h2 {{ color: #1e3a8a; border-bottom: 2px solid #3b82f6; padding-bottom: 8px; }}
+  h3 {{ color: #111827; margin: 6px 0; }}
+  a  {{ color: #2563eb; text-decoration: none; }}
+  a:hover {{ text-decoration: underline; }}
+</style>
+</head>
+<body>
+{body}
+</body>
+</html>
+"""
 
 
 def run():
@@ -96,7 +121,10 @@ def run():
         print("No new datasets found.")
         return
 
+    n_datasets = len(hits)
     html_content = f"<h2>scRNA-seq Zenodo Report ({LOOKBACK_PERIOD})</h2>"
+    html_content += f"<p><b>{n_datasets}</b> new dataset{'s' if n_datasets != 1 else ''} found.</p>"
+
     for hit in hits:
         meta = hit.get("metadata", {})
         links = hit.get("links", {})
@@ -116,8 +144,21 @@ def run():
             <p><b>Details:</b> {len(files)} files | Total Size: {total_size:.1f} MB</p>
         </div>"""
 
-    subject = f"scRNA-seq Data Alert: {datetime.date.today()}"
-    send_email(subject, html_content)
+    today = datetime.date.today().isoformat()
+
+    # Persist HTML report so the dashboard can link to it
+    REPORTS_DIR.mkdir(exist_ok=True)
+    report_path = REPORTS_DIR / f"{today}-zenodo.html"
+    page = _wrap_standalone_html(html_content, f"Zenodo Report — {today}")
+    report_path.write_text(page, encoding="utf-8")
+    print(f"Report saved → {report_path}")
+
+    # Email
+    subject = f"scRNA-seq Data Alert: {today}"
+    try:
+        send_email(subject, html_content)
+    except Exception as e:
+        print(f"Email send failed: {e}")
 
 
 if __name__ == "__main__":
