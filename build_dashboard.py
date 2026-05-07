@@ -194,9 +194,25 @@ def extract_journal_digest() -> dict:
     title_m = re.search(r"^# (.+)$", text, re.MULTILINE)
     title   = title_m.group(1).strip() if title_m else "Weekly Digest"
 
-    paras   = [p.strip() for p in text.split("\n\n") if p.strip() and not p.startswith("#")]
-    raw_preview = paras[0] if paras else ""
-    preview = re.sub(r'\*\*(.+?)\*\*', r'\1', raw_preview)[:200] + "…" if raw_preview else ""
+    # Category breakdown — skip the Featured section, count ### papers under each ##
+    cat_counts: dict[str, int] = {}
+    cur_cat = None
+    _SCRNA_PAT = re.compile(r"single[- ]cell|scRNA|snRNA|spatial transcriptomics", re.IGNORECASE)
+    scrna_count = 0
+    for line in text.splitlines():
+        if line.startswith("## "):
+            cur_cat = line[3:].strip()
+            if "Featured" not in cur_cat:
+                cat_counts[cur_cat] = 0
+        elif line.startswith("### ") and cur_cat and "Featured" not in cur_cat:
+            cat_counts[cur_cat] = cat_counts.get(cur_cat, 0) + 1
+        elif line.startswith("**Topics:**") and _SCRNA_PAT.search(line):
+            scrna_count += 1
+
+    # Top 5 by paper count; remainder folded into overflow
+    sorted_cats = sorted(cat_counts.items(), key=lambda x: -x[1])
+    top_cats    = sorted_cats[:5]
+    overflow    = sum(n for _, n in sorted_cats[5:])
 
     # Convert latest digest to HTML for the dashboard link
     html_candidate = f.with_suffix(".html")
@@ -225,7 +241,9 @@ def extract_journal_digest() -> dict:
         "date":        date,
         "title":       title,
         "paper_count": paper_count,
-        "preview":     preview,
+        "top_cats":    top_cats,
+        "overflow":    overflow,
+        "scrna_count": scrna_count,
         "link":        "journal.html",
         "archive":     entries,
     }
@@ -253,24 +271,35 @@ def extract_preprint_digest() -> dict:
         title_m = re.search(r"^# (.+)$", text, re.MULTILINE)
         title   = title_m.group(1).strip() if title_m else "Preprint Digest"
 
-        # Parse scan funnel from subtitle: _N papers across N organ systems (N preprints scanned)_
+        # Scan funnel from subtitle line
         funnel_m = re.search(
             r"_(\d+) papers? (?:matched )?across (\d+) (organ system|topic)s? \((\d+) preprints scanned\)_",
             text
         )
-        if funnel_m:
-            scanned    = int(funnel_m.group(4))
-            categories = int(funnel_m.group(2))
-            cat_label  = funnel_m.group(3) + ("s" if categories != 1 else "")
-        else:
-            scanned = categories = 0
-            cat_label = "organ systems"
+        scanned = int(funnel_m.group(4)) if funnel_m else 0
+
+        # Organ breakdown — count ### papers under each ## section
+        organ_counts: dict[str, int] = {}
+        cur_organ = None
+        _SCRNA_TAG = re.compile(
+            r"\|\s*`(scRNA[^`]*|snRNA[^`]*|single[- ]cell[^`]*|spatial transcriptomics[^`]*)`",
+            re.IGNORECASE
+        )
+        scrna_count = 0
+        for line in text.splitlines():
+            if line.startswith("## "):
+                cur_organ = line[3:].strip()
+                organ_counts[cur_organ] = 0
+            elif line.startswith("### ") and cur_organ:
+                organ_counts[cur_organ] = organ_counts.get(cur_organ, 0) + 1
+            elif _SCRNA_TAG.search(line):
+                scrna_count += 1
     else:
         f    = html_files[0]
         date = f.stem[:10] if len(f.stem) >= 10 else f.stem
         title = "Preprint Digest"
-        paper_count = scanned = categories = 0
-        cat_label = "organ systems"
+        paper_count = scanned = scrna_count = 0
+        organ_counts = {}
 
     # Prefer the HTML version for the dashboard link
     link = None
@@ -286,8 +315,8 @@ def extract_preprint_digest() -> dict:
         "title":       title,
         "paper_count": paper_count,
         "scanned":     scanned,
-        "categories":  categories,
-        "cat_label":   cat_label,
+        "organs":      organ_counts,
+        "scrna_count": scrna_count,
         "link":        link,
         "archive":     archive,
     }
@@ -445,10 +474,24 @@ def build_html(running: dict, journal: dict, preprint: dict,
 
     # ── Journal Digest card ───────────────────────────────────────
     if journal["available"]:
+        cat_pills = "".join(
+            f'<span class="cat-pill" title="{name}">'
+            f'{name[:22]}{"…" if len(name) > 22 else ""}'
+            f'<span class="cat-n">{n}</span></span>'
+            for name, n in journal.get("top_cats", [])
+        )
+        if journal.get("overflow"):
+            cat_pills += f'<span class="cat-pill-more">+{journal["overflow"]} more</span>'
+        scrna_j = (
+            f'<div class="scrna-flag">🧬 {journal["scrna_count"]} single-cell paper'
+            f'{"s" if journal["scrna_count"] != 1 else ""}</div>'
+            if journal.get("scrna_count") else ""
+        )
         j_content = f"""
         <div class="digest-title">{journal['title']}</div>
         <div class="paper-count">{journal['paper_count']} papers summarised</div>
-        <div class="preview">{journal['preview']}</div>"""
+        <div class="cat-pills">{cat_pills}</div>
+        {scrna_j}"""
         j_archive = archive_dropdown(journal.get("archive", []), "Past digests")
         j_card = bot_card("📰", "Journal Digest", "Friday · Nature, Science, Cell + more",
                           journal["date"], j_content, journal.get("link"),
@@ -467,13 +510,22 @@ def build_html(running: dict, journal: dict, preprint: dict,
                 f'<span class="funnel-n">{preprint["scanned"]}</span> scanned'
                 f'<span class="funnel-arrow"> → </span>'
                 f'<span class="funnel-n">{preprint["paper_count"]}</span> selected'
-                f'<span class="funnel-sep"> · </span>'
-                f'{preprint["categories"]} {preprint["cat_label"]}'
                 f'</div>'
             )
+        organ_pills = "".join(
+            f'<span class="cat-pill">{organ}<span class="cat-n">{n}</span></span>'
+            for organ, n in preprint.get("organs", {}).items()
+        )
+        scrna_p = (
+            f'<div class="scrna-flag">🧬 {preprint["scrna_count"]} scRNA paper'
+            f'{"s" if preprint["scrna_count"] != 1 else ""}</div>'
+            if preprint.get("scrna_count") else ""
+        )
         p_content = f"""
         <div class="digest-title">{preprint['title']}</div>
-        {funnel_html}"""
+        {funnel_html}
+        <div class="cat-pills">{organ_pills}</div>
+        {scrna_p}"""
         p_archive = archive_dropdown(preprint.get("archive", []), "Past digests")
         p_card = bot_card("📄", "Preprint Digest", "Thursday · bioRxiv + Gemini",
                           preprint["date"], p_content, preprint.get("link"),
@@ -567,7 +619,11 @@ def build_html(running: dict, journal: dict, preprint: dict,
   .funnel{{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mu);margin-top:6px;}}
   .funnel-n{{color:var(--accent,#8b5cf6);font-weight:500;}}
   .funnel-arrow{{color:var(--mu);}}
-  .funnel-sep{{color:var(--bdr);}}
+  .cat-pills{{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px;}}
+  .cat-pill{{font-family:'IBM Plex Mono',monospace;font-size:10px;background:var(--bg);border:1px solid var(--bdr);border-radius:4px;padding:3px 8px;color:var(--mu);white-space:nowrap;}}
+  .cat-n{{color:var(--accent,#f97316);font-weight:500;margin-left:5px;}}
+  .cat-pill-more{{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--mu);padding:3px 0;align-self:center;}}
+  .scrna-flag{{font-family:'IBM Plex Mono',monospace;font-size:11px;color:#14b8a6;margin-top:8px;}}
 
   /* FOOTER ELEMENTS */
   .card-btn{{background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.3);color:#f97316;padding:6px 14px;border-radius:6px;font-family:'IBM Plex Mono',monospace;font-size:11px;text-decoration:none;transition:background .15s;}}

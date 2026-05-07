@@ -52,7 +52,11 @@
   .funnel{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mu);margin-top:6px;}
   .funnel-n{color:var(--accent,#8b5cf6);font-weight:500;}
   .funnel-arrow{color:var(--mu);}
-  .funnel-sep{color:var(--bdr);}
+  .cat-pills{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px;}
+  .cat-pill{font-family:'IBM Plex Mono',monospace;font-size:10px;background:var(--bg);border:1px solid var(--bdr);border-radius:4px;padding:3px 8px;color:var(--mu);white-space:nowrap;}
+  .cat-n{color:var(--accent,#f97316);font-weight:500;margin-left:5px;}
+  .cat-pill-more{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--mu);padding:3px 0;align-self:center;}
+  .scrna-flag{font-family:'IBM Plex Mono',monospace;font-size:11px;color:#14b8a6;margin-top:8px;}
 
   /* FOOTER ELEMENTS */
   .card-btn{background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.3);color:#f97316;padding:6px 14px;border-radius:6px;font-family:'IBM Plex Mono',monospace;font-size:11px;text-decoration:none;transition:background .15s;}
@@ -75,7 +79,7 @@
       <div class="sched-item"><span class="sched-day">FRI</span><span class="sched-bot">Journal Digest</span></div>
       <div class="sched-item"><span class="sched-day">1st</span><span class="sched-bot">Athlete Context Update</span></div>
     </div>
-    <div class="generated">Dashboard generated Thursday 07 May 2026, 01:05 UTC</div>
+    <div class="generated">Dashboard generated Thursday 07 May 2026, 02:34 UTC</div>
   </div>
 </div>
 
@@ -120,7 +124,8 @@
       <div class="card-body">
         <div class="digest-title">Weekly Journal Digest — 2026-04-07</div>
         <div class="paper-count">111 papers summarised</div>
-        <div class="preview">111 new papers across 6 journals.…</div></div>
+        <div class="cat-pills"><span class="cat-pill" title="Neuroscience & Bioinformatics">Neuroscience & Bioinfo…<span class="cat-n">21</span></span><span class="cat-pill" title="Social Sciences & Reproducibility">Social Sciences & Repr…<span class="cat-n">10</span></span><span class="cat-pill" title="Materials Science & Nanotechnology">Materials Science & Na…<span class="cat-n">8</span></span><span class="cat-pill" title="Space Exploration & Astronautics">Space Exploration & As…<span class="cat-n">8</span></span><span class="cat-pill" title="Materials Science & Machine Learning">Materials Science & Ma…<span class="cat-n">6</span></span><span class="cat-pill-more">+10 more</span></div>
+        <div class="scrna-flag">🧬 5 single-cell papers</div></div>
       <div class="card-footer">
         <a href="journal.html" class="card-btn">View latest report →</a>
         
@@ -146,7 +151,9 @@
       </div>
       <div class="card-body">
         <div class="digest-title">Preprint Digest — 2026-05-06</div>
-        <div class="funnel"><span class="funnel-n">30</span> scanned<span class="funnel-arrow"> → </span><span class="funnel-n">4</span> selected<span class="funnel-sep"> · </span>4 organ systems</div></div>
+        <div class="funnel"><span class="funnel-n">30</span> scanned<span class="funnel-arrow"> → </span><span class="funnel-n">4</span> selected</div>
+        <div class="cat-pills"><span class="cat-pill">Intestine<span class="cat-n">1</span></span><span class="cat-pill">Liver<span class="cat-n">1</span></span><span class="cat-pill">Bone<span class="cat-n">1</span></span><span class="cat-pill">General<span class="cat-n">1</span></span></div>
+        <div class="scrna-flag">🧬 1 scRNA paper</div></div>
       <div class="card-footer">
         <span class="card-btn-disabled">No report yet</span>
         
