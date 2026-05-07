@@ -40,6 +40,85 @@ def strip_tags(html: str) -> str:
     return re.sub(r"<[^>]+>", "", html).strip()
 
 
+def _inline_md(t: str) -> str:
+    """Apply inline markdown formatting (bold, code, links)."""
+    t = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', t)
+    t = re.sub(r'`([^`]+)`', r'<code>\1</code>', t)
+    t = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'<a href="\2">\1</a>', t)
+    return t
+
+
+def _md_to_journal_html(md: str, title: str = "Weekly Journal Digest") -> str:
+    """Convert a journal digest .md file to a standalone HTML page."""
+    out, in_list = [], False
+
+    def close_list():
+        nonlocal in_list
+        if in_list:
+            out.append('</ul>')
+            in_list = False
+
+    for line in md.splitlines():
+        s = line.strip()
+        if s.startswith('# ') and not s.startswith('##'):
+            close_list(); out.append(f'<h1>{_inline_md(s[2:])}</h1>')
+        elif s.startswith('## ') and not s.startswith('###'):
+            close_list(); out.append(f'<h2>{_inline_md(s[3:])}</h2>')
+        elif s.startswith('### '):
+            close_list(); out.append(f'<h3>{_inline_md(s[4:])}</h3>')
+        elif s == '---':
+            close_list(); out.append('<hr>')
+        elif s.startswith('> '):
+            close_list(); out.append(f'<blockquote>{_inline_md(s[2:])}</blockquote>')
+        elif s.startswith('- '):
+            if not in_list:
+                out.append('<ul>'); in_list = True
+            out.append(f'<li>{_inline_md(s[2:])}</li>')
+        elif s == '':
+            close_list()
+        else:
+            close_list()
+            css = 'meta' if re.match(r'^\*\*[^*]+\*\*', s) else ''
+            if s:
+                out.append(f'<p class="{css}">{_inline_md(s)}</p>')
+
+    close_list()
+    body = '\n'.join(out)
+
+    return (
+        '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">'
+        '<meta name="viewport" content="width=device-width,initial-scale=1">'
+        f'<title>{title}</title>'
+        '<style>'
+        '*{box-sizing:border-box;margin:0;padding:0}'
+        'body{background:#f4f1ec;font-family:Georgia,serif;font-size:16px;line-height:1.7;color:#1a1a1a;padding:32px 16px 64px}'
+        '.wrapper{max-width:700px;margin:0 auto}'
+        '.masthead{border-top:4px solid #1a1a1a;border-bottom:1px solid #1a1a1a;padding:28px 0 20px;margin-bottom:40px}'
+        '.label{font-family:"Courier New",monospace;font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:#666;margin-bottom:8px}'
+        '.title{font-family:"Courier New",monospace;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#444}'
+        'h1{font-size:28px;font-weight:normal;letter-spacing:-.02em;line-height:1.2;margin:48px 0 16px;padding-bottom:12px;border-bottom:2px solid #1a1a1a}'
+        'h2{font-size:11px;font-family:"Courier New",monospace;font-weight:normal;letter-spacing:.2em;text-transform:uppercase;color:#fff;background:#1a1a1a;display:inline-block;padding:4px 12px;margin:40px 0 20px}'
+        'h3{font-size:19px;font-weight:normal;line-height:1.35;color:#1a1a1a;margin:28px 0 10px}'
+        'p{margin-bottom:10px;color:#2a2a2a}'
+        'p.meta{font-family:"Courier New",monospace;font-size:12px;color:#555;margin:6px 0}'
+        'blockquote{border-left:3px solid #c8b89a;margin:14px 0;padding:10px 16px;background:#faf8f5;font-style:italic;color:#3a3a3a;font-size:15px}'
+        'ul{padding-left:0;list-style:none;margin:8px 0}'
+        'ul li{font-family:"Courier New",monospace;font-size:12px;color:#444;padding:3px 0 3px 16px;position:relative}'
+        'ul li::before{content:"\\2192";position:absolute;left:0;color:#c8b89a}'
+        'a{color:#1a1a1a;text-decoration-color:#c8b89a}'
+        'code{font-family:"Courier New",monospace;font-size:12px;background:#f0ede8;padding:1px 5px;border-radius:2px}'
+        'hr{border:none;border-top:1px solid #ddd;margin:32px 0}'
+        'strong{font-weight:600}'
+        '</style></head><body><div class="wrapper">'
+        '<div class="masthead">'
+        '<div class="label">Automated Research Intelligence</div>'
+        f'<div class="title">{title}</div>'
+        '</div>'
+        + body +
+        '</div></body></html>'
+    )
+
+
 def _copy_archive(src_files: list[Path], dest_subdir: str, limit: int = 12) -> list[dict]:
     """Copy the latest N files into docs/<dest_subdir>/ and return archive entries."""
     arc_dir = DOCS / dest_subdir
@@ -97,31 +176,49 @@ def extract_running_bot() -> dict:
 
 
 def extract_journal_digest() -> dict:
+    # Exclude index.md by only matching date-prefixed files
     digests = sorted(
-        (REPO_ROOT / "journal_digest" / "digests").glob("*.md"),
+        (REPO_ROOT / "journal_digest" / "digests").glob("[0-9][0-9][0-9][0-9]-*.md"),
         reverse=True
     )
     if not digests:
         return {"available": False}
 
     f    = digests[0]
-    date = f.stem[:10] if len(f.stem) >= 10 else f.stem
+    date = f.stem[:10]
     text = f.read_text(encoding="utf-8")
 
-    paper_count = len(re.findall(r"^## ", text, re.MULTILINE))
+    # Papers use ### headings; ## headings are category sections
+    paper_count = len(re.findall(r"^### ", text, re.MULTILINE))
 
     title_m = re.search(r"^# (.+)$", text, re.MULTILINE)
     title   = title_m.group(1).strip() if title_m else "Weekly Digest"
 
     paras   = [p.strip() for p in text.split("\n\n") if p.strip() and not p.startswith("#")]
-    preview = paras[0][:200] + "…" if paras else ""
+    raw_preview = paras[0] if paras else ""
+    preview = re.sub(r'\*\*(.+?)\*\*', r'\1', raw_preview)[:200] + "…" if raw_preview else ""
 
-    # If journal_digest writes a same-named .html alongside the .md, prefer that
+    # Convert latest digest to HTML for the dashboard link
     html_candidate = f.with_suffix(".html")
     if html_candidate.exists():
         shutil.copy(html_candidate, DOCS / "journal.html")
+    else:
+        (DOCS / "journal.html").write_text(
+            _md_to_journal_html(text, title), encoding="utf-8"
+        )
 
-    archive = _copy_archive(digests, "journal_digests")
+    # Convert all archived .md files to .html so archive links are browseable
+    arc_dir = DOCS / "journal_digests"
+    arc_dir.mkdir(exist_ok=True)
+    entries = []
+    for src in digests[:12]:
+        dest_name = src.stem + ".html"
+        dest = arc_dir / dest_name
+        src_text = src.read_text(encoding="utf-8")
+        title_m2 = re.search(r"^# (.+)$", src_text, re.MULTILINE)
+        title2 = title_m2.group(1).strip() if title_m2 else "Weekly Digest"
+        dest.write_text(_md_to_journal_html(src_text, title2), encoding="utf-8")
+        entries.append({"date": src.stem[:10], "file": f"journal_digests/{dest_name}"})
 
     return {
         "available":   True,
@@ -130,7 +227,7 @@ def extract_journal_digest() -> dict:
         "paper_count": paper_count,
         "preview":     preview,
         "link":        "journal.html",
-        "archive":     archive,
+        "archive":     entries,
     }
 
 
