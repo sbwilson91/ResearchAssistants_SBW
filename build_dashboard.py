@@ -252,11 +252,25 @@ def extract_preprint_digest() -> dict:
 
         title_m = re.search(r"^# (.+)$", text, re.MULTILINE)
         title   = title_m.group(1).strip() if title_m else "Preprint Digest"
+
+        # Parse scan funnel from subtitle: _N papers across N organ systems (N preprints scanned)_
+        funnel_m = re.search(
+            r"_(\d+) papers? (?:matched )?across (\d+) (organ system|topic)s? \((\d+) preprints scanned\)_",
+            text
+        )
+        if funnel_m:
+            scanned    = int(funnel_m.group(4))
+            categories = int(funnel_m.group(2))
+            cat_label  = funnel_m.group(3) + ("s" if categories != 1 else "")
+        else:
+            scanned = categories = 0
+            cat_label = "organ systems"
     else:
         f    = html_files[0]
         date = f.stem[:10] if len(f.stem) >= 10 else f.stem
         title = "Preprint Digest"
-        paper_count = 0
+        paper_count = scanned = categories = 0
+        cat_label = "organ systems"
 
     # Prefer the HTML version for the dashboard link
     link = None
@@ -271,6 +285,9 @@ def extract_preprint_digest() -> dict:
         "date":        date,
         "title":       title,
         "paper_count": paper_count,
+        "scanned":     scanned,
+        "categories":  categories,
+        "cat_label":   cat_label,
         "link":        link,
         "archive":     archive,
     }
@@ -443,9 +460,20 @@ def build_html(running: dict, journal: dict, preprint: dict,
 
     # ── Preprint Digest card ─────────────────────────────────────
     if preprint["available"]:
+        funnel_html = ""
+        if preprint.get("scanned"):
+            funnel_html = (
+                f'<div class="funnel">'
+                f'<span class="funnel-n">{preprint["scanned"]}</span> scanned'
+                f'<span class="funnel-arrow"> → </span>'
+                f'<span class="funnel-n">{preprint["paper_count"]}</span> selected'
+                f'<span class="funnel-sep"> · </span>'
+                f'{preprint["categories"]} {preprint["cat_label"]}'
+                f'</div>'
+            )
         p_content = f"""
         <div class="digest-title">{preprint['title']}</div>
-        <div class="paper-count">{preprint['paper_count']} preprints reviewed</div>"""
+        {funnel_html}"""
         p_archive = archive_dropdown(preprint.get("archive", []), "Past digests")
         p_card = bot_card("📄", "Preprint Digest", "Thursday · bioRxiv + Gemini",
                           preprint["date"], p_content, preprint.get("link"),
@@ -536,6 +564,10 @@ def build_html(running: dict, journal: dict, preprint: dict,
   .paper-count{{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--accent,#14b8a6);margin-bottom:10px;}}
   .preview{{font-size:13px;color:var(--mu);line-height:1.65;}}
   .no-data{{font-size:13px;color:var(--mu);font-style:italic;}}
+  .funnel{{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mu);margin-top:6px;}}
+  .funnel-n{{color:var(--accent,#8b5cf6);font-weight:500;}}
+  .funnel-arrow{{color:var(--mu);}}
+  .funnel-sep{{color:var(--bdr);}}
 
   /* FOOTER ELEMENTS */
   .card-btn{{background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.3);color:#f97316;padding:6px 14px;border-radius:6px;font-family:'IBM Plex Mono',monospace;font-size:11px;text-decoration:none;transition:background .15s;}}
