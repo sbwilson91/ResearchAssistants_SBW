@@ -11,6 +11,11 @@ import os
 import time
 import requests
 
+from .accession_lookup import get_accessions
+
+# Tags that indicate a paper may have deposited scRNA/genomics data in a repository
+_SCRNA_TAGS = {"single-cell", "scRNA-seq", "spatial transcriptomics", "atlas"}
+
 
 _GEMINI_URL = (
     "https://generativelanguage.googleapis.com/v1beta/models/"
@@ -97,8 +102,7 @@ Respond ONLY with a JSON object — no markdown fences:
 {{
   "summary": "2–3 sentence plain-English summary of the paper's contribution",
   "significance": "High|Medium|Low based on relevance to kidney organoids, single-cell RNA-seq, iPSC biology, or vascularisation",
-  "takeaway": "One sentence: the single most important finding or method",
-  "accession": "Repository accession number (e.g. GSE123456, SRP123456, E-MTAB-1234) if explicitly mentioned in the abstract, otherwise null"
+  "takeaway": "One sentence: the single most important finding or method"
 }}
 
 Significance criteria:
@@ -143,6 +147,16 @@ def summarise_papers(papers: list) -> list:
         paper.significance = ai.get("significance", "Medium")
         paper.takeaway     = ai.get("takeaway", "")
         paper.accession    = ai.get("accession") or ""
+
+        # For scRNA-relevant papers, look up accession numbers from Europe PMC / NCBI
+        # (abstracts rarely mention them; the full paper body does)
+        if not paper.accession and bool(set(ai.get("tags", [])) & _SCRNA_TAGS):
+            doi = getattr(paper, "doi", "") or ""
+            found = get_accessions(paper.title, doi)
+            if found:
+                paper.accession = found
+                print(f"    ↳ Accessions: {found}")
+
         results.append(paper)
 
         # Small delay between calls to stay comfortably within 10 RPM free tier limit
