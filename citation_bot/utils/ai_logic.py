@@ -47,7 +47,9 @@ def get_ai_summary(prompt: str, max_tokens: int = 1024) -> str:
     Raises:
         requests.HTTPError on non-2xx responses (after retries)
     """
-    api_key = os.environ["GOOGLE_API_KEY"]
+    api_key = os.environ.get("GOOGLE_API_KEY")
+    if not api_key:
+        raise RuntimeError("GOOGLE_API_KEY environment variable is not set.")
 
     payload = {
         "system_instruction": {"parts": [{"text": _SYSTEM_PROMPT}]},

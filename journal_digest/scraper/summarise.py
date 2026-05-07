@@ -31,7 +31,9 @@ def _gemini(prompt: str, max_tokens: int = 600) -> str:
     Call Gemini 2.5 Flash with retry on transient errors.
     Returns generated text or empty string on failure.
     """
-    api_key = os.environ["GOOGLE_API_KEY"]
+    api_key = os.environ.get("GOOGLE_API_KEY")
+    if not api_key:
+        raise RuntimeError("GOOGLE_API_KEY environment variable is not set.")
     payload = {
         "contents": [{"parts": [{"text": prompt}]}],
         "generationConfig": {

@@ -12,6 +12,7 @@ Secret required: GOOGLE_API_KEY (free, no credit card — get at aistudio.google
 """
 
 import os
+import re
 import time
 import requests
 
@@ -19,6 +20,16 @@ import requests
 _GEMINI_URL = (
     "https://generativelanguage.googleapis.com/v1beta/models/"
     "gemini-2.5-flash:generateContent"
+)
+
+_SYSTEM_PROMPT = (
+    "You are a scientific data analyst reviewing research datasets on Zenodo. "
+    "Summarise the provided dataset description in 3-4 plain-English sentences. "
+    "Cover: (1) what data or resource is provided, "
+    "(2) the biological system, species, or conditions studied, "
+    "(3) the methods or assays used to generate the data, and "
+    "(4) its potential utility for single-cell or kidney/organoid research. "
+    "Never invent information not present in the description."
 )
 
 
@@ -36,10 +47,15 @@ def get_ai_summary(prompt: str, max_tokens: int = 500) -> str:
     Raises:
         requests.HTTPError on non-2xx responses (after retries)
     """
-    api_key = os.environ["GOOGLE_API_KEY"]
+    api_key = os.environ.get("GOOGLE_API_KEY")
+    if not api_key:
+        raise RuntimeError("GOOGLE_API_KEY environment variable is not set.")
+
+    clean_prompt = re.sub(r"<[^<]+?>", "", prompt).strip()[:1500]
 
     payload = {
-        "contents": [{"parts": [{"text": prompt}]}],
+        "system_instruction": {"parts": [{"text": _SYSTEM_PROMPT}]},
+        "contents": [{"parts": [{"text": clean_prompt}]}],
         "generationConfig": {
             "maxOutputTokens": max_tokens,
             "temperature": 0.3,   # consistent, factual summaries
