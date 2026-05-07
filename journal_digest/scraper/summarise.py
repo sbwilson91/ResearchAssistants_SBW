@@ -97,7 +97,8 @@ Respond ONLY with a JSON object — no markdown fences:
 {{
   "summary": "2–3 sentence plain-English summary of the paper's contribution",
   "significance": "High|Medium|Low based on relevance to kidney organoids, single-cell RNA-seq, iPSC biology, or vascularisation",
-  "takeaway": "One sentence: the single most important finding or method"
+  "takeaway": "One sentence: the single most important finding or method",
+  "accession": "Repository accession number (e.g. GSE123456, SRP123456, E-MTAB-1234) if explicitly mentioned in the abstract, otherwise null"
 }}
 
 Significance criteria:
@@ -141,6 +142,7 @@ def summarise_papers(papers: list) -> list:
         paper.summary      = ai.get("summary", "")
         paper.significance = ai.get("significance", "Medium")
         paper.takeaway     = ai.get("takeaway", "")
+        paper.accession    = ai.get("accession") or ""
         results.append(paper)
 
         # Small delay between calls to stay comfortably within 10 RPM free tier limit

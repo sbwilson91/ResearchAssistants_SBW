@@ -119,6 +119,108 @@ def _md_to_journal_html(md: str, title: str = "Weekly Journal Digest") -> str:
     )
 
 
+_SCRNA  = re.compile(r"single[- ]cell|scRNA|snRNA|spatial transcriptomics", re.IGNORECASE)
+_KIDNEY = re.compile(r"kidney|renal|nephron|podocyte|proximal tubule|nephrology|glomerul", re.IGNORECASE)
+_ACCESSION = re.compile(r"GSE\d+|GSM\d+|GDS\d+|E-[A-Z]{4}-\d+|SRP\d+|SRR\d+|PRJNA\d+|phs\d+", re.IGNORECASE)
+
+
+def _parse_journal_paper(block: str) -> dict:
+    """Extract structured fields from a single ### paper block in the digest markdown."""
+    title_m = re.match(r"### (.+)", block)
+    title = re.sub(r"<[^>]+>", "", title_m.group(1)).strip() if title_m else ""
+
+    url_m    = re.search(r"\[Full paper\]\(([^)]+)\)", block)
+    journal_m = re.search(r"^\*\*([^*]+)\*\*\s*\|", block, re.MULTILINE)
+    date_m   = re.search(r"\*Published:\s*([^*|]+)", block)
+    summary_m = re.search(r"^> (.+)", block, re.MULTILINE)
+    acc_field = re.search(r"\*\*Accession:\*\*\s*(.+)", block)
+    acc_inline = _ACCESSION.search(block)
+
+    accession = ""
+    if acc_field:
+        accession = acc_field.group(1).strip()
+    elif acc_inline:
+        accession = acc_inline.group(0)
+
+    return {
+        "title":     title,
+        "url":       url_m.group(1) if url_m else "",
+        "journal":   journal_m.group(1).strip() if journal_m else "",
+        "date":      date_m.group(1).strip() if date_m else "",
+        "summary":   summary_m.group(1).strip() if summary_m else "",
+        "accession": accession,
+    }
+
+
+def _build_scrna_page(papers: list[dict], digest_date: str) -> str:
+    """Generate a standalone HTML page listing single-cell papers from the latest digest."""
+    items = []
+    for p in papers:
+        acc_html = (
+            f'<div class="acc">📦 <strong>Accession:</strong> {p["accession"]}</div>'
+            if p["accession"] else
+            '<div class="acc-none">No accession number in abstract — '
+            f'check <a href="{p["url"]}">paper</a> Data Availability section.</div>'
+        )
+        items.append(f"""
+<div class="paper">
+  <h3><a href="{p['url']}">{p['title']}</a></h3>
+  <div class="meta">{p['journal']} &middot; {p['date']}</div>
+  <blockquote>{p['summary'] or 'Summary unavailable.'}</blockquote>
+  {acc_html}
+</div>""")
+
+    body = "\n".join(items)
+    return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Single-Cell Papers — Journal Digest {digest_date}</title>
+<style>
+*{{box-sizing:border-box;margin:0;padding:0}}
+body{{background:#f4f1ec;font-family:Georgia,serif;font-size:16px;line-height:1.7;color:#1a1a1a;padding:32px 16px 64px}}
+.wrapper{{max-width:720px;margin:0 auto}}
+.masthead{{border-top:4px solid #1a1a1a;border-bottom:1px solid #1a1a1a;padding:28px 0 20px;margin-bottom:40px}}
+.label{{font-family:"Courier New",monospace;font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:#666;margin-bottom:8px}}
+.title{{font-family:"Courier New",monospace;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#444}}
+.date{{font-family:"Courier New",monospace;font-size:11px;color:#888;margin-top:6px}}
+.count{{font-family:"Courier New",monospace;font-size:11px;color:#14b8a6;margin-top:4px}}
+.paper{{border-bottom:1px solid #ddd;padding:28px 0}}
+.paper:last-child{{border-bottom:none}}
+h3{{font-size:19px;font-weight:normal;line-height:1.35;margin-bottom:8px}}
+h3 a{{color:#1a1a1a;text-decoration-color:#c8b89a}}
+h3 a:hover{{text-decoration:underline}}
+.meta{{font-family:"Courier New",monospace;font-size:11px;color:#888;margin-bottom:12px}}
+blockquote{{border-left:3px solid #c8b89a;padding:10px 16px;background:#faf8f5;font-style:italic;color:#3a3a3a;font-size:15px;margin-bottom:12px}}
+.acc{{font-family:"Courier New",monospace;font-size:12px;color:#0d9488;background:#f0fdf9;border:1px solid #99f6e4;padding:6px 10px;border-radius:4px;display:inline-block}}
+.acc-none{{font-family:"Courier New",monospace;font-size:11px;color:#888}}
+.acc-none a{{color:#555}}
+.footer{{margin-top:48px;padding-top:16px;border-top:1px solid #ccc;font-family:"Courier New",monospace;font-size:11px;color:#888;line-height:1.8}}
+</style>
+</head>
+<body>
+<div class="wrapper">
+<div class="masthead">
+  <div class="label">Automated Research Intelligence</div>
+  <div class="title">Single-Cell Papers</div>
+  <div class="date">Weekly Journal Digest &middot; {digest_date}</div>
+  <div class="count">{len(papers)} paper{"s" if len(papers) != 1 else ""} identified</div>
+</div>
+{body}
+<div class="footer">
+  Accession numbers extracted from paper abstracts where available.<br>
+  For complete data availability, check the Data Availability or Supplementary sections of each paper.<br>
+  Common repositories: <a href="https://www.ncbi.nlm.nih.gov/geo/">GEO</a> &middot;
+  <a href="https://www.ebi.ac.uk/arrayexpress/">ArrayExpress</a> &middot;
+  <a href="https://www.ncbi.nlm.nih.gov/sra/">SRA</a> &middot;
+  <a href="https://zenodo.org/">Zenodo</a>
+</div>
+</div>
+</body>
+</html>"""
+
+
 def _copy_archive(src_files: list[Path], dest_subdir: str, limit: int = 12) -> list[dict]:
     """Copy the latest N files into docs/<dest_subdir>/ and return archive entries."""
     arc_dir = DOCS / dest_subdir
@@ -194,25 +296,25 @@ def extract_journal_digest() -> dict:
     title_m = re.search(r"^# (.+)$", text, re.MULTILINE)
     title   = title_m.group(1).strip() if title_m else "Weekly Digest"
 
-    # Category breakdown — skip the Featured section, count ### papers under each ##
-    cat_counts: dict[str, int] = {}
-    cur_cat = None
-    _SCRNA_PAT = re.compile(r"single[- ]cell|scRNA|snRNA|spatial transcriptomics", re.IGNORECASE)
-    scrna_count = 0
-    for line in text.splitlines():
-        if line.startswith("## "):
-            cur_cat = line[3:].strip()
-            if "Featured" not in cur_cat:
-                cat_counts[cur_cat] = 0
-        elif line.startswith("### ") and cur_cat and "Featured" not in cur_cat:
-            cat_counts[cur_cat] = cat_counts.get(cur_cat, 0) + 1
-        elif line.startswith("**Topics:**") and _SCRNA_PAT.search(line):
-            scrna_count += 1
+    # Identify single-cell and kidney papers; generate the scRNA detail page
+    sc_papers     = []
+    kidney_papers = []
+    blocks = re.split(r"\n(?=### )", text)
+    for block in blocks:
+        if not block.startswith("### "):
+            continue
+        topics_m = re.search(r"\*\*Topics:\*\*(.+)", block)
+        topics   = topics_m.group(1) if topics_m else ""
+        title_line = block.splitlines()[0] if block.splitlines() else ""
+        if _SCRNA.search(topics) or _SCRNA.search(title_line):
+            sc_papers.append(_parse_journal_paper(block))
+        if _KIDNEY.search(topics) or _KIDNEY.search(title_line):
+            kidney_papers.append(_parse_journal_paper(block))
 
-    # Top 5 by paper count; remainder folded into overflow
-    sorted_cats = sorted(cat_counts.items(), key=lambda x: -x[1])
-    top_cats    = sorted_cats[:5]
-    overflow    = sum(n for _, n in sorted_cats[5:])
+    if sc_papers:
+        (DOCS / "journal_scrna.html").write_text(
+            _build_scrna_page(sc_papers, date), encoding="utf-8"
+        )
 
     # Convert latest digest to HTML for the dashboard link
     html_candidate = f.with_suffix(".html")
@@ -237,15 +339,14 @@ def extract_journal_digest() -> dict:
         entries.append({"date": src.stem[:10], "file": f"journal_digests/{dest_name}"})
 
     return {
-        "available":   True,
-        "date":        date,
-        "title":       title,
-        "paper_count": paper_count,
-        "top_cats":    top_cats,
-        "overflow":    overflow,
-        "scrna_count": scrna_count,
-        "link":        "journal.html",
-        "archive":     entries,
+        "available":    True,
+        "date":         date,
+        "title":        title,
+        "paper_count":  paper_count,
+        "sc_papers":    sc_papers,
+        "kidney_count": len(kidney_papers),
+        "link":         "journal.html",
+        "archive":      entries,
     }
 
 
@@ -474,24 +575,21 @@ def build_html(running: dict, journal: dict, preprint: dict,
 
     # ── Journal Digest card ───────────────────────────────────────
     if journal["available"]:
-        cat_pills = "".join(
-            f'<span class="cat-pill" title="{name}">'
-            f'{name[:22]}{"…" if len(name) > 22 else ""}'
-            f'<span class="cat-n">{n}</span></span>'
-            for name, n in journal.get("top_cats", [])
+        sc_count = len(journal.get("sc_papers", []))
+        sc_chip = (
+            f'<a href="journal_scrna.html" class="highlight-chip chip-scrna">'
+            f'🧬 {sc_count} single-cell</a>'
+            if sc_count else ""
         )
-        if journal.get("overflow"):
-            cat_pills += f'<span class="cat-pill-more">+{journal["overflow"]} more</span>'
-        scrna_j = (
-            f'<div class="scrna-flag">🧬 {journal["scrna_count"]} single-cell paper'
-            f'{"s" if journal["scrna_count"] != 1 else ""}</div>'
-            if journal.get("scrna_count") else ""
+        kidney_chip = (
+            f'<span class="highlight-chip chip-kidney">'
+            f'🔬 {journal["kidney_count"]} kidney</span>'
+            if journal.get("kidney_count") else ""
         )
         j_content = f"""
         <div class="digest-title">{journal['title']}</div>
         <div class="paper-count">{journal['paper_count']} papers summarised</div>
-        <div class="cat-pills">{cat_pills}</div>
-        {scrna_j}"""
+        <div class="highlight-row">{sc_chip}{kidney_chip}</div>"""
         j_archive = archive_dropdown(journal.get("archive", []), "Past digests")
         j_card = bot_card("📰", "Journal Digest", "Friday · Nature, Science, Cell + more",
                           journal["date"], j_content, journal.get("link"),
@@ -619,10 +717,14 @@ def build_html(running: dict, journal: dict, preprint: dict,
   .funnel{{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mu);margin-top:6px;}}
   .funnel-n{{color:var(--accent,#8b5cf6);font-weight:500;}}
   .funnel-arrow{{color:var(--mu);}}
+  .highlight-row{{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}}
+  .highlight-chip{{font-family:'IBM Plex Mono',monospace;font-size:11px;border-radius:6px;padding:5px 10px;text-decoration:none;}}
+  .chip-scrna{{background:rgba(20,184,166,.12);border:1px solid rgba(20,184,166,.3);color:#14b8a6;}}
+  .chip-scrna:hover{{background:rgba(20,184,166,.22);}}
+  .chip-kidney{{background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.3);color:#a78bfa;cursor:default;}}
   .cat-pills{{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px;}}
   .cat-pill{{font-family:'IBM Plex Mono',monospace;font-size:10px;background:var(--bg);border:1px solid var(--bdr);border-radius:4px;padding:3px 8px;color:var(--mu);white-space:nowrap;}}
   .cat-n{{color:var(--accent,#f97316);font-weight:500;margin-left:5px;}}
-  .cat-pill-more{{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--mu);padding:3px 0;align-self:center;}}
   .scrna-flag{{font-family:'IBM Plex Mono',monospace;font-size:11px;color:#14b8a6;margin-top:8px;}}
 
   /* FOOTER ELEMENTS */

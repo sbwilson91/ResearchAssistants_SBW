@@ -66,6 +66,11 @@ def _format_paper(paper: Paper) -> str:
         links = " · ".join(f"[repo]({r})" for r in paper.repos)
         repos_line = f"\n**Code/Data:** {links}"
 
+    accession_line = ""
+    acc = getattr(paper, "accession", "")
+    if acc and str(acc).lower() not in ("null", "none", ""):
+        accession_line = f"\n**Accession:** {acc}"
+
     topics_line = ""
     if paper.categories:
         topics_line = "\n**Topics:** " + " · ".join(
@@ -78,7 +83,7 @@ def _format_paper(paper: Paper) -> str:
         f"*Published: {paper.published.strftime('%-d %b %Y')}* | {sig_icon}  \n"
         f"[Full paper]({paper.url})\n"
         f"\n> {paper.summary or 'Summary unavailable.'}\n"
-        f"{topics_line}{repos_line}\n\n---\n"
+        f"{topics_line}{repos_line}{accession_line}\n\n---\n"
     )
 
 

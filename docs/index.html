@@ -52,10 +52,14 @@
   .funnel{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mu);margin-top:6px;}
   .funnel-n{color:var(--accent,#8b5cf6);font-weight:500;}
   .funnel-arrow{color:var(--mu);}
+  .highlight-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+  .highlight-chip{font-family:'IBM Plex Mono',monospace;font-size:11px;border-radius:6px;padding:5px 10px;text-decoration:none;}
+  .chip-scrna{background:rgba(20,184,166,.12);border:1px solid rgba(20,184,166,.3);color:#14b8a6;}
+  .chip-scrna:hover{background:rgba(20,184,166,.22);}
+  .chip-kidney{background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.3);color:#a78bfa;cursor:default;}
   .cat-pills{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px;}
   .cat-pill{font-family:'IBM Plex Mono',monospace;font-size:10px;background:var(--bg);border:1px solid var(--bdr);border-radius:4px;padding:3px 8px;color:var(--mu);white-space:nowrap;}
   .cat-n{color:var(--accent,#f97316);font-weight:500;margin-left:5px;}
-  .cat-pill-more{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--mu);padding:3px 0;align-self:center;}
   .scrna-flag{font-family:'IBM Plex Mono',monospace;font-size:11px;color:#14b8a6;margin-top:8px;}
 
   /* FOOTER ELEMENTS */
@@ -79,7 +83,7 @@
       <div class="sched-item"><span class="sched-day">FRI</span><span class="sched-bot">Journal Digest</span></div>
       <div class="sched-item"><span class="sched-day">1st</span><span class="sched-bot">Athlete Context Update</span></div>
     </div>
-    <div class="generated">Dashboard generated Thursday 07 May 2026, 02:34 UTC</div>
+    <div class="generated">Dashboard generated Thursday 07 May 2026, 03:23 UTC</div>
   </div>
 </div>
 
@@ -124,8 +128,7 @@
       <div class="card-body">
         <div class="digest-title">Weekly Journal Digest — 2026-04-07</div>
         <div class="paper-count">111 papers summarised</div>
-        <div class="cat-pills"><span class="cat-pill" title="Neuroscience & Bioinformatics">Neuroscience & Bioinfo…<span class="cat-n">21</span></span><span class="cat-pill" title="Social Sciences & Reproducibility">Social Sciences & Repr…<span class="cat-n">10</span></span><span class="cat-pill" title="Materials Science & Nanotechnology">Materials Science & Na…<span class="cat-n">8</span></span><span class="cat-pill" title="Space Exploration & Astronautics">Space Exploration & As…<span class="cat-n">8</span></span><span class="cat-pill" title="Materials Science & Machine Learning">Materials Science & Ma…<span class="cat-n">6</span></span><span class="cat-pill-more">+10 more</span></div>
-        <div class="scrna-flag">🧬 5 single-cell papers</div></div>
+        <div class="highlight-row"><a href="journal_scrna.html" class="highlight-chip chip-scrna">🧬 5 single-cell</a><span class="highlight-chip chip-kidney">🔬 1 kidney</span></div></div>
       <div class="card-footer">
         <a href="journal.html" class="card-btn">View latest report →</a>
         
