@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 
 
 BIORXIV_API = "https://api.biorxiv.org/details/biorxiv/{start}/{end}/{cursor}"
-PAGE_SIZE = 100
+PAGE_SIZE = 30
 
 
 @dataclass
