@@ -461,8 +461,16 @@ def extract_citation_bot() -> dict:
         (REPO_ROOT / "citation_bot" / "reports").glob("*-citation.html"),
         reverse=True
     )
+
+    # Publications page is independent of the weekly report
+    pub_src = REPO_ROOT / "citation_bot" / "reports" / "publications.html"
+    pub_link = None
+    if pub_src.exists():
+        shutil.copy(pub_src, DOCS / "citation_pubs.html")
+        pub_link = "citation_pubs.html"
+
     if not reports:
-        return {"available": False}
+        return {"available": False, "pub_link": pub_link}
 
     f    = reports[0]
     date = f.stem[:10] if len(f.stem) >= 10 else f.stem
@@ -484,6 +492,7 @@ def extract_citation_bot() -> dict:
         "date":           date,
         "citation_count": n,
         "link":           "citation.html",
+        "pub_link":       pub_link,
         "archive":        archive,
     }
 
@@ -649,19 +658,27 @@ def build_html(running: dict, journal: dict, preprint: dict,
                           None, "#3b82f6")
 
     # ── Citation Bot card ────────────────────────────────────────
+    pub_link = citation.get("pub_link")
+    pub_btn = (
+        f'<a href="{pub_link}" class="card-btn card-btn-pubs">All publications →</a>'
+        if pub_link else ""
+    )
     if citation["available"]:
         c_content = f"""
         <div class="digest-title">Citation intelligence</div>
-        <div class="paper-count">{citation['citation_count']} new citation{'s' if citation['citation_count'] != 1 else ''}</div>
-        <div class="preview">Papers citing your work via OpenAlex (ORCID 0000-0002-8994-0781), tagged by Microscopy / Transcriptomics.</div>"""
-        c_archive = archive_dropdown(citation.get("archive", []), "Past reports")
+        <div class="paper-count">{citation['citation_count']} new citation{'s' if citation['citation_count'] != 1 else ''} this week</div>"""
+        c_footer_extra = pub_btn + archive_dropdown(citation.get("archive", []), "Past reports")
         c_card = bot_card("📚", "Citation Bot", "Wednesday · OpenAlex + Gemini",
                           citation["date"], c_content, citation["link"],
-                          "#f59e0b", c_archive)
+                          "#f59e0b", c_footer_extra)
     else:
+        c_content = (
+            "<p class='no-data'>No weekly report yet.</p>"
+            if not pub_link else
+            "<p class='no-data'>Weekly citations report not yet generated.</p>"
+        )
         c_card = bot_card("📚", "Citation Bot", "Wednesday · OpenAlex + Gemini",
-                          "", "<p class='no-data'>No reports yet.</p>",
-                          None, "#f59e0b")
+                          "", c_content, None, "#f59e0b", pub_btn)
 
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -730,6 +747,8 @@ def build_html(running: dict, journal: dict, preprint: dict,
   /* FOOTER ELEMENTS */
   .card-btn{{background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.3);color:#f97316;padding:6px 14px;border-radius:6px;font-family:'IBM Plex Mono',monospace;font-size:11px;text-decoration:none;transition:background .15s;}}
   .card-btn:hover{{background:rgba(249,115,22,.2);}}
+  .card-btn-pubs{{background:rgba(99,102,241,.1);border-color:rgba(99,102,241,.3);color:#6366f1;}}
+  .card-btn-pubs:hover{{background:rgba(99,102,241,.2);}}
   .card-btn-disabled{{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mu);}}
   .archive-select{{background:var(--bg);border:1px solid var(--bdr);color:var(--mu);padding:5px 10px;border-radius:6px;font-family:'IBM Plex Mono',monospace;font-size:11px;cursor:pointer;}}
   .archive-select:hover{{border-color:var(--mu);}}
