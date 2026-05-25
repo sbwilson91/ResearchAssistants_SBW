@@ -37,6 +37,6 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add journal_digest/digests/ journal_digest/trends/ docs/
+          git add journal_digest/digests/ journal_digest/trends/ journal_digest/organoid_intel/ docs/
           git diff --staged --quiet || git commit -m "digest: $(date +%Y-%m-%d) weekly [skip ci]"
           git push

@@ -9,7 +9,27 @@ def _matches_watchlist(paper: Paper, watchlist: list[str]) -> bool:
     haystack = (paper.title + " " + paper.abstract).lower()
     return any(term.lower() in haystack for term in watchlist)
 
-def generate_report(papers: list[Paper], config: dict, output_path: str) -> None:
+def format_intel_section(intel_entries: list) -> str:
+    if not intel_entries:
+        return ""
+    lines = ["---\n## 🧫 Organoid Intelligence\n"]
+    for entry in intel_entries:
+        actionable_line = (
+            f"**Actionable:** ✅ {entry['action_detail']}"
+            if entry.get("actionable")
+            else "**Actionable:** ➖ No immediate pipeline action"
+        )
+        lines.append(
+            f"### [{entry['title']}]({entry['url']}) · `{entry.get('category', 'other')}`\n\n"
+            f"**Finding:** {entry.get('finding', '')}\n\n"
+            f"**HKOCA relevance:** {entry.get('relevance', '')}\n\n"
+            f"{actionable_line}\n\n"
+            f"**Confidence:** {entry.get('confidence', 'medium')}\n\n---\n"
+        )
+    return "\n".join(lines)
+
+
+def generate_report(papers: list[Paper], config: dict, output_path: str, intel_entries=None) -> None:
     """
     Build the markdown digest.
     Watchlist-matching papers appear first under ## ⭐ Featured Papers,
@@ -26,6 +46,10 @@ def generate_report(papers: list[Paper], config: dict, output_path: str) -> None
     lines = [f"# Weekly Journal Digest — {today}\n",
              f"**{len(papers)} new papers** across "
              f"{len({p.journal for p in papers})} journals.\n"]
+
+    # --- Organoid Intelligence section ---
+    if intel_entries:
+        lines.append(format_intel_section(intel_entries))
 
     # --- Featured section (C1) ---
     if featured:
