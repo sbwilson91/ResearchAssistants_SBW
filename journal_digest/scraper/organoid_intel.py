@@ -1,7 +1,15 @@
 # scraper/organoid_intel.py
 import json
 from pathlib import Path
-from .llm import call_gemini
+
+# Supports both package import (journal bot) and sys.path import (preprint bot)
+try:
+    from .llm import call_gemini
+except ImportError:
+    from llm import call_gemini  # noqa: F401 — standalone / cross-package
+
+_LOG_PATH  = Path(__file__).parent.parent / "organoid_intel" / "log.json"
+_SEEN_PATH = Path(__file__).parent.parent / "organoid_intel" / "seen_dois.json"
 
 ORGANOID_KEYWORDS = [
     "organoid", "iPSC", "iPS cell", "induced pluripotent",
@@ -13,9 +21,6 @@ ORGANOID_KEYWORDS = [
     "label transfer", "fidelity", "cell type annotation",
     "bioprint", "bioprinting", "organotypic",
 ]
-
-_LOG_PATH  = Path(__file__).parent.parent / "organoid_intel" / "log.json"
-_SEEN_PATH = Path(__file__).parent.parent / "organoid_intel" / "seen_dois.json"
 
 _PROMPT_CONTEXT = (
     "You are a research assistant specialising in kidney organoids and single-cell "
@@ -60,19 +65,44 @@ Respond ONLY with a JSON object — no markdown fences:
         return None
 
 
-def _load_seen() -> set:
-    if _SEEN_PATH.exists():
-        return set(json.loads(_SEEN_PATH.read_text()))
+def format_intel_section(intel_entries: list) -> str:
+    """Return Markdown entry cards for intel entries. Caller adds the section header."""
+    if not intel_entries:
+        return ""
+    lines = []
+    for entry in intel_entries:
+        actionable_line = (
+            f"**Actionable:** ✅ {entry['action_detail']}"
+            if entry.get("actionable")
+            else "**Actionable:** ➖ No immediate pipeline action"
+        )
+        lines.append(
+            f"### [{entry['title']}]({entry['url']}) · `{entry.get('category', 'other')}`\n\n"
+            f"**Finding:** {entry.get('finding', '')}\n\n"
+            f"**HKOCA relevance:** {entry.get('relevance', '')}\n\n"
+            f"{actionable_line}\n\n"
+            f"**Confidence:** {entry.get('confidence', 'medium')}\n\n---\n"
+        )
+    return "\n".join(lines)
+
+
+def _load_seen(seen_path: Path) -> set:
+    if seen_path.exists():
+        return set(json.loads(seen_path.read_text()))
     return set()
 
 
-def _save_seen(seen: set) -> None:
-    _SEEN_PATH.write_text(json.dumps(sorted(seen), indent=2))
+def _save_seen(seen: set, seen_path: Path) -> None:
+    seen_path.write_text(json.dumps(sorted(seen), indent=2))
 
 
-def update_intel_log(entries: list, date_str: str) -> None:
-    seen = _load_seen()
-    log  = json.loads(_LOG_PATH.read_text()) if _LOG_PATH.exists() else []
+def update_intel_log(entries: list, date_str: str,
+                     log_path: Path = None, seen_path: Path = None) -> None:
+    log_path  = log_path  or _LOG_PATH
+    seen_path = seen_path or _SEEN_PATH
+
+    seen = _load_seen(seen_path)
+    log  = json.loads(log_path.read_text()) if log_path.exists() else []
 
     new_count = 0
     for entry in entries:
@@ -88,6 +118,6 @@ def update_intel_log(entries: list, date_str: str) -> None:
         seen.add(key)
         new_count += 1
 
-    _LOG_PATH.write_text(json.dumps(log, indent=2))
-    _save_seen(seen)
+    log_path.write_text(json.dumps(log, indent=2))
+    _save_seen(seen, seen_path)
     print(f"  Log updated: {new_count} new entries ({len(log)} total)")

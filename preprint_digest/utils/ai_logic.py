@@ -13,7 +13,7 @@ import requests
 
 _GEMINI_URL = (
     "https://generativelanguage.googleapis.com/v1beta/models/"
-    "gemini-2.5-flash:generateContent"
+    "gemini-2.5-flash-lite:generateContent"
 )
 MAX_RETRIES = 3
 

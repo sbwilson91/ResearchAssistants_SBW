@@ -10,6 +10,7 @@ import shutil
 import smtplib
 import subprocess
 import sys
+import time
 from datetime import date
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -19,11 +20,21 @@ from fetcher import fetch_recent, filter_by_watchlist
 from organ_classifier import ORGAN_KEYWORDS, classify_organ
 from utils.ai_logic import get_ai_summary
 
+# Pull in shared organoid intel module from the journal digest scraper
+sys.path.insert(0, str(Path(__file__).parent.parent / "journal_digest" / "scraper"))
+from organoid_intel import (  # noqa: E402
+    is_organoid_relevant, extract_organoid_intel, update_intel_log, format_intel_section,
+)
+from llm import INTEL_SLEEP_S  # noqa: E402
+
 HERE        = Path(__file__).parent
 DIGESTS_DIR = HERE / "digests"
 WATCHLIST   = HERE / "watchlist.txt"
 DAYS_BACK   = int(os.environ.get("DAYS_BACK", 7))
 EMAIL_HTML  = Path("/tmp/digest_email.html")
+
+_PREPRINT_LOG_PATH  = HERE / "preprint_organoid_intel" / "log.json"
+_PREPRINT_SEEN_PATH = HERE / "preprint_organoid_intel" / "seen_dois.json"
 
 
 def load_watchlist(path=WATCHLIST) -> list:
@@ -54,7 +65,7 @@ def _format_paper(p) -> str:
     )
 
 
-def build_digest(all_papers: list, today: str, total_fetched: int) -> str:
+def build_digest(all_papers: list, today: str, total_fetched: int, intel_entries=None) -> str:
     by_organ: dict = {}
     for p in all_papers:
         by_organ.setdefault(p.organ, []).append(p)
@@ -74,6 +85,19 @@ def build_digest(all_papers: list, today: str, total_fetched: int) -> str:
         "---",
         "",
     ]
+
+    if intel_entries:
+        lines += [
+            "## 🧬 Preprint Intelligence",
+            "",
+            "> Sourced from bioRxiv / medRxiv. Findings are not yet peer-reviewed — "
+            "treat as directional signals, not established results.",
+            "> Low-confidence extractions are logged but not shown here.",
+            "",
+            format_intel_section(intel_entries),
+            "---",
+            "",
+        ]
 
     for organ in organ_order:
         if organ not in by_organ:
@@ -139,9 +163,11 @@ def run():
 
         print(f"Matched {len(all_papers)} preprints. Summarising...")
 
-        for p in all_papers:
+        for i, p in enumerate(all_papers):
             if len(p.abstract) >= 50:
                 p.summary = get_ai_summary(p.abstract)
+            if i < len(all_papers) - 1:
+                time.sleep(6)
 
         for p in all_papers:
             p.organ = classify_organ(p.title, p.abstract)
@@ -150,7 +176,43 @@ def run():
         organ_dist = Counter(p.organ for p in all_papers)
         print(f"Organ distribution: {dict(organ_dist)}")
 
-        content  = build_digest(all_papers, today, len(preprints))
+        # Organoid intelligence extraction
+        print("Extracting preprint organoid intelligence...")
+        intel_entries = []
+        try:
+            relevant = [p for p in all_papers if is_organoid_relevant(p)]
+            print(f"  {len(relevant)} organoid-relevant preprint(s) found")
+            if relevant:
+                print("  Waiting 60s for RPM window to reset after summarise…")
+                time.sleep(60)
+            for i, p in enumerate(relevant):
+                entry = extract_organoid_intel(p)
+                if entry:
+                    entry.update({
+                        "title":   p.title,
+                        "url":     p.url,
+                        "doi":     p.doi or "",
+                        "journal": p.category or "bioRxiv",
+                        "source":  "bioRxiv",
+                    })
+                    intel_entries.append(entry)
+                if i < len(relevant) - 1:
+                    time.sleep(INTEL_SLEEP_S)
+            all_intel = intel_entries
+            if all_intel:
+                update_intel_log(
+                    all_intel, today,
+                    log_path=_PREPRINT_LOG_PATH,
+                    seen_path=_PREPRINT_SEEN_PATH,
+                )
+            # Filter low-confidence for digest display only
+            intel_entries = [e for e in all_intel if e.get("confidence") != "low"]
+            print(f"  → {len(all_intel)} extracted, {len(intel_entries)} medium/high shown")
+        except Exception as e:
+            print(f"  ⚠ Preprint intel step failed: {e} — continuing without intel")
+            intel_entries = []
+
+        content  = build_digest(all_papers, today, len(preprints), intel_entries=intel_entries)
         n_papers = len(all_papers)
 
     # Save Markdown digest
