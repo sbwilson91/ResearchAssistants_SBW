@@ -18,8 +18,10 @@ or new races are completed. No Python knowledge required.
 - Stem cell / kidney organoid researcher, postdoc at EMBL Barcelona
 
 ## Any other info
-- Currently on holiday in Australia visiting family (23rd April to 18th May)
-- Trying to run 3-4 times per week following a Runna maintenance plan during the holiday period
+- Returned from holiday in Australia visiting family (23rd April to 18th May)
+- Started a Runna program to target sub 90 minutes at Copenhagen Half on 20th September
+- Will also run a Backyard Ultra on 29th August
+- Light ligament strain 24/5/2026, taking some days off training to recover
 
 ## Career Bests
 
@@ -28,8 +30,7 @@ or new races are completed. No Python knowledge required.
 | Parkrun       | 19:52     | Local               | Jan 2025 |
 | 10km          | 43:34     | Frost Cup           | Feb 2024 |
 | Half marathon | 1:32:55   | Berlin              | Apr 2025 |
-| Marathon      | 3:30:45   | Copenhagen          | May 2025 |
-| 59km ultra    | 9:37:10   | Kullaberg recce     | Jul 2024 |
+| Marathon      | 3:31:06   | Copenhagen          | May 2025 |
 | 100km ultra   | 17:23:21  | Kullamannen UTMB    | Nov 2024 |
 | 90km ultra    | 12:02:39  | Ultravasan          | Aug 2025 |
 
