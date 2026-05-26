@@ -4,8 +4,8 @@ import os
 import time
 import requests
 
-GEMINI_SLEEP_S = 6   # summarise loop
-INTEL_SLEEP_S  = 12  # organoid intel loop — no rush, avoids rate limit burst
+GEMINI_SLEEP_S = 13  # summarise loop — 13s keeps us under 5 RPM (account limit)
+INTEL_SLEEP_S  = 15  # organoid intel loop — extra headroom, no time pressure
 
 _GEMINI_URL = (
     "https://generativelanguage.googleapis.com/v1beta/models/"

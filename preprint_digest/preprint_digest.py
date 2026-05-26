@@ -167,7 +167,7 @@ def run():
             if len(p.abstract) >= 50:
                 p.summary = get_ai_summary(p.abstract)
             if i < len(all_papers) - 1:
-                time.sleep(6)
+                time.sleep(INTEL_SLEEP_S)  # reuse 15s — preprint runs are smaller
 
         for p in all_papers:
             p.organ = classify_organ(p.title, p.abstract)

@@ -12,6 +12,7 @@ import time
 import requests
 
 from .accession_lookup import get_accessions
+from .llm import GEMINI_SLEEP_S
 
 # Tags that indicate a paper may have deposited scRNA/genomics data in a repository
 _SCRNA_TAGS = {"single-cell", "scRNA-seq", "spatial transcriptomics", "atlas"}
@@ -159,9 +160,8 @@ def summarise_papers(papers: list) -> list:
 
         results.append(paper)
 
-        # Small delay between calls to stay comfortably within 10 RPM free tier limit
         if i < len(papers) - 1:
-            time.sleep(6)
+            time.sleep(GEMINI_SLEEP_S)
 
     return results
 
