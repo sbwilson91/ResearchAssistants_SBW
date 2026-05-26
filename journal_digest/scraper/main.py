@@ -42,6 +42,9 @@ def main():
     try:
         relevant = [p for p in papers if is_organoid_relevant(p)]
         print(f"  {len(relevant)} organoid-relevant paper(s) found")
+        if relevant:
+            print("  Waiting 60s for RPM window to reset after summarise…")
+            time.sleep(60)
         for i, paper in enumerate(relevant):
             entry = extract_organoid_intel(paper)
             if entry:
