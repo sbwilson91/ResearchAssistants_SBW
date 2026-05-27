@@ -9,6 +9,8 @@ import yaml
 from strava import refresh_access_token, build_report_data
 from speed_sessions import get_speed_sessions
 from insights import get_claude_insights
+from races import get_race_data
+from parkrun_scraper import fetch_parkrun_results, summarise_parkrun
 from report import generate_html
 from utils.email_logic import send_email
 
@@ -53,9 +55,27 @@ def run():
             print(f"⚠  Garmin failed: {e}")
     data["garmin"] = garmin_data
 
-    # 5. Claude insights
+    # 5. parkrun leaderboard
+    parkrun_athlete_id = cfg.get("parkrun_athlete_id", "")
+    if parkrun_athlete_id:
+        try:
+            pr_results = fetch_parkrun_results(parkrun_athlete_id)
+            data["parkrun_leaderboard"] = summarise_parkrun(pr_results)
+        except Exception as e:
+            print(f"⚠  parkrun scraper: {e}")
+            data["parkrun_leaderboard"] = {}
+    else:
+        data["parkrun_leaderboard"] = {}
+
+    # 6. Race countdown
+    race_data = get_race_data(cfg)
+    if race_data["races"]:
+        primary = race_data.get("primary")
+        print(f"\n  Phase: {race_data['phase']} | Next race: {primary['name']} in {primary['days_until']}d")
+
+    # 6. Claude insights
     try:
-        insights = get_claude_insights(data, athlete_context)
+        insights = get_claude_insights(data, athlete_context, race_data=race_data)
     except Exception as e:
         print(f"⚠  Claude error: {e}")
         tw = data.get("this_week") or {}
@@ -68,14 +88,14 @@ def run():
             "next_week_focus": "Review charts manually.",
         }
 
-    # 6. Render + save
-    html     = generate_html(data, insights, history_weeks=history_wks)
+    # 7. Render + save
+    html     = generate_html(data, insights, history_weeks=history_wks, race_data=race_data)
     date_str = datetime.date.today().strftime("%Y-%m-%d")
     for path in [output_dir / f"report_{date_str}.html", output_dir / "index.html"]:
         path.write_text(html, encoding="utf-8")
     print(f"✓ report_{date_str}.html")
 
-    # 7. Email
+    # 8. Email
     if cfg.get("send_email", True):
         try:
             tw = data.get("this_week") or {}
@@ -84,7 +104,7 @@ def run():
         except Exception as e:
             print(f"⚠  Email: {e}")
 
-    # 8. Summary
+    # 9. Summary
     tw = data.get("this_week") or {}
     print(f"\n── {data['week_label']} ──────────────────")
     print(f"  {tw.get('dist_km','–')} km · {tw.get('avg_pace','–')}/km · {tw.get('avg_hr','–')} bpm")

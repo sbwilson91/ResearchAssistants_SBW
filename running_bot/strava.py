@@ -187,6 +187,21 @@ def _hr_zones(activities, token, max_hr=185):
     return zones
 
 
+def _daily_activities(activities: list) -> dict:
+    """Return {date_str: {dist_km, suffer_score, type}} for heatmap rendering."""
+    daily = {}
+    for a in activities:
+        d = _dt(a).strftime("%Y-%m-%d")
+        t = a.get("type", "Other")
+        if d not in daily:
+            daily[d] = {"dist_km": 0.0, "suffer_score": 0, "type": t}
+        if t == "Run":
+            daily[d]["dist_km"]     += round(a.get("distance", 0) / 1000, 1)
+            daily[d]["suffer_score"] += a.get("suffer_score") or 0
+            daily[d]["type"]          = "Run"
+    return daily
+
+
 def build_report_data(token, history_weeks=16):
     now           = datetime.now(timezone.utc)
     week_start    = now - timedelta(days=7)
@@ -246,5 +261,6 @@ def build_report_data(token, history_weeks=16):
         "zone_dist":        _hr_zones(this_week, token),
         "current_streak":   _detect_streak(all_acts),
         "total_activities": len(all_acts),
+        "daily_activities": _daily_activities(all_acts),
         "speed_sessions":   [],              # populated by running_bot.py after stream fetch
     }

@@ -478,11 +478,261 @@ def _next_week_html(garmin: dict, insights: dict) -> str:
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 
+def _heatmap_html(daily: dict, history_weeks: int = 16) -> str:
+    """GitHub-style training calendar. Weeks as columns, Mon–Sun as rows."""
+    from datetime import date, timedelta
+
+    if not daily:
+        return ""
+
+    today      = date.today()
+    # Start on the Monday of the earliest week
+    start      = today - timedelta(weeks=history_weeks)
+    start      = start - timedelta(days=start.weekday())  # back to Monday
+
+    # Build list of (date, cell_html) for every day start → today
+    DAY_LABELS = ["M", "T", "W", "T", "F", "S", "S"]
+
+    def _color(d_str):
+        if d_str not in daily:
+            return "#1a2035", ""
+        e = daily[d_str]
+        km = e.get("dist_km", 0)
+        t  = e.get("type", "")
+        if t != "Run" or km == 0:
+            return "#242c45", ""   # cross-training / rest with activity
+        if km < 5:   return "#164e63", f"{km}km"
+        if km < 10:  return "#0e7490", f"{km}km"
+        if km < 15:  return "#14b8a6", f"{km}km"
+        if km < 25:  return "#f59e0b", f"{km}km"
+        return "#f97316", f"{km}km"
+
+    # Group into weeks (columns of 7 days)
+    weeks = []
+    cursor = start
+    while cursor <= today:
+        week = []
+        for _ in range(7):
+            week.append(cursor)
+            cursor += timedelta(days=1)
+        weeks.append(week)
+
+    # Build columns HTML
+    cols_html = ""
+    for week in weeks:
+        cells = ""
+        for day in week:
+            d_str = day.strftime("%Y-%m-%d")
+            color, label = _color(d_str)
+            future = "opacity:.25;" if day > today else ""
+            tip    = f"{d_str} — {label}" if label else d_str
+            cells += (f'<div title="{tip}" style="width:11px;height:11px;border-radius:2px;'
+                      f'background:{color};{future}"></div>')
+        cols_html += f'<div style="display:flex;flex-direction:column;gap:2px;">{cells}</div>'
+
+    # Day-of-week labels on left
+    dow_labels = "".join(
+        f'<div style="height:11px;font-family:IBM Plex Mono,monospace;font-size:8px;'
+        f'color:#2a3050;line-height:11px;">{l}</div>'
+        for l in DAY_LABELS
+    )
+
+    # Month labels along top (approximate — one label per ~4 weeks)
+    month_labels_html = ""
+    seen_months = set()
+    for i, week in enumerate(weeks):
+        m = week[0].strftime("%b")
+        if m not in seen_months:
+            seen_months.add(m)
+            month_labels_html += (f'<div style="grid-column:{i+1};font-family:IBM Plex Mono,monospace;'
+                                   f'font-size:8px;color:#2a3050;white-space:nowrap;">{m}</div>')
+
+    # Legend
+    legend = ""
+    for color, label in [("#1a2035","rest"), ("#14b8a6","5–15km"), ("#f59e0b","15–25km"), ("#f97316","25km+")]:
+        legend += (f'<div style="display:flex;align-items:center;gap:4px;'
+                   f'font-family:IBM Plex Mono,monospace;font-size:9px;color:#4a5270;">'
+                   f'<div style="width:9px;height:9px;border-radius:2px;background:{color};"></div>'
+                   f'{label}</div>')
+
+    return f"""
+  <div class="section">
+    <div class="sh">Training Calendar</div>
+    <div style="overflow-x:auto;padding-bottom:8px;">
+      <div style="display:flex;gap:3px;align-items:flex-start;min-width:max-content;">
+        <div style="display:flex;flex-direction:column;gap:2px;padding-top:14px;margin-right:2px;">
+          {dow_labels}
+        </div>
+        <div>
+          <div style="display:flex;gap:3px;margin-bottom:3px;">{month_labels_html}</div>
+          <div style="display:flex;gap:3px;">{cols_html}</div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:14px;margin-top:10px;flex-wrap:wrap;">{legend}</div>
+  </div>"""
+
+
+def _parkrun_leaderboard_html(lb: dict) -> str:
+    if not lb or not lb.get("recent"):
+        return ""
+
+    recent = lb["recent"]
+    trend  = lb.get("age_grade_trend", "stable")
+    trend_icon  = {"improving": "↑", "declining": "↓", "stable": "→"}.get(trend, "→")
+    trend_color = {"improving": "#22c55e", "declining": "#ef4444", "stable": "#4a5270"}.get(trend, "#4a5270")
+
+    best_ag  = lb.get("best_age_grade")
+    best_pos = lb.get("best_position")
+    avg_ag   = lb.get("avg_age_grade_10")
+    total    = lb.get("total_runs", 0)
+
+    # Summary bar
+    summary_parts = []
+    if total:        summary_parts.append(f"{total} runs total")
+    if best_pos:     summary_parts.append(f"best position #{best_pos}")
+    if best_ag:      summary_parts.append(f"best age grade {best_ag}%")
+    if avg_ag:       summary_parts.append(f"10-run avg {avg_ag}%")
+    summary_html = (
+        f'<div style="font-size:11px;color:#4a5270;margin-bottom:14px;">'
+        + " · ".join(summary_parts)
+        + f' <span style="color:{trend_color};font-weight:500;">{trend_icon} age grade {trend}</span>'
+        + '</div>'
+    ) if summary_parts else ""
+
+    # Table rows
+    rows = ""
+    prev_ag = None
+    for r in recent:
+        ag      = r.get("age_grade")
+        pos     = r.get("position")
+        t_str   = r.get("time_str", "–")
+        event   = r.get("event", "–")
+        # shorten event names
+        event_short = event.replace("parkrun", "").replace("Parkrun", "").strip() or event
+
+        ag_color = (
+            "#8b5cf6" if ag and ag >= 70 else
+            "#22c55e" if ag and ag >= 65 else
+            "#f97316" if ag and ag >= 60 else
+            "#ef4444" if ag else
+            "#4a5270"
+        )
+        ag_arrow = ""
+        if ag and prev_ag:
+            diff = ag - prev_ag
+            if diff > 0.5:    ag_arrow = f'<span style="color:#22c55e;font-size:9px;"> ↑</span>'
+            elif diff < -0.5: ag_arrow = f'<span style="color:#ef4444;font-size:9px;"> ↓</span>'
+        prev_ag = ag
+
+        pb_badge = '<span style="color:#f59e0b;font-size:9px;font-weight:600;"> PB</span>' if r.get("is_pb") else ""
+
+        rows += f"""
+        <tr>
+          <td style="color:#4a5270;">{r['date'][5:]}</td>
+          <td style="color:#dde2f0;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{event_short}</td>
+          <td style="font-family:'IBM Plex Mono',monospace;color:#f97316;">{t_str}{pb_badge}</td>
+          <td style="font-family:'IBM Plex Mono',monospace;color:#4a5270;">{f"#{pos}" if pos else "–"}</td>
+          <td style="font-family:'IBM Plex Mono',monospace;color:{ag_color};">{f"{ag}%" if ag else "–"}{ag_arrow}</td>
+        </tr>"""
+
+    return f"""
+    <div style="margin-bottom:20px;">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:#4a5270;
+                  text-transform:uppercase;letter-spacing:.12em;margin-bottom:10px;">Recent Results</div>
+      {summary_html}
+      <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;font-size:12px;">
+          <thead>
+            <tr style="border-bottom:1px solid #1a2035;">
+              <th style="text-align:left;padding:6px 10px 6px 0;font-family:'IBM Plex Mono',monospace;
+                         font-size:9px;font-weight:400;color:#4a5270;text-transform:uppercase;letter-spacing:.08em;">Date</th>
+              <th style="text-align:left;padding:6px 10px 6px 0;font-family:'IBM Plex Mono',monospace;
+                         font-size:9px;font-weight:400;color:#4a5270;text-transform:uppercase;letter-spacing:.08em;">Event</th>
+              <th style="text-align:left;padding:6px 10px 6px 0;font-family:'IBM Plex Mono',monospace;
+                         font-size:9px;font-weight:400;color:#4a5270;text-transform:uppercase;letter-spacing:.08em;">Time</th>
+              <th style="text-align:left;padding:6px 10px 6px 0;font-family:'IBM Plex Mono',monospace;
+                         font-size:9px;font-weight:400;color:#4a5270;text-transform:uppercase;letter-spacing:.08em;">Pos</th>
+              <th style="text-align:left;padding:6px 0;font-family:'IBM Plex Mono',monospace;
+                         font-size:9px;font-weight:400;color:#4a5270;text-transform:uppercase;letter-spacing:.08em;">Age Grade</th>
+            </tr>
+          </thead>
+          <tbody>{rows}
+          </tbody>
+        </table>
+      </div>
+    </div>"""
+
+
+def _race_countdown_html(race_data: dict) -> str:
+    if not race_data or not race_data.get("races"):
+        return ""
+
+    phase        = race_data.get("phase", "Base")
+    phase_detail = race_data.get("phase_detail", "")
+
+    PHASE_COLORS = {
+        "Race Week": "#ef4444",
+        "Taper":     "#f97316",
+        "Peak":      "#f59e0b",
+        "Build":     "#14b8a6",
+        "Base":      "#8b5cf6",
+        "Off-Season":"#4a5270",
+    }
+    phase_color = PHASE_COLORS.get(phase, "#4a5270")
+
+    cards_html = ""
+    for r in race_data["races"]:
+        primary_style = 'border-top:2px solid #f97316;' if r.get("primary") else ''
+        goal_html = f'<div style="font-size:11px;color:#f97316;margin-top:4px;">{r["goal"]}</div>' if r.get("goal") else ""
+        race_phase_color = PHASE_COLORS.get(r["phase"], "#4a5270")
+
+        # Progress bar: weeks elapsed out of ~20 week cycle (capped)
+        total_weeks = 20
+        elapsed = max(0, total_weeks - r["weeks_until"])
+        pct = min(100, round(elapsed / total_weeks * 100))
+
+        cards_html += f"""
+    <div class="race-card" style="{primary_style}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+        <div>
+          <div style="font-family:'Source Serif 4',serif;font-size:15px;font-weight:600;color:#dde2f0;">{r["name"]}</div>
+          <div style="font-size:10px;color:#4a5270;text-transform:uppercase;letter-spacing:.08em;margin-top:2px;">{r["type_label"]} · {r["date_str"]}</div>
+          {goal_html}
+        </div>
+        <div style="text-align:right;">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:28px;font-weight:500;color:#f97316;line-height:1;">{r["days_until"]}</div>
+          <div style="font-size:10px;color:#4a5270;text-transform:uppercase;letter-spacing:.08em;">days</div>
+        </div>
+      </div>
+      <div style="margin-bottom:8px;">
+        <div style="height:3px;background:#1a2035;border-radius:2px;">
+          <div style="height:3px;width:{pct}%;background:{race_phase_color};border-radius:2px;transition:width .3s;"></div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:{race_phase_color};font-weight:500;">{r["phase"]}</div>
+      <div style="font-size:11px;color:#4a5270;margin-top:2px;">{r["phase_detail"]}</div>
+    </div>"""
+
+    return f"""
+  <div class="section">
+    <div class="sh">Race Schedule
+      <span style="font-size:10px;font-family:'IBM Plex Mono',monospace;color:{phase_color};
+                   background:rgba(139,92,246,.12);padding:3px 8px;border-radius:10px;
+                   text-transform:uppercase;letter-spacing:.08em;font-weight:500;">{phase}</span>
+    </div>
+    <div style="font-size:12px;color:#4a5270;margin-bottom:16px;">{phase_detail}</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;">
+      {cards_html}
+    </div>
+  </div>"""
+
+
 # Module-level reference so speed session HTML can access insights
 insights_ref = None
 
 
-def generate_html(data: dict, insights: dict, history_weeks: int = 16) -> str:
+def generate_html(data: dict, insights: dict, history_weeks: int = 16, race_data: dict | None = None) -> str:
     global insights_ref
     insights_ref = insights
 
@@ -581,6 +831,9 @@ def generate_html(data: dict, insights: dict, history_weeks: int = 16) -> str:
     speed_section       = _speed_sessions_html(data.get("speed_sessions", []))
     plan_actual_section = _plan_actual_html(garmin, insights)
     next_week_section   = _next_week_html(garmin, insights)
+    race_section        = _race_countdown_html(race_data or {})
+    pr_leaderboard_html = _parkrun_leaderboard_html(data.get("parkrun_leaderboard", {}))
+    heatmap_section     = _heatmap_html(data.get("daily_activities", {}), history_weeks)
 
     aeff_delta_html = (
         f'<div><div style="font-family:IBM Plex Mono,monospace;font-size:9px;color:var(--mu);'
@@ -706,6 +959,7 @@ def generate_html(data: dict, insights: dict, history_weeks: int = 16) -> str:
   .upcoming-name{{font-size:14px;font-weight:600;color:var(--tx);margin:3px 0 6px;}}
   .upcoming-steps{{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mu);line-height:1.7;}}
   /* FOOTER */
+  .race-card{{background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:18px 20px;}}
   .footer{{border-top:1px solid var(--bdr);padding:32px 0 48px;margin-top:48px;}}
   .footer p{{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--mu);line-height:1.9;}}
 </style>
@@ -733,6 +987,7 @@ def generate_html(data: dict, insights: dict, history_weeks: int = 16) -> str:
     <div class="hs"><span class="hs-l">Streak</span><span class="hs-v" style="color:{streak_color}">{streak}d</span></div>
     <div class="hs"><span class="hs-l">Aero Eff.</span><span class="hs-v t">{aeff_str}</span><span class="hs-delta" style="color:{aeff_delta_color}">{aeff_delta}</span></div>
   </div>
+  {race_section}
   <div class="section">
     <div class="sh">Weekly Analysis <span class="ai-badge">◆ Claude</span></div>
     <div class="narrative">{narrative_html}</div>
@@ -743,6 +998,7 @@ def generate_html(data: dict, insights: dict, history_weeks: int = 16) -> str:
   {speed_section}
   {plan_actual_section}
   {next_week_section}
+  {heatmap_section}
   <div class="section">
     <div class="sh">Volume — Last {history_weeks} Weeks</div>
     <div class="fig">
@@ -786,6 +1042,7 @@ def generate_html(data: dict, insights: dict, history_weeks: int = 16) -> str:
   <div class="section">
     <div class="sh">Parkrun</div>
     {bp_html}
+    {pr_leaderboard_html}
     <div class="fig">
       <div class="fig-h"><span class="fig-title">Parkrun Times & HR</span><span class="fig-n">Fig. 5</span></div>
       <div class="fig-body"><canvas id="chart-parkrun" height="230"></canvas></div>

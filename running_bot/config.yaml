@@ -7,6 +7,22 @@ send_email:    true
 # Set to false to disable Garmin integration without removing the secrets
 garmin_enabled: true
 
+parkrun_athlete_id:    "A7859764"
+
 max_hr_estimate:       185
 parkrun_distance_min_km: 4.8
 parkrun_distance_max_km: 5.3
+
+races:
+  - name: "Backyard Ultra"
+    date: "2026-08-29"
+    type: "backyard_ultra"
+    goal: null
+    primary: false
+
+  - name: "Copenhagen Half Marathon"
+    date: "2026-09-20"
+    type: "half_marathon"
+    goal: "sub-1:30"
+    goal_seconds: 5400
+    primary: true

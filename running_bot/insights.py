@@ -16,7 +16,7 @@ ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages"
 MODEL             = "claude-sonnet-4-20250514"
 
 
-def get_claude_insights(data: dict, athlete_context: str) -> dict:
+def get_claude_insights(data: dict, athlete_context: str, race_data: dict | None = None) -> dict:
     system_prompt = (
         "You are providing weekly running analysis for a specific athlete. "
         "Use the following context to make your insights specific and personal:\n\n"
@@ -34,7 +34,7 @@ def get_claude_insights(data: dict, athlete_context: str) -> dict:
             "model":      MODEL,
             "max_tokens": 2800,
             "system":     system_prompt,
-            "messages":   [{"role": "user", "content": _build_prompt(data)}],
+            "messages":   [{"role": "user", "content": _build_prompt(data, race_data)}],
         },
         timeout=60,
     )
@@ -357,6 +357,36 @@ def _speed_session_block(sessions: list[dict]) -> str:
     return "\n".join(lines)
 
 
+def _race_context_block(race_data: dict) -> str:
+    if not race_data or not race_data.get("races"):
+        return ""
+
+    lines = ["RACE COUNTDOWN & TRAINING PHASE:"]
+    phase        = race_data.get("phase", "Base")
+    phase_detail = race_data.get("phase_detail", "")
+    lines.append(f"  Current phase: {phase} — {phase_detail}")
+    lines.append("")
+
+    for r in race_data["races"]:
+        goal_str = f" (goal: {r['goal']})" if r.get("goal") else ""
+        primary_tag = " ★ PRIMARY" if r.get("primary") else ""
+        lines.append(f"  {r['name']} [{r['type_label']}]{primary_tag}")
+        lines.append(f"    Date: {r['date_str']}  |  {r['days_until']} days away ({r['weeks_until']} weeks){goal_str}")
+        lines.append(f"    Phase: {r['phase']} — {r['phase_detail']}")
+
+    primary = race_data.get("primary")
+    if primary:
+        lines.append(
+            f"\n  ANALYTICAL NOTE: The athlete is {primary['weeks_until']} weeks from {primary['name']}. "
+            f"Phase is '{primary['phase']}'. Frame your analysis in terms of what this phase demands — "
+            f"what kind of training stimulus is appropriate, what adaptations should be occurring, "
+            f"and whether this week's load and recovery picture supports or undermines that. "
+            f"If a race goal exists ({primary.get('goal') or 'none stated'}), assess whether "
+            f"current fitness trajectory (VO₂, race predictions) is on track to achieve it."
+        )
+    return "\n".join(lines)
+
+
 def _garmin_plan_block(garmin: dict) -> str:
     if not garmin.get("available"):
         return "Garmin calendar not available."
@@ -393,7 +423,7 @@ def _garmin_plan_block(garmin: dict) -> str:
 
 # ── Main prompt builder ───────────────────────────────────────────────────────
 
-def _build_prompt(data: dict) -> str:
+def _build_prompt(data: dict, race_data: dict | None = None) -> str:
     tw        = data.get("this_week") or {}
     aeff      = data.get("aero_eff_now")
     aeff_prev = data.get("aero_eff_prev")
@@ -446,6 +476,7 @@ def _build_prompt(data: dict) -> str:
     sleep_block    = _sleep_block(analytics)
     speed_block    = _speed_session_block(data.get("speed_sessions", []))
     plan_block     = _garmin_plan_block(garmin)
+    race_block     = _race_context_block(race_data or {})
 
     return f"""WEEK: {data['week_label']}
 
@@ -490,6 +521,9 @@ PARKRUNS:
 
 ━━━ TRAINING PLAN ━━━
 {plan_block}
+
+━━━ RACE SCHEDULE ━━━
+{race_block}
 
 ---
 
