@@ -1,7 +1,6 @@
 # scraper/report.py
 from datetime import datetime, date
 from .feeds import Paper
-from .organoid_intel import format_intel_section
 from collections import defaultdict
 import re, os
 
@@ -10,7 +9,7 @@ def _matches_watchlist(paper: Paper, watchlist: list[str]) -> bool:
     haystack = (paper.title + " " + paper.abstract).lower()
     return any(term.lower() in haystack for term in watchlist)
 
-def generate_report(papers: list[Paper], config: dict, output_path: str, intel_entries=None) -> None:
+def generate_report(papers: list[Paper], config: dict, output_path: str) -> None:
     """
     Build the markdown digest.
     Watchlist-matching papers appear first under ## ⭐ Featured Papers,
@@ -27,11 +26,6 @@ def generate_report(papers: list[Paper], config: dict, output_path: str, intel_e
     lines = [f"# Weekly Journal Digest — {today}\n",
              f"**{len(papers)} new papers** across "
              f"{len({p.journal for p in papers})} journals.\n"]
-
-    # --- Organoid Intelligence section ---
-    if intel_entries:
-        lines.append("---\n## 🧫 Organoid Intelligence\n")
-        lines.append(format_intel_section(intel_entries))
 
     # --- Featured section (C1) ---
     if featured:
