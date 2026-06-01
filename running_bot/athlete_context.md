@@ -27,7 +27,7 @@ or new races are completed. No Python knowledge required.
 
 | Distance      | Time      | Race                | Date     |
 |---------------|-----------|---------------------|----------|
-| Parkrun       | 19:52     | Local               | Jan 2025 |
+| Parkrun       | 21:46     | Local               | May 2026 |
 | 10km          | 43:34     | Frost Cup           | Feb 2024 |
 | Half marathon | 1:32:55   | Berlin              | Apr 2025 |
 | Marathon      | 3:31:06   | Copenhagen          | May 2025 |
@@ -48,6 +48,7 @@ Superhalfs series: **6/6 complete** (Copenhagen, Lisbon, Prague, Cardiff, Berlin
 
 ## Training Patterns
 
+- **Post-streak/holiday pattern (May 2026):** ~30-35 km/week during holiday recovery, significant reduction from previous patterns
 - **Post-streak pattern (Apr 2026):** ~175 km/month, more volatile week-to-week (24-67km swings)
 - **Weekly average in peak phase (Dec 2024–May 2025):** ~250 km/month
 - **Peak week ever:** 143.8 km
@@ -57,11 +58,12 @@ Superhalfs series: **6/6 complete** (Copenhagen, Lisbon, Prague, Cardiff, Berlin
 ## Known Limiters
 
 - **Calf endurance:** gave out at km 37 in CPH Marathon — posterior chain S&C needed
-- **Cadence:** 163–170 spm, still 5–7 below optimal 170–180 range (though hitting 180+ spm during quality intervals as of Apr 2026)
+- **Cadence:** 163–170 spm, still 5–7 below optimal 170–180 range (though hitting 180+ spm during quality intervals as of Apr 2026); regression to 157-162 spm observed during fatigue periods
 - **Vertical oscillation:** ~92mm (target <80mm) — linked to cadence, regressing to 9.3cm under fatigue
 - History of racing on heavy legs
 - Recurring heel issues; achilles warning during Kullamannen ultra taper
 - **Zone distribution discipline:** tendency to drift into Zone 3 (80% of time in Apr 2026) rather than maintaining 80/20 polarization
+- **Holiday/travel disruption sensitivity:** HRV drops to LOW status even with reduced training volume, suggesting high sensitivity to routine disruption
 
 ## Current Goals
 
@@ -83,3 +85,4 @@ Superhalfs series: **6/6 complete** (Copenhagen, Lisbon, Prague, Cardiff, Berlin
 ## Update Log
 
 - **2026-05-01**: Updated from reports 2026-04-26, 2026-04-19, 2026-04-13, 2026-04-12
+- **2026-06-01**: Updated from reports 2026-05-31, 2026-05-24, 2026-05-17, 2026-05-10
