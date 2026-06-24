@@ -14,7 +14,7 @@ import requests
 
 
 ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages"
-MODEL             = "claude-sonnet-4-20250514"
+MODEL             = "claude-sonnet-4-6"
 MAX_TOKENS        = 4096
 MAX_ATTEMPTS       = 3
 RETRYABLE_STATUSES = {429, 500, 502, 503, 529}
@@ -61,6 +61,15 @@ def get_claude_insights(data: dict, athlete_context: str, race_data: dict | None
 
             print(f'✓ Insights: "{insights.get("headline","…")}"')
             return insights
+
+        except requests.HTTPError as e:
+            last_error = e
+            if e.response.status_code not in RETRYABLE_STATUSES:
+                print(f"✗  Claude API {e.response.status_code} (non-retryable): {e.response.text[:300]}")
+                break
+            if attempt < MAX_ATTEMPTS:
+                print(f"⚠  Claude call failed ({e}), retrying (attempt {attempt}/{MAX_ATTEMPTS})…")
+                time.sleep(5 * attempt)
 
         except (requests.RequestException, json.JSONDecodeError, KeyError, IndexError) as e:
             last_error = e
