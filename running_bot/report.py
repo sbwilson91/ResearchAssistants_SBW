@@ -1051,7 +1051,7 @@ def generate_html(data: dict, insights: dict, history_weeks: int = 16, race_data
   </div>
   <div class="footer">
     <p>ResearchAssistants_SBW · running_bot · {data["generated_at"]}<br>
-    Strava API (streams) · Garmin Connect (analytics + calendar) · Claude (claude-sonnet-4-20250514)</p>
+    Strava API (streams) · Garmin Connect (analytics + calendar) · Claude (claude-sonnet-4-6)</p>
   </div>
 </div>
 <script>
