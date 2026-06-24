@@ -224,16 +224,15 @@ def _fetch_training_readiness(client, today: str) -> dict:
     }
 
 
-def _fetch_running_dynamics(client, today_dt: date, strava_activities: list) -> dict:
+def _fetch_running_dynamics(client, today_dt: date) -> dict:
     """
-    Weekly average running dynamics: cadence, vertical oscillation,
-    ground contact time, vertical ratio.
+    Weekly average running dynamics: vertical oscillation, ground contact
+    time, vertical ratio, from Garmin's weekly aggregates.
 
-    Tries to get from Garmin's weekly aggregates first; falls back to
-    computing averages from Strava activity summaries (which often include
-    cadence from the Garmin device).
+    Cadence is deliberately not computed here — running_bot.py overrides it
+    with a threshold-effort-only figure (see speed_sessions.threshold_cadence),
+    since blending in easy-run cadence would dilute the 170-180 spm target.
     """
-    # Try Garmin weekly running dynamics endpoint
     week_start = (today_dt - timedelta(days=today_dt.weekday())).strftime("%Y-%m-%d")
     raw = _safe(
         lambda: client.get_activities_by_date(week_start, today_dt.strftime("%Y-%m-%d"), "running"),
@@ -243,10 +242,8 @@ def _fetch_running_dynamics(client, today_dt: date, strava_activities: list) -> 
     dynamics = {}
 
     if raw and isinstance(raw, list):
-        cadences, voscs, gcts, vrats = [], [], [], []
+        voscs, gcts, vrats = [], [], []
         for act in raw:
-            if act.get("averageRunningCadenceInStepsPerMinute"):
-                cadences.append(act["averageRunningCadenceInStepsPerMinute"])
             if act.get("avgVerticalOscillation"):
                 voscs.append(act["avgVerticalOscillation"])
             if act.get("avgGroundContactTime"):
@@ -254,21 +251,9 @@ def _fetch_running_dynamics(client, today_dt: date, strava_activities: list) -> 
             if act.get("avgVerticalRatio"):
                 vrats.append(act["avgVerticalRatio"])
 
-        if cadences: dynamics["cadence_spm"]     = round(statistics.mean(cadences), 1)
         if voscs:    dynamics["vert_osc_cm"]     = round(statistics.mean(voscs), 1)
         if gcts:     dynamics["ground_contact_ms"] = round(statistics.mean(gcts), 1)
         if vrats:    dynamics["vert_ratio_pct"]  = round(statistics.mean(vrats), 2)
-
-    # Fallback: extract cadence from Strava summaries (Garmin device populates this)
-    if not dynamics.get("cadence_spm") and strava_activities:
-        strava_cads = [
-            a.get("average_cadence", 0) * 2   # Strava stores per-leg
-            for a in strava_activities
-            if a.get("type") == "Run" and a.get("average_cadence", 0) > 0
-        ]
-        if strava_cads:
-            dynamics["cadence_spm"] = round(statistics.mean(strava_cads), 1)
-            dynamics["cadence_source"] = "strava_fallback"
 
     return dynamics
 
@@ -446,7 +431,7 @@ def get_garmin_data(strava_this_week: list[dict], now: datetime | None = None) -
     analytics["race_predictions"] = _fetch_race_predictions(client, today_str)
     analytics["hrv"]              = _fetch_hrv_status(client, today_str)
     analytics["readiness"]        = _fetch_training_readiness(client, today_str)
-    analytics["running_dynamics"] = _fetch_running_dynamics(client, today_dt, strava_this_week)
+    analytics["running_dynamics"] = _fetch_running_dynamics(client, today_dt)
     analytics["sleep"]            = _fetch_sleep_week(client, today_dt)
 
     # ── Calendar: last week ────────────────────────────────────────────────────

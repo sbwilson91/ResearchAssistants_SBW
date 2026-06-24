@@ -281,6 +281,29 @@ def is_speed_session(activity: dict) -> bool:
     return (is_key_day or has_keyword) and is_plausible
 
 
+def threshold_cadence(sessions: list[dict]) -> dict:
+    """
+    Average cadence across this week's detected threshold/quality intervals only.
+
+    Easy-run cadence is deliberately lower and shouldn't dilute this — the
+    170-180 spm target tracks what the athlete can hit under load, not the
+    blended average across an easy + quality week.
+    """
+    cads = [
+        iv["mean_cad"]
+        for s in sessions
+        for iv in s.get("intervals", [])
+        if iv.get("mean_cad")
+    ]
+    if not cads:
+        return {}
+    return {
+        "cadence_spm":            round(statistics.mean(cads), 1),
+        "cadence_source":         "threshold_efforts",
+        "cadence_n_intervals":    len(cads),
+    }
+
+
 # ── Main entry point ──────────────────────────────────────────────────────────
 
 def get_speed_sessions(token: str, activities: list[dict]) -> list[dict]:

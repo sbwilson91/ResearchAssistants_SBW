@@ -7,7 +7,7 @@ from pathlib import Path
 import yaml
 
 from strava import refresh_access_token, build_report_data
-from speed_sessions import get_speed_sessions
+from speed_sessions import get_speed_sessions, threshold_cadence
 from insights import get_claude_insights
 from races import get_race_data
 from parkrun_scraper import fetch_parkrun_results, summarise_parkrun
@@ -54,6 +54,15 @@ def run():
         except Exception as e:
             print(f"⚠  Garmin failed: {e}")
     data["garmin"] = garmin_data
+
+    # Cadence vs the 170-180 spm target should reflect threshold/quality efforts
+    # only — easy-run cadence is intentionally lower and shouldn't pull it down.
+    if garmin_data.get("available"):
+        rd = garmin_data["analytics"].setdefault("running_dynamics", {})
+        rd.pop("cadence_spm", None)
+        rd.pop("cadence_source", None)
+        rd.pop("cadence_n_intervals", None)
+        rd.update(threshold_cadence(data["speed_sessions"]))
 
     # 5. parkrun leaderboard
     parkrun_athlete_id = cfg.get("parkrun_athlete_id", "")

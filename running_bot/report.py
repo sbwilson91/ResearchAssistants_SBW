@@ -241,22 +241,22 @@ def _analytics_section(garmin: dict, insights: dict) -> str:
         <div class="ac-header">
           <span class="ac-icon">🦾</span>
           <span class="ac-title">Running Form</span>
-          <span class="ac-badge" style="color:#4a5270;font-size:9px;">weekly avg</span>
         </div>
         <div class="ac-metrics">
           <div class="ac-metric">
             <span class="ac-mk">Cadence</span>
             <span class="ac-mv" style="color:{cad_color}">{cadence or '–'}{' spm' if cadence else ''}</span>
-            <span class="ac-mk" style="font-size:9px;">target 170–180</span>
+            <span class="ac-mk" style="font-size:9px;">target 170–180 · threshold efforts{'' if cadence else ' · none this week'}</span>
           </div>
           <div class="ac-metric">
             <span class="ac-mk">Vert. oscillation</span>
             <span class="ac-mv" style="color:{vosc_color}">{vert_osc or '–'}{' cm' if vert_osc else ''}</span>
-            <span class="ac-mk" style="font-size:9px;">target &lt;8.0cm</span>
+            <span class="ac-mk" style="font-size:9px;">target &lt;8.0cm · weekly avg</span>
           </div>
           <div class="ac-metric">
             <span class="ac-mk">Ground contact</span>
             <span class="ac-mv">{gct or '–'}{' ms' if gct else ''}</span>
+            <span class="ac-mk" style="font-size:9px;">weekly avg</span>
           </div>
         </div>
       </div>""")

@@ -310,33 +310,39 @@ def _running_dynamics_block(analytics: dict) -> str:
     if not rd:
         return ""
 
-    cadence   = rd.get("cadence_spm")
-    vert_osc  = rd.get("vert_osc_cm")
-    gct       = rd.get("ground_contact_ms")
-    vert_rat  = rd.get("vert_ratio_pct")
-    source    = rd.get("cadence_source", "garmin")
+    cadence    = rd.get("cadence_spm")
+    n_intervals = rd.get("cadence_n_intervals")
+    vert_osc   = rd.get("vert_osc_cm")
+    gct        = rd.get("ground_contact_ms")
+    vert_rat   = rd.get("vert_ratio_pct")
 
-    lines = ["RUNNING FORM METRICS (weekly averages):"]
+    lines = ["RUNNING FORM METRICS:"]
     if cadence:
         gap    = round(cadence - 170, 1)
         status = "AT TARGET" if cadence >= 170 else f"{abs(gap)} spm below 170 target"
-        lines.append(f"  Cadence:              {cadence} spm — {status}")
+        lines.append(
+            f"  Cadence (threshold efforts, {n_intervals} interval"
+            f"{'s' if n_intervals != 1 else ''}): {cadence} spm — {status}"
+        )
     if vert_osc:
         status = "AT TARGET" if vert_osc <= 8.0 else f"{round(vert_osc - 8.0, 1)}cm above 8.0cm target"
-        lines.append(f"  Vertical oscillation: {vert_osc} cm — {status}")
+        lines.append(f"  Vertical oscillation (weekly avg): {vert_osc} cm — {status}")
     if gct:
-        lines.append(f"  Ground contact time:  {gct} ms")
+        lines.append(f"  Ground contact time (weekly avg):  {gct} ms")
     if vert_rat:
-        lines.append(f"  Vertical ratio:       {vert_rat}%")
+        lines.append(f"  Vertical ratio (weekly avg):       {vert_rat}%")
 
     lines.append(
-        "\n  ANALYTICAL NOTE: Cadence and vertical oscillation directly link. "
-        "This athlete's known limiters: cadence 163–170 spm (target 170–180), "
-        "vertical oscillation ~92mm (target <80mm). "
-        "These are correlated — higher cadence typically reduces oscillation. "
-        "If cadence moved this week (up or down), explain why that matters for "
-        "the athlete's economy and what it might indicate about fatigue or focus. "
-        "Don't just state the numbers — explain the mechanism."
+        "\n  ANALYTICAL NOTE: Cadence here is measured only from sustained fast "
+        "efforts (intervals/threshold work), not blended with easy-run cadence — "
+        "easy runs are intentionally lower and don't reflect the athlete's ceiling. "
+        "This athlete's known limiters: cadence 163–170 spm on easy days but "
+        "180+ during quality work (target 170–180 even under load), vertical "
+        "oscillation ~92mm (target <80mm). If no cadence figure is present, no "
+        "threshold/quality session was detected this week — don't assume cadence "
+        "regressed, there's simply no qualifying data. If cadence during this "
+        "week's quality work moved versus prior weeks, explain why that matters "
+        "for economy and what it might indicate about fatigue or focus."
     )
     return "\n".join(lines)
 
@@ -583,7 +589,7 @@ Respond with a single JSON object — no markdown fences:
 
   "speed_analysis": "1–2 paragraphs on quality sessions from the Strava stream data. Reference actual paces against this athlete's benchmarks (parkrun PB = 3:58/km, HM avg = 4:24/km). Discuss recovery quality between intervals and what peak HRs indicate about effort level and fitness.",
 
-  "form_analysis": "1–2 paragraphs on running form. Cadence target is 170–180 spm (currently at 163–170 — still short). Vertical oscillation target is <80mm (currently ~92mm). Explain the mechanism: how do these link to each other, to economy, and to the athlete's injury history (calves). If dynamics improved or worsened this week, say why that matters.",
+  "form_analysis": "1–2 paragraphs on running form. Cadence is measured from this week's threshold/quality efforts only (target 170–180 spm under load; easy-run cadence is intentionally lower and irrelevant here — if no quality session was detected, say so rather than implying a regression). Vertical oscillation target is <80mm (currently ~92mm, weekly average). Explain the mechanism: how do these link to each other, to economy, and to the athlete's injury history (calves). If dynamics improved or worsened this week, say why that matters.",
 
   "plan_vs_actual": "1 paragraph comparing Garmin schedule to Strava execution. What was planned, what was done, what was skipped. If skipped: was it appropriate given the load ratio and HRV picture? Don't moralize about missed sessions — evaluate whether the choice made physiological sense.",
 
