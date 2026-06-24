@@ -9,11 +9,15 @@ transcription.
 
 import os
 import json
+import time
 import requests
 
 
 ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages"
 MODEL             = "claude-sonnet-4-20250514"
+MAX_TOKENS        = 4096
+MAX_ATTEMPTS       = 3
+RETRYABLE_STATUSES = {429, 500, 502, 503, 529}
 
 
 def get_claude_insights(data: dict, athlete_context: str, race_data: dict | None = None) -> dict:
@@ -22,31 +26,62 @@ def get_claude_insights(data: dict, athlete_context: str, race_data: dict | None
         "Use the following context to make your insights specific and personal:\n\n"
         + athlete_context
     )
+    prompt = _build_prompt(data, race_data)
 
-    resp = requests.post(
-        ANTHROPIC_API_URL,
-        headers={
-            "x-api-key":         os.environ["ANTHROPIC_API_KEY"],
-            "anthropic-version": "2023-06-01",
-            "content-type":      "application/json",
-        },
-        json={
-            "model":      MODEL,
-            "max_tokens": 2800,
-            "system":     system_prompt,
-            "messages":   [{"role": "user", "content": _build_prompt(data, race_data)}],
-        },
-        timeout=60,
-    )
-    resp.raise_for_status()
-    raw = resp.json()["content"][0]["text"].strip()
+    last_error = None
+    for attempt in range(1, MAX_ATTEMPTS + 1):
+        try:
+            resp = requests.post(
+                ANTHROPIC_API_URL,
+                headers={
+                    "x-api-key":         os.environ["ANTHROPIC_API_KEY"],
+                    "anthropic-version": "2023-06-01",
+                    "content-type":      "application/json",
+                },
+                json={
+                    "model":      MODEL,
+                    "max_tokens": MAX_TOKENS,
+                    "system":     system_prompt,
+                    "messages":   [{"role": "user", "content": prompt}],
+                },
+                timeout=90,
+            )
+            if resp.status_code in RETRYABLE_STATUSES and attempt < MAX_ATTEMPTS:
+                print(f"⚠  Claude API {resp.status_code}, retrying (attempt {attempt}/{MAX_ATTEMPTS})…")
+                time.sleep(5 * attempt)
+                continue
+            resp.raise_for_status()
 
-    if raw.startswith("```"):
-        raw = raw.split("\n", 1)[1].rsplit("```", 1)[0].strip()
+            body = resp.json()
+            raw = body["content"][0]["text"].strip()
+            insights = _parse_insights(raw)
 
-    insights = json.loads(raw)
-    print(f'✓ Insights: "{insights.get("headline","…")}"')
-    return insights
+            if body.get("stop_reason") == "max_tokens":
+                print("⚠  Claude response hit max_tokens — insights may be truncated.")
+
+            print(f'✓ Insights: "{insights.get("headline","…")}"')
+            return insights
+
+        except (requests.RequestException, json.JSONDecodeError, KeyError, IndexError) as e:
+            last_error = e
+            if attempt < MAX_ATTEMPTS:
+                print(f"⚠  Claude call failed ({e}), retrying (attempt {attempt}/{MAX_ATTEMPTS})…")
+                time.sleep(5 * attempt)
+
+    raise RuntimeError(f"Claude insights failed after {MAX_ATTEMPTS} attempts: {last_error}")
+
+
+def _parse_insights(raw: str) -> dict:
+    """Strip markdown fences / stray preamble text and parse the JSON object."""
+    text = raw.strip()
+    if text.startswith("```"):
+        text = text.split("\n", 1)[1].rsplit("```", 1)[0].strip()
+
+    start, end = text.find("{"), text.rfind("}")
+    if start != -1 and end != -1:
+        text = text[start:end + 1]
+
+    return json.loads(text)
 
 
 def _secs_to_time(secs: int) -> str:
