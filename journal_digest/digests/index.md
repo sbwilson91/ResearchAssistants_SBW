@@ -13,3 +13,4 @@
 | 2026-04-07 | 111 | [2026-04-07-weekly-digest.md](2026-04-07-weekly-digest.html) |
 | 2026-05-08 | 103 | [2026-05-08-weekly-digest.md](2026-05-08-weekly-digest.html) |
 | 2026-05-22 | 22 | [2026-05-22-weekly-digest.md](2026-05-22-weekly-digest.html) |
+| 2026-06-26 | 103 | [2026-06-26-weekly-digest.md](2026-06-26-weekly-digest.html) |
