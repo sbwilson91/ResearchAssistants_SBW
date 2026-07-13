@@ -25,7 +25,7 @@ or new races are completed. No Python knowledge required.
 
 | Distance      | Time      | Race                | Date     |
 |---------------|-----------|---------------------|----------|
-| Parkrun       | 21:46     | Local               | May 2026 |
+| Parkrun       | 19:57     | Local               | Feb 2025 |
 | 10km          | 43:34     | Frost Cup           | Feb 2024 |
 | Half marathon | 1:32:55   | Berlin              | Apr 2025 |
 | Marathon      | 3:31:06   | Copenhagen          | May 2025 |
