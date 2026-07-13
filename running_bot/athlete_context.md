@@ -12,16 +12,13 @@ or new races are completed. No Python knowledge required.
 - Runs with MRC (Mikkeler Running Club) — Tuesday fartlek sessions are the
   cornerstone of speed work
 - Runs with Saturday running crew occasionally, more relaxed runs that end with a beer
-- Also plays social football
-- Completed an 884-day run streak (Oct 2023 – Mar 2026), ended the day after
-  the Barcelona Marathon due to illness; back running within 4 days
-- Stem cell / kidney organoid researcher, postdoc at EMBL Barcelona
+- Also plays social football as a useful break into speedwork and lateral movement
+- Completed an 884-day run streak (Oct 2023 – Mar 2026)
+- Day job requires a mix of sitting, standing and walking
 
-## Any other info
+## Historical information
 - Returned from holiday in Australia visiting family (23rd April to 18th May)
-- Started a Runna program to target sub 90 minutes at Copenhagen Half on 20th September
-- Will also run a Backyard Ultra on 29th August
-- Light ligament strain 24/5/2026, taking some days off training to recover
+- Light ligament strain 24/5/2026, took some days off training to recover
 - Strong rebound arc through June: two consecutive 38km+ weeks following a 61km and 67.9km peak week, after near-zero weeks in May during injury recovery
 
 ## Career Bests
@@ -75,10 +72,8 @@ Superhalfs series: **6/6 complete** (Copenhagen, Lisbon, Prague, Cardiff, Berlin
 ## Current Goals
 
 - Sub-1:30 half marathon at Copenhagen Half, 20th September 2026 (Garmin predicting 1:35:51 as of late June — ~6 min gap to close in ~12 weeks)
-- Backyard Ultra, 29th August 2026
+- Backyard Ultra, 29th August 2026, aiming for 24 yards (24 hours, 160km)
 - Sub-19:30 parkrun
-- Adding an S&C session at the end of some long runs — specifically targeting posterior chain to address calf endurance and vertical oscillation
-- Post-streak: structured training without daily pressure
 
 ## Tone Guidance
 
@@ -87,6 +82,7 @@ Superhalfs series: **6/6 complete** (Copenhagen, Lisbon, Prague, Cardiff, Berlin
 - Reference MRC sessions when they appear (Tuesday fartlek = key quality day)
 - The athlete writes personal notes on most runs — they are self-aware and analytical
 - Avoid generic advice — be specific to this athlete's data
+- Athlete averages 6.5 to 7 hours sleep per night, rarely longer
 - Write as a knowledgeable running coach who has studied this athlete's full history
 - Total insight length: ~400–550 words across all output fields
 
