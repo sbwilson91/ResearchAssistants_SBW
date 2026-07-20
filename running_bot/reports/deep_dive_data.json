@@ -7,7 +7,7 @@
     "target_seconds": 5400,
     "target_pace": "4:16/km"
   },
-  "athlete_context": "# Athlete Context — Sean\n\nRead by `running_bot/insights.py` on every report run and injected into\nClaude's system prompt. Edit this file freely when PBs change, goals shift,\nor new races are completed. No Python knowledge required.\n\n---\n\n## Background\n\n- Male runner, 35, currently based in Copenhagen \n- Runs with MRC (Mikkeler Running Club) — Tuesday fartlek sessions are the\n  cornerstone of speed work\n- Runs with Saturday running crew occasionally, more relaxed runs that end with a beer\n- Also plays social football as a useful break into speedwork and lateral movement\n- Completed an 884-day run streak (Oct 2023 – Mar 2026)\n- Day job requires a mix of sitting, standing and walking\n\n## Historical information\n- Returned from holiday in Australia visiting family (23rd April to 18th May)\n- Light ligament strain 24/5/2026, took some days off training to recover\n- Strong rebound arc through June: two consecutive 38km+ weeks following a 61km and 67.9km peak week, after near-zero weeks in May during injury recovery\n\n## Career Bests\n\n| Distance      | Time      | Race                | Date     |\n|---------------|-----------|---------------------|----------|\n| Parkrun       | 19:57     | Local               | Feb 2025 |\n| 10km          | 43:34     | Frost Cup           | Feb 2024 |\n| Half marathon | 1:32:55   | Berlin              | Apr 2025 |\n| Marathon      | 3:31:06   | Copenhagen          | May 2025 |\n| 100km ultra   | 17:23:21  | Kullamannen UTMB    | Nov 2024 |\n| 90km ultra    | 12:02:39  | Ultravasan          | Aug 2025 |\n\nSuperhalfs series: **6/6 complete** (Copenhagen, Lisbon, Prague, Cardiff, Berlin, Valencia)\n\n## Key Physiological Benchmarks\n\n- **Aerobic efficiency peak:** 5:01/km at 130–145 bpm (Apr 2025, post-Kullamannen)\n- **Aerobic efficiency current (Jun 2026):** 5:48–5:51/km at 130–145 bpm — reflecting post-disruption base state, not a regression within recent weeks\n- **Average HR Oct 2023 baseline:** ~139 bpm\n- **Average HR at peak fitness (Feb 2025):** ~120 bpm\n- **Average HR Feb 2026:** ~129–131 bpm\n- **Average HR Jun 2026:** ~133–136 bpm\n- **Cadence:** rose from 152 spm → 163–170 spm after a deliberate experiment Nov 2023; hitting 172–179+ spm during quality intervals as of June 2026\n- The Kullamannen 100km (Nov 2024) produced the biggest single aerobic adaptation —\n  HR dropped ~10 bpm in the following two months\n- **VO₂ max trend (Jun 2026):** three consecutive weekly gains totalling +1.2 ml/kg/min — genuine fitness response post-disruption\n\n## Training Patterns\n\n- **June 2026 rebuild pattern:** 38–67.9 km/week, consistent upward trajectory from near-zero injury weeks in May; six consecutive weeks of rising or stable volume through late June\n- **Post-streak/holiday pattern (May 2026):** ~30-35 km/week during holiday recovery, significant reduction from previous patterns\n- **Post-streak pattern (Apr 2026):** ~175 km/month, more volatile week-to-week (24-67km swings)\n- **Weekly average in peak phase (Dec 2024–May 2025):** ~250 km/month\n- **Peak week ever:** 143.8 km\n- **Annual 2024:** 3,001 km (actively chased as a specific target)\n- **Shoe rotation:** Nike Vaporfly 3 (carbon racing), Novablast (daily), Speedgoat (trails)\n\n## Known Limiters\n\n- **Calf endurance:** gave out at km 37 in CPH Marathon — posterior chain S&C needed; flagged again as primary at-risk structure during rapid volume ramp-up in June 2026\n- **Cadence:** consolidating well in quality sessions (172–179+ spm in June intervals), but regression to 157–162 spm still observed during fatigue periods; target 170–180 spm consistently\n- **Vertical oscillation:** ~9.3cm weekly average (target <8.0cm) — persistent despite cadence improvements in quality work; suggests posterior chain S&C is the underlying fix, not pace cues alone\n- History of racing on heavy legs\n- Recurring heel issues; achilles warning during Kullamannen ultra taper\n- **Zone distribution discipline:** documented tendency to drift into Zone 3 (80% Z3 in April 2026); improving significantly — 88% Z1/Z2 achieved week of 17–24 Jun 2026 (best recorded split)\n- **Holiday/travel disruption sensitivity:** HRV drops to LOW status even with reduced training volume, suggesting high sensitivity to routine disruption\n- **Sleep:** averaging 6.2–6.4h with worst nights at 5.3h; consistently below the 6.5h threshold flagged as limiting adaptation and suppressing readiness scores (74/100 and 71/100 recorded in June); identified as the clearest current limiter on recovery quality\n- **Dual periodisation risk (Backyard Ultra + HM build):** long ultra training runs pulling toward volume and time-on-feet while sub-1:30 HM requires lactate threshold development; needs deliberate intensity blocks through July–August or HM build will stall\n\n## Current Goals\n\n- Sub-1:30 half marathon at Copenhagen Half, 20th September 2026 (Garmin predicting 1:35:51 as of late June — ~6 min gap to close in ~12 weeks)\n- Backyard Ultra, 29th August 2026, aiming for 24 yards (24 hours, 160km)\n- Sub-19:30 parkrun\n\n## Tone Guidance\n\n- Be specific and personal — reference actual PBs, race names, real patterns\n- Be honest about regressions without being dramatic\n- Reference MRC sessions when they appear (Tuesday fartlek = key quality day)\n- The athlete writes personal notes on most runs — they are self-aware and analytical\n- Avoid generic advice — be specific to this athlete's data\n- Athlete averages 6.5 to 7 hours sleep per night, rarely longer\n- Write as a knowledgeable running coach who has studied this athlete's full history\n- Total insight length: ~400–550 words across all output fields\n\n## Update Log\n\n- **2026-05-01**: Updated from reports 2026-04-26, 2026-04-19, 2026-04-13, 2026-04-12\n- **2026-06-01**: Updated from reports 2026-05-31, 2026-05-24, 2026-05-17, 2026-05-10\n- **2026-07-01**: Updated from reports 2026-06-28, 2026-06-25, 2026-06-24, 2026-06-22\n",
+  "athlete_context": "# Athlete Context — Sean\n\nRead by `running_bot/insights.py` on every report run and injected into\nClaude's system prompt. Edit this file freely when PBs change, goals shift,\nor new races are completed. No Python knowledge required.\n\n---\n\n## Background\n\n- Male runner, 35, currently based in Copenhagen\n- **188 cm, ~83 kg, lean/medium build** — weight is a non-issue; do NOT suggest cutting\n- Runs with MRC (Mikkeler Running Club) — Tuesday fartlek/threshold sessions are the\n  cornerstone of speed work and the **locked quality anchor** of the current plan\n- Runs with Saturday running crew occasionally, more relaxed runs that end with a beer\n- Also plays social football as a useful break into speedwork and lateral movement\n- Completed an 884-day run streak (Oct 2023 – Mar 2026)\n- Day job requires a mix of sitting, standing and walking\n\n## Historical information\n- Returned from holiday in Australia visiting family (23rd April to 18th May)\n- Light ligament strain 24/5/2026, took some days off training to recover\n- Strong rebound arc through June: two consecutive 38km+ weeks following a 61km and 67.9km peak week, after near-zero weeks in May during injury recovery\n\n## Career Bests\n\n| Distance      | Time      | Race                | Date     |\n|---------------|-----------|---------------------|----------|\n| Parkrun       | 19:57     | Local               | Feb 2025 |\n| 10km          | 43:34     | Frost Cup           | Feb 2024 |\n| Half marathon | 1:32:55   | Berlin              | Apr 2025 |\n| Marathon      | 3:31:06   | Copenhagen          | May 2025 |\n| 100km ultra   | 17:23:21  | Kullamannen UTMB    | Nov 2024 |\n| 90km ultra    | 12:02:39  | Ultravasan          | Aug 2025 |\n\nSuperhalfs series: **6/6 complete** (Copenhagen, Lisbon, Prague, Cardiff, Berlin, Valencia)\n\n## Key Physiological Benchmarks\n\n- **Aerobic efficiency peak:** 5:01/km at 130–145 bpm (Apr 2025, post-Kullamannen)\n- **Aerobic efficiency current (Jun 2026):** 5:48–5:51/km at 130–145 bpm — reflecting post-disruption base state, not a regression within recent weeks\n- **Average HR Oct 2023 baseline:** ~139 bpm\n- **Average HR at peak fitness (Feb 2025):** ~120 bpm\n- **Average HR Feb 2026:** ~129–131 bpm\n- **Average HR Jun 2026:** ~133–136 bpm\n- **Cadence:** rose from 152 spm → 163–170 spm after a deliberate experiment Nov 2023; hitting 172–179+ spm during quality intervals as of June 2026\n- The Kullamannen 100km (Nov 2024) produced the biggest single aerobic adaptation —\n  HR dropped ~10 bpm in the following two months\n- **VO₂ max trend (Jun 2026):** three consecutive weekly gains totalling +1.2 ml/kg/min — genuine fitness response post-disruption\n\n## Training Patterns\n\n- **June 2026 rebuild pattern:** 38–67.9 km/week, consistent upward trajectory from near-zero injury weeks in May; six consecutive weeks of rising or stable volume through late June\n- **Post-streak/holiday pattern (May 2026):** ~30-35 km/week during holiday recovery, significant reduction from previous patterns\n- **Post-streak pattern (Apr 2026):** ~175 km/month, more volatile week-to-week (24-67km swings)\n- **Weekly average in peak phase (Dec 2024–May 2025):** ~250 km/month\n- **Peak week ever:** 143.8 km\n- **Annual 2024:** 3,001 km (actively chased as a specific target)\n- **Shoe rotation:** Nike Vaporfly 3 (carbon racing), Novablast (daily), Speedgoat (trails)\n\n## Known Limiters\n\n- **Calf endurance:** gave out at km 37 in CPH Marathon — posterior chain S&C needed; flagged again as primary at-risk structure during rapid volume ramp-up in June 2026\n- **Cadence:** consolidating well in quality sessions (172–179+ spm in June intervals), but regression to 157–162 spm still observed during fatigue periods; target 170–180 spm consistently\n- **Vertical oscillation:** ~9.3cm weekly average (target <8.0cm) — persistent despite cadence improvements in quality work; suggests posterior chain S&C is the underlying fix, not pace cues alone\n- History of racing on heavy legs\n- Recurring heel issues; achilles warning during Kullamannen ultra taper\n- **Zone distribution discipline:** documented tendency to drift into Zone 3 (80% Z3 in April 2026); improving significantly — 88% Z1/Z2 achieved week of 17–24 Jun 2026 (best recorded split)\n- **Holiday/travel disruption sensitivity:** HRV drops to LOW status even with reduced training volume, suggesting high sensitivity to routine disruption\n- **Sleep:** averaging 6.2–6.4h with worst nights at 5.3h; consistently below the 6.5h threshold flagged as limiting adaptation and suppressing readiness scores (74/100 and 71/100 recorded in June); identified as the clearest current limiter on recovery quality\n- **Dual periodisation risk (Backyard Ultra + HM build):** long ultra training runs pulling toward volume and time-on-feet while sub-1:30 HM requires lactate threshold development; needs deliberate intensity blocks through July–August or HM build will stall\n\n## Current Goals\n\n- **Sub-1:30 half marathon at Copenhagen Half, 20th September 2026 — the racing priority** (needs 4:16/km). Garmin projected 1:33:58 on 20 Jul, improving from 1:35:51 in late June.\n- Backyard Ultra, 29th August 2026, going for the **full 24 yards (24 hours, ~161 km / 100 mi)** — a fixed social goal with friends, run on endurance background + grit, NOT specifically trained for.\n- Sub-19:30 parkrun\n\n## Sub-1:30 Strategy & Weekly Plan (20 Jul – 20 Sep 2026)\n\n**Strategy (from the 2026-07-20 deep-dive investigation):** The half is the racing priority, but the Backyard Ultra sits just 3 weeks before it, and you cannot sharpen after a 100-miler. So the plan **peaks sub-90 fitness by ~24 Aug, banks it, runs the ultra to minimise damage, then converts recovery into race-readiness.** Honest odds ~1 in 4; the limiter is ultra recovery, not fitness. Realistic outcome 1:31–1:36. The single most important proof session is the **17 Aug long run with a strong last 10 km @ goal pace** — if that lands, sub-90 fitness is genuinely banked before the ultra.\n\n**Paces:** Goal pace (GP) = **4:16/km** · Threshold (T) = 4:12–4:22/km · Easy = **5:15–5:45/km at HR 130–145** (the #1 fitness lever — pull aerobic efficiency back under 5:30/km from the current ~5:49). Tuesday threshold (MRC) is locked every week; the 2nd quality slot moves VO₂ → goal-pace; long runs carry the GP work.\n\n| Week | Phase | Target | Tuesday (locked) | 2nd quality | Long run |\n|---|---|---|---|---|---|\n| 21–27 Jul | Base | ~62 km | 5×5 min T | 6×3 min VO₂ | 24 km easy |\n| 28 Jul–3 Aug | Base | ~68 km | 3×10 min T | 5×1 km VO₂ | 26 km, last 5 @ MP |\n| 4–10 Aug | Specific | ~70 km | 4×8 min T | 5×1.5 km @ GP | 28 km w/ 3×3 km @ GP |\n| 11–17 Aug | **Specific — PEAK** | ~72 km | 2×15 min T | 4×2 km @ GP | **26 km, last 10 km @ GP** (key proof session) |\n| 18–24 Aug | Specific | ~60 km | 5×1 km @ 4:12 | Sat parkrun / 5 km TT | 20 km easy |\n| 25–31 Aug | **Backyard Ultra** | — | light 15–20 min tempo | — | **Sat 29: 24 laps — easy loops (6:30–7:00), fuel every loop, minimise damage** |\n| 1–7 Sep | Recover | ~20–30 km | — | — | walk/off days 1–4, easy jogs later; no quality |\n| 8–14 Sep | Reactivate | ~48 km | 3×6 min T (if fresh) | 4×1 km @ GP | 18 km, last 4 @ GP |\n| 15–20 Sep | Taper / RACE | ~30 km | 3×3 min @ GP | — | **RACE Sun 20: negative-split, open 4:20, settle 4:16, push only if 15 km feels strong** |\n\n## Nutrition & Recovery Targets\n\n- **Protein (the current gap):** target **135–165 g/day (1.6–2.0 g/kg)**. Diet is carb-heavy — mostly pasta + granola, ~2 meals/day (≈11am & 18–22h). Fix by *fortifying, not overhauling*: protein **in** the pasta (mince/chicken/tuna/lentils + cheese), **skyr under the granola**, and make the morning + pre-bed granola daily & skyr-based (→ 4 protein feedings incl. an overnight casein dose for calf repair).\n- **Carbs:** periodise — 6–8 g/kg on hard days (Tue, long, GP), 3–5 g/kg easy. **Do NOT run Tuesday threshold or long runs fasted;** fasted easy runs are fine.\n- **Gut training:** 60–90 g carbs/hour on 90 min+ runs — rehearsal for both the half and the 24-loop BYU (a fuelling event as much as a running one).\n- **Creatine:** 5 g monohydrate daily (consistency > timing).\n- **Alcohol:** Saturday beers fine socially, but keep minimal across the **4–24 Aug peak weeks**.\n- **Sleep:** the biggest recovery lever; historically 6.2–6.5h (below the 6.5h adaptation threshold) — push toward 8h, especially in the post-BYU recovery week.\n- **Bloods:** tested tip-top Jan 2026 — iron/ferritin a low-priority recheck, only if HR stays elevated deep into the block.\n- **S&C:** calf/posterior chain 2×/week — targets the km-37 limiter and the vertical-oscillation issue.\n\n## Tone Guidance\n\n- Be specific and personal — reference actual PBs, race names, real patterns\n- Be honest about regressions without being dramatic\n- Reference MRC sessions when they appear (Tuesday fartlek = key quality day)\n- The athlete writes personal notes on most runs — they are self-aware and analytical\n- Avoid generic advice — be specific to this athlete's data\n- Athlete averages 6.5 to 7 hours sleep per night, rarely longer\n- Write as a knowledgeable running coach who has studied this athlete's full history\n- **Weekly progress assessment (a primary job now):** locate the current week in the Sub-1:30 Weekly Plan table and judge adherence — did the target volume, the locked Tuesday threshold, the 2nd quality session, and the long-run goal-pace work actually happen? Call out deviations plainly, and say whether the week moved the sub-90 goal closer.\n- Track the two fitness levers every week: (1) is aerobic efficiency trending toward sub-5:30/km at 130–145 bpm, and (2) are the easy runs actually easy (Z1/Z2 discipline)?\n- Comment on nutrition/recovery adherence when the data supports it — sleep, readiness, HRV, and signs of under-fuelling such as elevated easy-run HR or a missing protein/refuel pattern.\n- Keep the Backyard Ultra tradeoff in view: through August, reward damage-limiting and freshness, not ultra volume.\n- Total insight length: ~450–600 words across all output fields\n\n## Update Log\n\n- **2026-05-01**: Updated from reports 2026-04-26, 2026-04-19, 2026-04-13, 2026-04-12\n- **2026-06-01**: Updated from reports 2026-05-31, 2026-05-24, 2026-05-17, 2026-05-10\n- **2026-07-01**: Updated from reports 2026-06-28, 2026-06-25, 2026-06-24, 2026-06-22\n- **2026-07-20**: Manual update from the deep-dive investigation — added sub-1:30 strategy + 9-week weekly plan, nutrition & recovery targets, physique, and weekly progress-assessment guidance so reports grade progress against the plan\n",
   "weekly_reports": [
     {
       "file": "report_2026-04-11.html",
@@ -145,11 +145,11 @@
   "monthly_series": [
     {
       "month": "2024-01",
-      "runs": 10,
-      "dist_km": 44.1,
-      "elev_m": 134,
-      "avg_hr": 128,
-      "avg_pace": "5:45",
+      "runs": 9,
+      "dist_km": 40.9,
+      "elev_m": 114,
+      "avg_hr": 127,
+      "avg_pace": "5:44",
       "longest_km": 10.9
     },
     {
@@ -5430,6 +5430,227 @@
         "quality_sessions": 2
       }
     ]
+  },
+  "durability": {
+    "races": [
+      {
+        "kind": "race",
+        "name": "CPH Half Marathon",
+        "date": "2024-09-15",
+        "dist_km": 21.4,
+        "time": "1:36:53",
+        "decoupling_pct": 8.1,
+        "label": "fades",
+        "usable_km": 20.3,
+        "first_half": {
+          "pace": "4:28",
+          "avg_hr": 157
+        },
+        "second_half": {
+          "pace": "4:34",
+          "avg_hr": 167
+        },
+        "fade_sec_per_km": 6.3,
+        "race_label": "Copenhagen Half Marathon 2024"
+      },
+      {
+        "kind": "race",
+        "name": "Berlin Half Marathon!",
+        "date": "2025-04-06",
+        "dist_km": 21.3,
+        "time": "1:32:55",
+        "decoupling_pct": 5.7,
+        "label": "moderate",
+        "usable_km": 20.1,
+        "first_half": {
+          "pace": "4:20",
+          "avg_hr": 163
+        },
+        "second_half": {
+          "pace": "4:23",
+          "avg_hr": 171
+        },
+        "fade_sec_per_km": 2.9,
+        "race_label": "Berlin Half Marathon 2025"
+      },
+      {
+        "kind": "race",
+        "name": "Copenhagen Marathon 2025",
+        "date": "2025-05-11",
+        "dist_km": 42.8,
+        "time": "3:30:45",
+        "decoupling_pct": 10.0,
+        "label": "fades",
+        "usable_km": 41.8,
+        "first_half": {
+          "pace": "4:55",
+          "avg_hr": 146
+        },
+        "second_half": {
+          "pace": "4:56",
+          "avg_hr": 162
+        },
+        "fade_sec_per_km": 0.4,
+        "race_label": "Copenhagen Marathon 2025"
+      },
+      {
+        "kind": "race",
+        "name": "CPH Half 2025",
+        "date": "2025-09-14",
+        "dist_km": 21.4,
+        "time": "1:32:57",
+        "decoupling_pct": 8.3,
+        "label": "fades",
+        "usable_km": 20.2,
+        "first_half": {
+          "pace": "4:13",
+          "avg_hr": 162
+        },
+        "second_half": {
+          "pace": "4:28",
+          "avg_hr": 167
+        },
+        "fade_sec_per_km": 14.8,
+        "race_label": "Copenhagen Half Marathon 2025"
+      },
+      {
+        "kind": "race",
+        "name": "Valencia half",
+        "date": "2025-10-26",
+        "dist_km": 21.4,
+        "time": "1:45:36",
+        "decoupling_pct": 9.6,
+        "label": "fades",
+        "usable_km": 20.3,
+        "first_half": {
+          "pace": "4:38",
+          "avg_hr": 161
+        },
+        "second_half": {
+          "pace": "5:16",
+          "avg_hr": 157
+        },
+        "fade_sec_per_km": 37.5,
+        "race_label": "Valencia Half Marathon 2025"
+      }
+    ],
+    "long_runs": [
+      {
+        "kind": "long_run",
+        "name": "Backyard practice",
+        "date": "2026-07-12",
+        "dist_km": 27.3,
+        "time": "3:38:27",
+        "decoupling_pct": -0.6,
+        "label": "strong",
+        "usable_km": 26.5,
+        "first_half": {
+          "pace": "8:56",
+          "avg_hr": 103
+        },
+        "second_half": {
+          "pace": "8:33",
+          "avg_hr": 107
+        },
+        "fade_sec_per_km": -23.0
+      },
+      {
+        "kind": "long_run",
+        "name": "More Amager sightseeing",
+        "date": "2026-07-05",
+        "dist_km": 22.2,
+        "time": "2:28:36",
+        "decoupling_pct": 3.7,
+        "label": "strong",
+        "usable_km": 21.4,
+        "first_half": {
+          "pace": "6:52",
+          "avg_hr": 117
+        },
+        "second_half": {
+          "pace": "7:00",
+          "avg_hr": 119
+        },
+        "fade_sec_per_km": 8.5
+      },
+      {
+        "kind": "long_run",
+        "name": "Made the distance",
+        "date": "2026-06-30",
+        "dist_km": 20.7,
+        "time": "1:54:34",
+        "decoupling_pct": 21.1,
+        "label": "fades",
+        "usable_km": 19.7,
+        "first_half": {
+          "pace": "5:12",
+          "avg_hr": 155
+        },
+        "second_half": {
+          "pace": "7:18",
+          "avg_hr": 140
+        },
+        "fade_sec_per_km": 126.0
+      },
+      {
+        "kind": "long_run",
+        "name": "Backyard training run",
+        "date": "2026-06-21",
+        "dist_km": 25.1,
+        "time": "3:12:42",
+        "decoupling_pct": 5.7,
+        "label": "moderate",
+        "usable_km": 24.3,
+        "first_half": {
+          "pace": "7:35",
+          "avg_hr": 132
+        },
+        "second_half": {
+          "pace": "7:55",
+          "avg_hr": 134
+        },
+        "fade_sec_per_km": 20.4
+      },
+      {
+        "kind": "long_run",
+        "name": "Mikkeller Baghaven Ultra",
+        "date": "2026-06-13",
+        "dist_km": 26.4,
+        "time": "2:26:21",
+        "decoupling_pct": -2.9,
+        "label": "strong",
+        "usable_km": 25.6,
+        "first_half": {
+          "pace": "6:23",
+          "avg_hr": 143
+        },
+        "second_half": {
+          "pace": "5:32",
+          "avg_hr": 160
+        },
+        "fade_sec_per_km": -50.4
+      },
+      {
+        "kind": "long_run",
+        "name": "Barcelona Marathon!",
+        "date": "2026-03-15",
+        "dist_km": 42.6,
+        "time": "4:31:51",
+        "decoupling_pct": 22.3,
+        "label": "fades",
+        "usable_km": 41.7,
+        "first_half": {
+          "pace": "5:23",
+          "avg_hr": 151
+        },
+        "second_half": {
+          "pace": "7:25",
+          "avg_hr": 141
+        },
+        "fade_sec_per_km": 122.4
+      }
+    ],
+    "note": null
   },
   "garmin": {
     "available": true,
