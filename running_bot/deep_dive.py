@@ -338,6 +338,14 @@ def run(dry_run: bool = False):
     payload["case_studies"] = [extract_block(acts, a) for a in CASE_STUDY_ANCHORS]
     payload["current_build"] = extract_block(acts, CURRENT_BUILD)
 
+    # 4b. Durability — aerobic decoupling / fade on long runs + races (stream-level)
+    try:
+        from durability import get_durability
+        payload["durability"] = get_durability(token, acts, CASE_STUDY_ANCHORS, TODAY)
+    except Exception as e:
+        print(f"⚠  durability analysis failed: {e}")
+        payload["durability"] = {"races": [], "long_runs": [], "note": f"error: {e}"}
+
     # 5. Garmin current physiology (+ sparse VO2 history if any)
     payload["garmin"] = _collect_garmin()
 
