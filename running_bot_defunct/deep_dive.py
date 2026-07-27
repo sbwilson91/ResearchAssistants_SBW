@@ -2,10 +2,10 @@
 """
 running_bot/deep_dive.py — ONE-OFF investigation collector (not the weekly bot).
 
-Fetches real data from the same sources the weekly bot uses (Garmin full
-history + current physiology) and the artefacts the bot has already produced
-(weekly HTML reports, monthly logs, athlete context), aggregates everything
-into a single rich JSON, and writes it to running_bot/reports/deep_dive_data.json.
+Fetches real data from the same sources the weekly bot uses (Strava full history,
+Garmin current physiology) and the artefacts the bot has already produced (weekly
+HTML reports, monthly logs, athlete context), aggregates everything into a single
+rich JSON, and writes it to running_bot/reports/deep_dive_data.json.
 
 It does NOT call Claude. The analytical synthesis + feasibility verdict + the
 shareable Artifact are produced separately (in a Claude Code session) from the
@@ -13,7 +13,7 @@ JSON this script commits. Keeping Claude out of this path avoids the retired-mod
 404 that has repeatedly broken the weekly bot.
 
 Run in GitHub Actions via .github/workflows/deep_dive_run.yml (workflow_dispatch),
-which supplies the Garmin secrets. Locally you can do a parsing-only dry run:
+which supplies the Strava/Garmin secrets. Locally you can do a parsing-only dry run:
 
     python running_bot/deep_dive.py --dry-run   # no secrets needed
 """
@@ -26,8 +26,9 @@ from collections import defaultdict
 from datetime import datetime, timedelta, timezone, date
 from pathlib import Path
 
-from garmin_activities import (
-    get_activities, _dt, pace_val, pace_from_speed,
+import strava
+from strava import (
+    refresh_access_token, _get_activities, _dt, pace_val, pace_from_speed,
     fmt_duration, _parkruns, _aerobic_efficiency, _weekly_stats,
 )
 from speed_sessions import is_speed_session, get_speed_sessions
@@ -41,7 +42,7 @@ HISTORY_WEEKS = 130
 
 # Race anchors for the targeted training-block case studies. Each block is the
 # 12 weeks *before* the race. `approx_date` only seeds a search window — the exact
-# race date + finish time are pinned from the matching Garmin activity. Edit freely.
+# race date + finish time are pinned from the matching Strava activity. Edit freely.
 CASE_STUDY_ANCHORS = [
     {"key": "cph_half_2024",   "name": "Copenhagen Half Marathon 2024", "approx_date": "2024-09-15", "type": "half_marathon", "outcome": "reference"},
     {"key": "berlin_half_2025","name": "Berlin Half Marathon 2025",     "approx_date": "2025-04-06", "type": "half_marathon", "outcome": "strong (HM PB 1:32:55)"},
@@ -286,16 +287,20 @@ def run(dry_run: bool = False):
     }
 
     if dry_run:
-        payload["note"] = "DRY RUN — Garmin not fetched; narrative artefacts only."
+        payload["note"] = "DRY RUN — Strava/Garmin not fetched; narrative artefacts only."
         OUT_PATH.write_text(json.dumps(payload, indent=2, ensure_ascii=False))
         print(f"✓ (dry run) wrote {OUT_PATH}")
         return payload
 
-    # ── Garmin full history ──
+    # ── Strava full history ──
+    token, new_refresh = refresh_access_token()
+    if new_refresh:
+        Path("new_refresh_token.txt").write_text(new_refresh)
+
     now = datetime.now(timezone.utc)
-    start_dt = now - timedelta(weeks=HISTORY_WEEKS)
-    print(f"Fetching Garmin {start_dt.date()} → {now.date()}…")
-    acts = get_activities(start_dt, now)
+    start_ts = (now - timedelta(weeks=HISTORY_WEEKS)).timestamp()
+    print(f"Fetching Strava {datetime.fromtimestamp(start_ts).date()} → {now.date()}…")
+    acts = _get_activities(token, after_ts=start_ts, before_ts=now.timestamp())
     print(f"  → {len(acts)} activities")
 
     # 1. Long-term trajectory
@@ -324,7 +329,7 @@ def run(dry_run: bool = False):
     }
     recent_acts = _in_window(acts, four_mo_start, TODAY)
     try:
-        payload["recent_4_months"]["speed_sessions"] = get_speed_sessions(recent_acts)
+        payload["recent_4_months"]["speed_sessions"] = get_speed_sessions(token, recent_acts)
     except Exception as e:
         print(f"⚠  speed session stream analysis failed: {e}")
         payload["recent_4_months"]["speed_sessions"] = []
@@ -336,7 +341,7 @@ def run(dry_run: bool = False):
     # 4b. Durability — aerobic decoupling / fade on long runs + races (stream-level)
     try:
         from durability import get_durability
-        payload["durability"] = get_durability(acts, CASE_STUDY_ANCHORS, TODAY)
+        payload["durability"] = get_durability(token, acts, CASE_STUDY_ANCHORS, TODAY)
     except Exception as e:
         print(f"⚠  durability analysis failed: {e}")
         payload["durability"] = {"races": [], "long_runs": [], "note": f"error: {e}"}

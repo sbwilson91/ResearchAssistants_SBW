@@ -26,27 +26,13 @@ jobs:
       - name: Generate monthly summary
         env:
           PYTHONPATH:           running_bot
-          STRAVA_CLIENT_ID:     ${{ secrets.STRAVA_CLIENT_ID }}
-          STRAVA_CLIENT_SECRET: ${{ secrets.STRAVA_CLIENT_SECRET }}
-          STRAVA_REFRESH_TOKEN: ${{ secrets.STRAVA_REFRESH_TOKEN }}
           ANTHROPIC_API_KEY:    ${{ secrets.ANTHROPIC_API_KEY }}
+          GARMIN_EMAIL:         ${{ secrets.GARMIN_EMAIL }}
+          GARMIN_PASSWORD:      ${{ secrets.GARMIN_PASSWORD }}
           EMAIL_SENDER:         ${{ secrets.EMAIL_SENDER }}
           EMAIL_RECEIVER:       ${{ secrets.EMAIL_RECEIVER }}
           EMAIL_PASSWORD:       ${{ secrets.EMAIL_PASSWORD }}
         run: python running_bot/monthly_summary.py
-
-      - name: Rotate Strava refresh token if needed
-        if: always()
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          if [ -f new_refresh_token.txt ]; then
-            gh secret set STRAVA_REFRESH_TOKEN \
-              --body "$(cat new_refresh_token.txt)" \
-              --repo "${{ github.repository }}"
-            rm new_refresh_token.txt
-            echo "✓ STRAVA_REFRESH_TOKEN rotated"
-          fi
 
       - name: Commit monthly log
         run: |

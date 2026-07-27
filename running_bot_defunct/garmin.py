@@ -3,7 +3,7 @@ running_bot/garmin.py
 
 Fetches two categories of data from Garmin Connect:
 
-1. CALENDAR — scheduled workouts (last week vs actual activities, next week preview)
+1. CALENDAR — scheduled workouts (last week vs Strava actuals, next week preview)
 2. ANALYTICS — metrics that enable real training analysis:
      - Training load (acute / chronic / ratio)
      - Training status label
@@ -28,22 +28,7 @@ from pathlib import Path
 
 # ── Auth ─────────────────────────────────────────────────────────────────────
 
-_client_cache = None  # process-wide singleton — one login per run, everything reuses it
-
-
 def _get_client():
-    """Return a single shared, authenticated Garmin client for this process.
-
-    Constructing a fresh `Garmin(...)` and calling `login()` per call (as this
-    used to do) hammers Garmin's login endpoint on every activity/stream fetch
-    in a run and reliably trips their IP rate limiter — every caller across
-    this module, garmin_activities.py, speed_sessions.py, and durability.py
-    MUST go through this cached instance instead of constructing their own.
-    """
-    global _client_cache
-    if _client_cache is not None:
-        return _client_cache
-
     try:
         from garminconnect import Garmin
     except ImportError:
@@ -60,7 +45,6 @@ def _get_client():
     if token_file.exists():
         try:
             client.load_tokens(str(token_file))
-            _client_cache = client
             return client
         except Exception:
             pass
@@ -72,7 +56,6 @@ def _get_client():
         pass
 
     print("✓ Garmin: authenticated")
-    _client_cache = client
     return client
 
 
@@ -305,7 +288,7 @@ def _fetch_sleep_week(client, today_dt: date) -> dict:
 # ── Calendar fetchers (unchanged from previous version) ───────────────────────
 
 def _parse_target(step: dict) -> str:
-    target = step.get("targetType") or {}
+    target = step.get("targetType", {})
     t_key  = target.get("workoutTargetTypeKey", "")
 
     def pace_from_ms(ms):
@@ -327,7 +310,7 @@ def _parse_target(step: dict) -> str:
 
 
 def _parse_duration(step: dict) -> str:
-    dur_type = (step.get("endCondition") or {}).get("conditionTypeKey", "")
+    dur_type = step.get("endCondition", {}).get("conditionTypeKey", "")
     dur_val  = step.get("endConditionValue")
     if dur_type == "time" and dur_val:
         m, s = divmod(int(dur_val), 60)
@@ -342,7 +325,7 @@ def _parse_duration(step: dict) -> str:
 def _parse_steps(workout: dict) -> list[dict]:
     steps = []
     def _parse_one(step):
-        step_type = ((step.get("stepType") or {}).get("stepTypeKey", "")
+        step_type = (step.get("stepType", {}).get("stepTypeKey", "")
                      or step.get("type", "")).lower()
         return {"type": step_type, "duration": _parse_duration(step),
                 "target": _parse_target(step)}
@@ -375,12 +358,6 @@ def _steps_to_text(steps: list[dict]) -> str:
 
 
 def _fetch_calendar_workouts(client, start_date: str, end_date: str) -> list[dict]:
-    """Fetch scheduled workouts overlapping [start_date, end_date].
-
-    get_scheduled_workouts(year, month) returns Garmin's raw calendar payload
-    for that month — historically shaped as {"calendarItems": [...]} rather
-    than a bare list, so both shapes are handled defensively here.
-    """
     start = datetime.strptime(start_date, "%Y-%m-%d")
     end   = datetime.strptime(end_date,   "%Y-%m-%d")
     items, months_seen = [], set()
@@ -388,10 +365,8 @@ def _fetch_calendar_workouts(client, start_date: str, end_date: str) -> list[dic
         key = (d.year, d.month)
         if key in months_seen: continue
         months_seen.add(key)
-        batch = _safe(lambda y=d.year, m=d.month: client.get_scheduled_workouts(y, m),
-                      f"calendar {d.year}-{d.month:02d}", {})
-        if isinstance(batch, dict):
-            batch = batch.get("calendarItems", [])
+        batch = _safe(lambda y=d.year, m=d.month: client.get_calendar_items(y, m),
+                      f"calendar {d.year}-{d.month:02d}", [])
         items.extend(batch or [])
 
     return [
@@ -402,9 +377,9 @@ def _fetch_calendar_workouts(client, start_date: str, end_date: str) -> list[dic
     ]
 
 
-def _match_to_activity(calendar_item: dict, week_acts: list[dict]):
+def _match_to_strava(calendar_item: dict, strava_acts: list[dict]):
     planned_date = calendar_item.get("date", "")[:10]
-    for act in week_acts:
+    for act in strava_acts:
         if act.get("start_date_local", "")[:10] == planned_date and act.get("type") == "Run":
             return act
     return None
@@ -412,7 +387,7 @@ def _match_to_activity(calendar_item: dict, week_acts: list[dict]):
 
 # ── Main entry point ──────────────────────────────────────────────────────────
 
-def get_garmin_data(week_activities: list[dict], now: datetime | None = None) -> dict:
+def get_garmin_data(strava_this_week: list[dict], now: datetime | None = None) -> dict:
     """
     Fetches all Garmin data needed for the weekly report:
       - Analytics metrics (load, VO₂, HRV, readiness, dynamics, sleep)
@@ -470,11 +445,11 @@ def get_garmin_data(week_activities: list[dict], now: datetime | None = None) ->
         date  = item.get("date", "")[:10]
         steps, steps_text = [], "(no structured steps)"
         if wid:
-            detail = _safe(lambda w=wid: client.get_workout_by_id(w), f"workout detail {wid}", None)
+            detail = _safe(lambda w=wid: client.get_workout(w), f"workout detail {wid}", None)
             if detail:
                 steps      = _parse_steps(detail)
                 steps_text = _steps_to_text(steps)
-        actual  = _match_to_activity(item, week_activities)
+        actual  = _match_to_strava(item, strava_this_week)
         status  = "completed" if actual else "skipped"
         last_week.append({
             "workout_id": wid, "workout_name": name, "date": date,
@@ -494,7 +469,7 @@ def get_garmin_data(week_activities: list[dict], now: datetime | None = None) ->
         date  = item.get("date", "")[:10]
         steps, steps_text = [], "(no structured steps)"
         if wid:
-            detail = _safe(lambda w=wid: client.get_workout_by_id(w), f"workout detail {wid}", None)
+            detail = _safe(lambda w=wid: client.get_workout(w), f"workout detail {wid}", None)
             if detail:
                 steps      = _parse_steps(detail)
                 steps_text = _steps_to_text(steps)

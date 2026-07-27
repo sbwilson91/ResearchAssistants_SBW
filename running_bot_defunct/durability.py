@@ -17,16 +17,15 @@ sagging at the same HR) — i.e. fading. Rough reads: <5% strong, 5-8% moderate,
 >8% fades. We also report first- vs second-half pace — the positive split the
 athlete actually feels in the last 5 km.
 
-API cost: one detail-stream GET per analysed effort, bounded by MAX_LONG_RUNS +
-the race anchors. Garmin has no documented rate limit like Strava's 100 req /
-15 min, but FETCH_SLEEP_S keeps this polite regardless.
+API cost: one stream GET per analysed effort, bounded by MAX_LONG_RUNS + the race
+anchors. A one-off deep-dive stays well inside Strava's 100 req / 15 min limit.
 """
 
 import time
 import statistics
 from datetime import date, timedelta
 
-from garmin_activities import _dt, fmt_duration, pace_from_speed
+from strava import _dt, fmt_duration, pace_from_speed
 from speed_sessions import _fetch_streams
 
 
@@ -36,7 +35,7 @@ LONG_RUN_MIN_KM = 18.0     # a run must be at least this long to be "durability-
 WARMUP_SECS     = 300      # trim the first 5 min (HR-lag ramp) before analysing
 MAX_LONG_RUNS   = 8        # cap stream fetches for long runs
 RECENT_DAYS     = 210      # only analyse long runs from the last ~7 months
-FETCH_SLEEP_S   = 1.0      # be polite to Garmin's (undocumented) rate limits
+FETCH_SLEEP_S   = 1.0      # be polite to the Strava rate limiter
 
 # Distance bands used to pin race efforts near each anchor date
 RACE_DIST_BANDS = {
@@ -123,8 +122,8 @@ def compute_decoupling(streams: dict, warmup_s: int = WARMUP_SECS) -> dict | Non
 
 # ── Orchestration ─────────────────────────────────────────────────────────────
 
-def _analyse(activity: dict, kind: str) -> dict | None:
-    streams = _fetch_streams(activity["id"])
+def _analyse(token: str, activity: dict, kind: str) -> dict | None:
+    streams = _fetch_streams(token, activity["id"])
     if not streams:
         return None
     metrics = compute_decoupling(streams)
@@ -154,7 +153,7 @@ def _find_race_activity(acts: list, anchor: dict):
     return min(cands, key=lambda a: a.get("moving_time", 1e12)) if cands else None
 
 
-def get_durability(acts: list, anchors: list,
+def get_durability(token: str, acts: list, anchors: list,
                    today: date | None = None, max_long: int = MAX_LONG_RUNS) -> dict:
     """
     Analyse decoupling/fade for the case-study races + recent long runs.
@@ -171,7 +170,7 @@ def get_durability(acts: list, anchors: list,
         if not act or act["id"] in seen_ids:
             continue
         seen_ids.add(act["id"])
-        res = _analyse(act, "race")
+        res = _analyse(token, act, "race")
         if res:
             res["race_label"] = anchor["name"]
             races.append(res)
@@ -189,7 +188,7 @@ def get_durability(acts: list, anchors: list,
 
     long_runs = []
     for act in long_runs_all:
-        res = _analyse(act, "long_run")
+        res = _analyse(token, act, "long_run")
         if res:
             long_runs.append(res)
             print(f"  ✓ long run {res['date']} {res['dist_km']}km: "

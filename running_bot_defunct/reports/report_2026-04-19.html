@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Weekly Run Report — w/c 13 April 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,300;8..60,400;8..60,600&display=swap" rel="stylesheet">
+<style>
+  :root{--o:#f97316;--a:#f59e0b;--t:#14b8a6;--r:#ef4444;--g:#22c55e;--p:#8b5cf6;
+         --bg:#080b12;--card:#141926;--bdr:#1a2035;--tx:#dde2f0;--mu:#4a5270;--dim:#1e2540;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--tx);font-family:'Source Serif 4',serif;font-weight:300;line-height:1.75;font-size:16px;}
+  .wrap{max-width:940px;margin:0 auto;padding:0 32px;}
+  @media(max-width:600px){.wrap{padding:0 16px;}}
+  .header{background:linear-gradient(180deg,#0f1520 0%,#080b12 100%);border-bottom:3px solid var(--o);padding:44px 0 36px;position:relative;overflow:hidden;}
+  .header::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 65% 30%,rgba(249,115,22,.07) 0%,transparent 70%);pointer-events:none;}
+  .header-inner{position:relative;z-index:1;}
+  .tag{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.18em;color:var(--o);text-transform:uppercase;margin-bottom:8px;}
+  .report-title{font-family:'Playfair Display',serif;font-size:clamp(28px,5vw,50px);font-weight:900;color:#fff;line-height:1;margin-bottom:6px;}
+  .report-title em{color:var(--o);font-style:italic;}
+  .report-sub{font-size:12px;color:var(--mu);font-family:'IBM Plex Mono',monospace;margin-top:6px;}
+  .ai-headline{background:linear-gradient(135deg,#0a1a0a,#0f1520);border:1px solid rgba(34,197,94,.2);border-left:4px solid var(--g);border-radius:10px;padding:20px 24px;margin:24px 0 0;}
+  .ai-hl-tag{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.16em;color:var(--g);text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+  .ai-hl-tag::before{content:'◆';font-size:8px;}
+  .ai-headline-text{font-family:'Playfair Display',serif;font-size:clamp(18px,3vw,24px);font-style:italic;color:#ccd4e8;line-height:1.4;}
+  .hero{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:10px;margin:24px 0;}
+  .hs{background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:14px 16px;}
+  .hs-l{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.12em;color:var(--mu);text-transform:uppercase;display:block;margin-bottom:4px;}
+  .hs-v{font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:500;color:var(--o);display:block;line-height:1;}
+  .hs-v.g{color:var(--g);}.hs-v.t{color:var(--t);}.hs-v.a{color:var(--a);}.hs-v.r{color:var(--r);}.hs-v.m{color:var(--mu);}
+  .hs-delta{font-family:'IBM Plex Mono',monospace;font-size:11px;margin-top:3px;display:block;}
+  .section{padding:40px 0 28px;border-top:1px solid var(--bdr);}
+  .sh{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;color:var(--o);text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+  .sh::after{content:'';flex:1;height:1px;background:var(--bdr);}
+  .ai-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:4px;padding:2px 7px;font-size:9px;color:var(--g);letter-spacing:.06em;}
+  .narrative{max-width:720px;}
+  .narrative p{color:#8090b0;font-size:15px;line-height:1.9;margin-bottom:1.3em;}
+  .narrative p strong{color:var(--tx);font-weight:600;}
+  .signals{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin:20px 0;}
+  .signal{background:var(--card);border:1px solid var(--bdr);border-radius:9px;padding:15px 17px;}
+  .signal-positive{border-left:3px solid var(--g);}.signal-warning{border-left:3px solid var(--r);}.signal-neutral{border-left:3px solid var(--t);}
+  .signal-header{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+  .signal-icon{font-size:14px;font-weight:700;}.signal-label{font-size:13px;font-weight:600;color:var(--tx);}
+  .signal-detail{font-size:13px;color:var(--mu);line-height:1.65;}
+  .next-focus{background:linear-gradient(135deg,#0f0f1a,#0f1520);border:1px solid rgba(139,92,246,.25);border-left:4px solid var(--p);border-radius:10px;padding:18px 22px;margin-top:20px;}
+  .nf-tag{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.14em;color:var(--p);text-transform:uppercase;margin-bottom:8px;}
+  .nf-body{font-size:14px;color:#8090b0;line-height:1.75;}
+  .fig{background:var(--card);border:1px solid var(--bdr);border-radius:12px;overflow:hidden;margin:18px 0;}
+  .fig-h{padding:16px 20px 0;display:flex;justify-content:space-between;}
+  .fig-title{font-size:14px;font-weight:600;color:var(--tx);}.fig-n{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--o);letter-spacing:.1em;text-transform:uppercase;}
+  .fig-body{padding:14px 20px;}.fig-cap{padding:10px 20px 14px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--mu);border-top:1px solid var(--bdr);line-height:1.6;}
+  canvas{display:block;width:100%!important;}
+  .act-grid{display:flex;flex-direction:column;gap:8px;}
+  .act-card{background:var(--bg);border:1px solid var(--bdr);border-radius:8px;padding:12px 16px;}
+  .act-meta{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--mu);}
+  .act-name{font-size:14px;font-weight:600;color:var(--tx);margin:3px 0 6px;}
+  .act-stats{display:flex;gap:14px;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--t);}
+  .act-desc{font-size:12px;color:var(--mu);font-style:italic;margin-top:8px;border-left:2px solid var(--dim);padding-left:10px;line-height:1.6;}
+  .empty{color:var(--mu);font-size:14px;padding:8px 0;}
+  .zones{display:flex;flex-direction:column;gap:9px;}
+  .zr{display:flex;align-items:center;gap:10px;}
+  .zl{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mu);width:90px;flex-shrink:0;}
+  .zb{flex:1;height:6px;background:var(--dim);border-radius:3px;overflow:hidden;}
+  .zbi{height:100%;border-radius:3px;opacity:.85;}
+  .zp{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mu);width:30px;text-align:right;}
+  /* ANALYTICS */
+  .analytics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;}
+  .analytics-card{background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:16px;}
+  .ac-wide{grid-column:1/-1;}
+  .ac-header{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+  .ac-icon{font-size:16px;}.ac-title{font-size:13px;font-weight:600;color:var(--tx);flex:1;}
+  .ac-badge{font-family:'IBM Plex Mono',monospace;font-size:10px;}
+  .ac-metrics{display:flex;flex-wrap:wrap;gap:12px;}
+  .ac-metric{display:flex;flex-direction:column;gap:2px;min-width:70px;}
+  .ac-mk{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:.08em;}
+  .ac-mv{font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:500;color:var(--tx);}
+  .pred-table{width:100%;border-collapse:collapse;font-size:12px;}
+  .pred-table th{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;color:var(--mu);text-transform:uppercase;padding:5px 8px;border-bottom:1px solid var(--bdr);text-align:left;}
+  .pred-table td{padding:7px 8px;border-bottom:1px solid var(--dim);}
+  .pred-dist{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mu);}
+  .pred-time{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;color:var(--tx);}
+  /* SPEED */
+  .speed-grid{display:flex;flex-direction:column;gap:20px;}
+  .speed-card{background:var(--card);border:1px solid var(--bdr);border-radius:12px;overflow:hidden;border-top:3px solid var(--o);}
+  .speed-card-header{padding:16px 20px;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;border-bottom:1px solid var(--bdr);}
+  .speed-date{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--mu);}
+  .speed-name{font-size:15px;font-weight:600;color:var(--tx);margin-top:3px;}
+  .speed-meta{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+  .speed-badge{font-family:'IBM Plex Mono',monospace;font-size:10px;background:rgba(249,115,22,.12);border:1px solid rgba(249,115,22,.3);color:var(--o);padding:3px 8px;border-radius:4px;}
+  .speed-best{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mu);}.speed-best strong{color:var(--g);}
+  .speed-hr{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--r);}
+  .speed-chart-wrap{padding:14px 20px 0;}
+  .speed-table-wrap{padding:14px 20px 20px;overflow-x:auto;}
+  .speed-table{width:100%;border-collapse:collapse;font-family:'IBM Plex Mono',monospace;font-size:12px;}
+  .speed-table th{color:var(--mu);text-transform:uppercase;font-size:9px;letter-spacing:.1em;padding:5px 8px;border-bottom:1px solid var(--bdr);text-align:left;}
+  .speed-table td{padding:7px 8px;border-bottom:1px solid var(--dim);}
+  .effort-row td{color:var(--tx);}.iv-label,.iv-pace{color:var(--o);font-weight:500;}.iv-peak{color:var(--g);}
+  .rec-row td{color:var(--mu);font-size:11px;}.rec-label,.rec-pace{color:var(--t);}
+  /* PLAN */
+  .plan-grid{display:flex;flex-direction:column;gap:10px;}
+  .plan-row{background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:14px 18px;}
+  .plan-completed{border-left:3px solid var(--g);}.plan-skipped{border-left:3px solid var(--r);}
+  .plan-row-header{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px;}
+  .plan-icon{font-size:14px;font-weight:700;}.plan-date{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mu);}
+  .plan-name{font-size:14px;font-weight:600;color:var(--tx);flex:1;}
+  .plan-steps{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mu);background:var(--bg);border-radius:6px;padding:10px 12px;margin:8px 0;line-height:1.7;}
+  .plan-actual{display:flex;gap:12px;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--t);margin-top:8px;}
+  .plan-note{font-size:12px;color:var(--mu);font-style:italic;margin-top:6px;border-left:2px solid var(--dim);padding-left:10px;}
+  /* UPCOMING */
+  .upcoming-grid{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+  .upcoming-card{background:var(--card);border:1px solid var(--bdr);border-left:3px solid var(--p);border-radius:8px;padding:12px 16px;}
+  .upcoming-date{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--mu);}
+  .upcoming-name{font-size:14px;font-weight:600;color:var(--tx);margin:3px 0 6px;}
+  .upcoming-steps{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mu);line-height:1.7;}
+  /* FOOTER */
+  .footer{border-top:1px solid var(--bdr);padding:32px 0 48px;margin-top:48px;}
+  .footer p{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--mu);line-height:1.9;}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="wrap header-inner">
+    <div class="tag">ResearchAssistants_SBW · Running Bot · Strava + Garmin + Claude</div>
+    <div class="report-title">Week of <em>13 April 2026</em></div>
+    <div class="report-sub">Generated Sunday 19 April 2026, 21:43 UTC</div>
+    <div class="ai-headline">
+      <div class="ai-hl-tag">Claude · Weekly Read</div>
+      <div class="ai-headline-text">Strong volume recovery with improved efficiency, but running form regression signals fatigue.</div>
+    </div>
+  </div>
+</div>
+<div class="wrap">
+  <div class="hero" style="margin-top:24px;">
+    <div class="hs"><span class="hs-l">This Week</span><span class="hs-v g">51.4 km</span><span class="hs-delta" style="color:#22c55e">+7.5 km</span></div>
+    <div class="hs"><span class="hs-l">Runs</span><span class="hs-v">5</span></div>
+    <div class="hs"><span class="hs-l">Avg Pace</span><span class="hs-v t">5:23/km</span></div>
+    <div class="hs"><span class="hs-l">Avg HR</span><span class="hs-v r">134 bpm</span></div>
+    <div class="hs"><span class="hs-l">Elevation</span><span class="hs-v a">147 m</span></div>
+    <div class="hs"><span class="hs-l">8-wk Avg</span><span class="hs-v m">43.9 km</span></div>
+    <div class="hs"><span class="hs-l">Streak</span><span class="hs-v" style="color:#f97316">3d</span></div>
+    <div class="hs"><span class="hs-l">Aero Eff.</span><span class="hs-v t">5:21/km</span><span class="hs-delta" style="color:#22c55e">↑ 1s/km vs prior 8 wks</span></div>
+  </div>
+  <div class="section">
+    <div class="sh">Weekly Analysis <span class="ai-badge">◆ Claude</span></div>
+    <div class="narrative"><p>After a volatile March with weeks swinging between 24-67km, you've settled into a more consistent 46-51km pattern over the last fortnight. The 51.4km this week represents a solid 17% bump above your 8-week rolling average, driven primarily by Tuesday's 16km MRC session — your first structured quality work in recent weeks. The aerobic efficiency improvement (5:21/km at aerobic threshold, 1s/km faster than recent weeks) suggests the recent volume is translating into measurable adaptation. However, this came at a cost: 80% of the week was spent in Zone 3, well above the typical 80/20 distribution that built your peak fitness last year.</p></div>
+    <div class="signals"><div class="signal signal-warning"><div class="signal-header"><span class="signal-icon" style="color:#ef4444">⚠</span><span class="signal-label">Form regression under load</span></div><div class="signal-detail">Cadence dropped to 158 spm with vertical oscillation rising to 9.3cm. This combination increases calf loading exactly where you're vulnerable and reduces economy.</div></div><div class="signal signal-positive"><div class="signal-header"><span class="signal-icon" style="color:#22c55e">↑</span><span class="signal-label">Aerobic efficiency improving</span></div><div class="signal-detail">5:21/km at aerobic threshold is 1s/km faster than recent weeks, suggesting volume is driving positive adaptation despite VO₂ decline.</div></div><div class="signal signal-warning"><div class="signal-header"><span class="signal-icon" style="color:#ef4444">⚠</span><span class="signal-label">Zone distribution problematic</span></div><div class="signal-detail">80% Zone 3 running will limit adaptation and increase injury risk. Peak fitness came from disciplined 80/20 polarization.</div></div><div class="signal signal-positive"><div class="signal-header"><span class="signal-icon" style="color:#22c55e">↑</span><span class="signal-label">Race predictions strengthening</span></div><div class="signal-detail">10:47 ahead of marathon PB and just 57s off half PB suggests fitness is tracking well toward sub-3:20 marathon capability.</div></div><div class="signal signal-positive"><div class="signal-header"><span class="signal-icon" style="color:#22c55e">↑</span><span class="signal-label">Recovery systems coping</span></div><div class="signal-detail">Balanced HRV and 75/100 readiness despite volume increase shows nervous system handling load well currently.</div></div></div>
+    <div class="next-focus"><div class="nf-tag">Focus for next week</div><div class="nf-body">Prioritize cadence discipline and easy pace control to correct form regression while maintaining volume momentum.</div></div>
+  </div>
+  
+  <div class="section">
+    <div class="sh">Garmin Analytics <span class="ai-badge">◆ Claude</span></div>
+    <div class="analytics-grid">
+      <div class="analytics-card">
+        <div class="ac-header">
+          <span class="ac-icon">⚡</span>
+          <span class="ac-title">Training Load</span>
+          <span class="ac-badge" style="color:#4a5270">Unknown</span>
+        </div>
+        <div class="ac-metrics">
+          <div class="ac-metric">
+            <span class="ac-mk">Acute (7d)</span>
+            <span class="ac-mv">–</span>
+          </div>
+          <div class="ac-metric">
+            <span class="ac-mk">Chronic (28d)</span>
+            <span class="ac-mv">–</span>
+          </div>
+          <div class="ac-metric">
+            <span class="ac-mk">Ratio</span>
+            <span class="ac-mv" style="color:#4a5270">–</span>
+          </div>
+          <div class="ac-metric">
+            <span class="ac-mk">Zone</span>
+            <span class="ac-mv" style="color:#4a5270;font-size:11px;">–</span>
+          </div>
+        </div>
+      </div>
+      <div class="analytics-card">
+        <div class="ac-header">
+          <span class="ac-icon">❤️</span>
+          <span class="ac-title">VO₂ Max</span>
+          <span class="ac-badge" style="color:#ef4444">-0.6 (4wk)</span>
+        </div>
+        <div class="ac-metrics">
+          <div class="ac-metric">
+            <span class="ac-mk">Current</span>
+            <span class="ac-mv">55.8</span>
+          </div>
+          <div class="ac-metric">
+            <span class="ac-mk">5wk ago</span>
+            <span class="ac-mv">56.4</span>
+          </div>
+          <div class="ac-metric">
+            <span class="ac-mk">Trend</span>
+            <span class="ac-mv" style="color:#ef4444">-0.6</span>
+          </div>
+        </div>
+        <canvas id="chart-vo2" height="50" style="margin-top:10px;"></canvas>
+        <script>
+        new Chart(document.getElementById('chart-vo2'),{
+          type:'line',
+          data:{labels:["03-22", "03-29", "04-12", "04-19"],datasets:[{
+            data:[56.4, 56.2, 56.0, 55.8],borderColor:'#ef4444',
+            backgroundColor:'#ef444422',borderWidth:2,
+            pointRadius:3,tension:0.3,fill:true
+          }]},
+          options:{responsive:true,maintainAspectRatio:true,animation:false,
+            plugins:{legend:{display:false},tooltip:{enabled:false}},
+            scales:{x:{display:false},y:{display:false}}
+          }
+        });
+        </script>
+      </div>
+      <div class="analytics-card ac-wide">
+        <div class="ac-header">
+          <span class="ac-icon">🏁</span>
+          <span class="ac-title">Race Predictions</span>
+        </div>
+        <table class="pred-table">
+          <thead><tr>
+            <th>Distance</th><th>Predicted</th>
+            <th>vs PB</th><th>vs Target</th>
+          </tr></thead>
+          <tbody>
+          <tr>
+            <td class="pred-dist">5k</td>
+            <td class="pred-time">19:49</td>
+            <td style="color:#22c55e;font-family:'IBM Plex Mono',monospace;font-size:11px;">0:03</td>
+            <td style="color:#4a5270;font-family:'IBM Plex Mono',monospace;font-size:11px;">–</td>
+          </tr>
+          <tr>
+            <td class="pred-dist">10k</td>
+            <td class="pred-time">41:23</td>
+            <td style="color:#22c55e;font-family:'IBM Plex Mono',monospace;font-size:11px;">2:11</td>
+            <td style="color:#4a5270;font-family:'IBM Plex Mono',monospace;font-size:11px;">–</td>
+          </tr>
+          <tr>
+            <td class="pred-dist">Half</td>
+            <td class="pred-time">1:31:58</td>
+            <td style="color:#22c55e;font-family:'IBM Plex Mono',monospace;font-size:11px;">0:57</td>
+            <td style="color:#f97316;font-family:'IBM Plex Mono',monospace;font-size:11px;">+1:58</td>
+          </tr>
+          <tr>
+            <td class="pred-dist">Marathon</td>
+            <td class="pred-time">3:19:58</td>
+            <td style="color:#22c55e;font-family:'IBM Plex Mono',monospace;font-size:11px;">10:47</td>
+            <td style="color:#22c55e;font-family:'IBM Plex Mono',monospace;font-size:11px;">0:02</td>
+          </tr></tbody>
+        </table>
+      </div>
+      <div class="analytics-card">
+        <div class="ac-header">
+          <span class="ac-icon">🫀</span>
+          <span class="ac-title">Recovery</span>
+        </div>
+        <div class="ac-metrics">
+          <div class="ac-metric">
+            <span class="ac-mk">HRV status</span>
+            <span class="ac-mv" style="color:#22c55e;font-size:11px;">Balanced</span>
+          </div>
+          <div class="ac-metric">
+            <span class="ac-mk">7d avg HRV</span>
+            <span class="ac-mv">100 ms</span>
+          </div>
+          <div class="ac-metric">
+            <span class="ac-mk">vs baseline</span>
+            <span class="ac-mv" style="font-size:11px;color:#ef4444">–</span>
+          </div>
+          <div class="ac-metric">
+            <span class="ac-mk">Readiness</span>
+            <span class="ac-mv" style="color:#22c55e">75/100</span>
+          </div>
+        </div>
+      </div>
+      <div class="analytics-card">
+        <div class="ac-header">
+          <span class="ac-icon">🦾</span>
+          <span class="ac-title">Running Form</span>
+          <span class="ac-badge" style="color:#4a5270;font-size:9px;">weekly avg</span>
+        </div>
+        <div class="ac-metrics">
+          <div class="ac-metric">
+            <span class="ac-mk">Cadence</span>
+            <span class="ac-mv" style="color:#22c55e">316.3 spm</span>
+            <span class="ac-mk" style="font-size:9px;">target 170–180</span>
+          </div>
+          <div class="ac-metric">
+            <span class="ac-mk">Vert. oscillation</span>
+            <span class="ac-mv" style="color:#f97316">9.3 cm</span>
+            <span class="ac-mk" style="font-size:9px;">target &lt;8.0cm</span>
+          </div>
+          <div class="ac-metric">
+            <span class="ac-mk">Ground contact</span>
+            <span class="ac-mv">272.9 ms</span>
+          </div>
+        </div>
+      </div>
+      <div class="analytics-card">
+        <div class="ac-header">
+          <span class="ac-icon">😴</span>
+          <span class="ac-title">Sleep (7-day)</span>
+        </div>
+        <div class="ac-metrics">
+          <div class="ac-metric">
+            <span class="ac-mk">Avg duration</span>
+            <span class="ac-mv" style="color:#ef4444">6.3h</span>
+          </div>
+          <div class="ac-metric">
+            <span class="ac-mk">Worst night</span>
+            <span class="ac-mv">4.8h</span>
+          </div>
+          <div class="ac-metric">
+            <span class="ac-mk">Avg score</span>
+            <span class="ac-mv">75/100</span>
+          </div>
+        </div>
+      </div></div>
+    <div class="narrative" style="margin-top:24px;"><p>The Garmin analytics paint a picture of an athlete managing load carefully but showing early warning signs. Your VO₂ max continues its gradual decline (-0.6 ml/kg/min over 4 weeks to 55.8), which is concerning given your sub-1:30 half marathon target typically requires ~58+. However, the race predictions tell a more encouraging story: you're tracking 10:47 ahead of your marathon PB and just 57 seconds off your half marathon PB. The contradiction between declining VO₂ trend and strong race predictions likely reflects recent volume consistency overriding older low-volume weeks in the predictive model. Your HRV remains balanced at 100ms with high training readiness (75/100), suggesting your nervous system is coping well despite the increased load. The key metric to watch is that unknown training load status — without the acute:chronic ratio, we can't assess injury risk from this volume jump.</p></div>
+    <div class="narrative" style="margin-top:12px;"><p>Your running form metrics reveal the clearest warning signal of the week. Cadence dropped to 158.2 spm (316.3 ÷ 2), well below both your target range of 170-180 spm and your typical 163-170 range from peak fitness periods. This regression coincides with vertical oscillation rising to 9.3cm, 1.3cm above your 8.0cm target. The mechanism is clear: as cadence drops, your stride lengthens and you bounce higher with each step, reducing economy and increasing impact forces through your calves — your known weak point from the Copenhagen Marathon. This pattern typically emerges when athletes are fatigued or running above their aerobic capacity, which aligns with spending 80% of the week in Zone 3.</p></div>
+  </div>
+  
+  
+  
+  <div class="section">
+    <div class="sh">Next Week <span class="ai-badge">◆ Garmin schedule</span></div>
+    
+    <div class="next-focus"><div class="nf-tag">Claude's read on next week</div><div class="nf-body">Your next week should prioritize form correction and polarization. If MRC Tuesday is scheduled again, focus obsessively on cadence — aim for 165+ spm throughout the session, even if it means slightly slower splits initially. Add deliberate easy running below 5:40/km pace to rebalance the intensity distribution and allow the volume adaptation to consolidate.</div></div>
+  </div>
+  <div class="section">
+    <div class="sh">Volume — Last 16 Weeks</div>
+    <div class="fig">
+      <div class="fig-h"><span class="fig-title">Weekly Distance & Rolling Average</span><span class="fig-n">Fig. 1</span></div>
+      <div class="fig-body"><canvas id="chart-weekly" height="220"></canvas></div>
+      <div class="fig-cap">Weekly distance (bars). Orange = this week. Teal dashed = 8-week rolling average.</div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="sh">Notable Activities</div>
+    <div class="act-grid"><div class="act-card"><div class="act-meta">2026-04-14</div><div class="act-name">Mrc Tuesday</div><div class="act-stats"><span>16.0 km</span><span>1:26:11</span><span>5:22/km</span><span>♥ 139.8 bpm</span></div></div></div>
+  </div>
+  <div class="section">
+    <div class="sh">Heart Rate</div>
+    <div class="fig">
+      <div class="fig-h"><span class="fig-title">Average HR per Week</span><span class="fig-n">Fig. 2</span></div>
+      <div class="fig-body"><canvas id="chart-hr" height="200"></canvas></div>
+      <div class="fig-cap">Sustained downward trend at maintained volume = improving aerobic fitness.</div>
+    </div>
+    <div class="fig">
+      <div class="fig-h"><span class="fig-title">HR Zone Distribution — This Week</span><span class="fig-n">Fig. 3</span></div>
+      <div class="fig-body"><div class="zones"><div class="zr"><div class="zl">Z1 Recovery</div><div class="zb"><div class="zbi" style="width:0%;background:#60a5fa;"></div></div><div class="zp">0%</div></div><div class="zr"><div class="zl">Z2 Easy</div><div class="zb"><div class="zbi" style="width:20%;background:#14b8a6;"></div></div><div class="zp">20%</div></div><div class="zr"><div class="zl">Z3 Aerobic</div><div class="zb"><div class="zbi" style="width:80%;background:#f59e0b;"></div></div><div class="zp">80%</div></div><div class="zr"><div class="zl">Z4 Threshold</div><div class="zb"><div class="zbi" style="width:0%;background:#f97316;"></div></div><div class="zp">0%</div></div><div class="zr"><div class="zl">Z5 Max</div><div class="zb"><div class="zbi" style="width:0%;background:#ef4444;"></div></div><div class="zp">0%</div></div></div></div>
+      <div class="fig-cap">Estimated from avg HR vs max 185 bpm.</div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="sh">Aerobic Efficiency</div>
+    <div class="fig">
+      <div class="fig-h"><span class="fig-title">Pace at 130–145 bpm — 8-Week Rolling</span><span class="fig-n">Fig. 4</span></div>
+      <div class="fig-body" style="padding:20px 24px;">
+        <div style="display:flex;align-items:flex-end;gap:32px;flex-wrap:wrap;">
+          <div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;">Current 8-week avg</div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:36px;font-weight:500;color:var(--t);">5:21/km</div>
+          </div>
+          <div><div style="font-family:IBM Plex Mono,monospace;font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;">vs prior 8 weeks</div><div style="font-family:IBM Plex Mono,monospace;font-size:22px;font-weight:500;color:#22c55e;">↑ 1s/km vs prior 8 wks</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="sh">Parkrun</div>
+    <div style="background:var(--card);border:1px solid rgba(245,158,11,.3);border-left:3px solid var(--a);border-radius:8px;padding:13px 16px;margin-bottom:14px;"><div style="font-family:IBM Plex Mono,monospace;font-size:9px;color:var(--a);text-transform:uppercase;letter-spacing:.12em;">All-Time PB</div><div style="font-family:IBM Plex Mono,monospace;font-size:22px;color:var(--a);margin-top:4px;">21:53 (2026-01-17)</div></div>
+    <div class="fig">
+      <div class="fig-h"><span class="fig-title">Parkrun Times & HR</span><span class="fig-n">Fig. 5</span></div>
+      <div class="fig-body"><canvas id="chart-parkrun" height="230"></canvas></div>
+      <div class="fig-cap">Finish time (bars, left). HR (line, right). Green = sub-20.</div>
+    </div>
+  </div>
+  <div class="footer">
+    <p>ResearchAssistants_SBW · running_bot · Sunday 19 April 2026, 21:43 UTC<br>
+    Strava API (streams) · Garmin Connect (analytics + calendar) · Claude (claude-sonnet-4-20250514)</p>
+  </div>
+</div>
+<script>
+const GC='rgba(26,32,53,.9)',TC='#2a3050';
+Chart.defaults.color='#4a5270';Chart.defaults.font.family="'IBM Plex Mono',monospace";Chart.defaults.font.size=11;
+const wd=[25.9, 52.9, 45.0, 57.8, 49.8, 38.0, 73.0, 59.2, 29.2, 28.0, 67.4, 24.4, 60.1, 36.6, 46.4, 51.4];
+new Chart(document.getElementById('chart-weekly'),{type:'bar',
+  data:{labels:["12-29", "01-05", "01-12", "01-19", "01-26", "02-02", "02-09", "02-16", "02-23", "03-02", "03-09", "03-16", "03-23", "03-30", "04-06", "04-13"],datasets:[
+    {label:'Weekly km',data:wd,backgroundColor:wd.map((_,i)=>i===15?'#f97316':'rgba(249,115,22,.48)'),borderRadius:4,order:2},
+    {type:'line',label:'8-wk avg',data:[43.9, 43.9, 43.9, 43.9, 43.9, 43.9, 43.9, 43.9, 43.9, 43.9, 43.9, 43.9, 43.9, 43.9, 43.9, 43.9],borderColor:'rgba(20,184,166,.65)',borderWidth:1.5,borderDash:[6,4],pointRadius:0,tension:0,order:1}
+  ]},
+  options:{responsive:true,maintainAspectRatio:true,
+    plugins:{legend:{labels:{color:'#5a6280',boxWidth:12}},tooltip:{callbacks:{label:c=>` ${c.parsed.y} km`}}},
+    scales:{x:{grid:{display:false},ticks:{color:TC,maxRotation:45,font:{size:9}}},y:{grid:{color:GC},ticks:{color:TC,callback:v=>v+'km'}}}}
+});
+const hd=[129, 134, 135, 131, 128, 125, 134, 130, 124, 123, 131, 133, 134, 139, 133, 134];
+new Chart(document.getElementById('chart-hr'),{type:'line',
+  data:{labels:["12-29", "01-05", "01-12", "01-19", "01-26", "02-02", "02-09", "02-16", "02-23", "03-02", "03-09", "03-16", "03-23", "03-30", "04-06", "04-13"],datasets:[{label:'Avg HR',data:hd,borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,.08)',borderWidth:2.5,pointRadius:4,pointBackgroundColor:hd.map(h=>h&&h<=126?'#22c55e':'#ef4444'),tension:.3,fill:true}]},
+  options:{responsive:true,maintainAspectRatio:true,
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.parsed.y} bpm`}}},
+    scales:{x:{grid:{color:GC},ticks:{color:TC,maxRotation:45,font:{size:9}}},y:{grid:{color:GC},ticks:{color:TC,callback:v=>v+' bpm'}}}}
+});
+const prt=[21.9, 22.7],prh=[171.0, 165.1];
+new Chart(document.getElementById('chart-parkrun'),{type:'bar',
+  data:{labels:["01-17", "02-21"],datasets:[
+    {type:'bar',label:'Time',data:prt,backgroundColor:prt.map(t=>t<20?'#22c55e':t<22?'#f97316':t>27?'#1e2540':'#3b82f6'),borderRadius:3,yAxisID:'y',order:2},
+    {type:'line',label:'HR',data:prh,borderColor:'rgba(239,68,68,.6)',borderWidth:1.5,pointRadius:3,tension:.3,yAxisID:'y2',order:1}
+  ]},
+  options:{responsive:true,maintainAspectRatio:true,
+    plugins:{legend:{labels:{color:'#5a6280',boxWidth:12}}},
+    scales:{x:{grid:{display:false},ticks:{color:TC,font:{size:9}}},
+      y:{grid:{color:GC},reverse:true,min:18,max:32,ticks:{color:TC,callback:v=>`${Math.floor(v)}:${String(Math.round((v-Math.floor(v))*60)).padStart(2,'0')}`}},
+      y2:{grid:{display:false},min:110,max:190,position:'right',ticks:{color:'#ef4444'}}}}
+});
+</script>
+</body>
+</html>

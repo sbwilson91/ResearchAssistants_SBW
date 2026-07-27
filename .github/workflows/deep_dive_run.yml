@@ -1,6 +1,6 @@
 name: Running Deep Dive (one-off)
 
-# Manual, one-off investigation. Fetches Strava full history + Garmin current
+# Manual, one-off investigation. Fetches Garmin full history + current
 # physiology and commits running_bot/reports/deep_dive_data.json. It does NOT
 # call Claude — the synthesis + Artifact are produced separately from the JSON.
 
@@ -28,25 +28,9 @@ jobs:
       - name: Collect deep-dive data
         env:
           PYTHONPATH:           running_bot
-          STRAVA_CLIENT_ID:     ${{ secrets.STRAVA_CLIENT_ID }}
-          STRAVA_CLIENT_SECRET: ${{ secrets.STRAVA_CLIENT_SECRET }}
-          STRAVA_REFRESH_TOKEN: ${{ secrets.STRAVA_REFRESH_TOKEN }}
           GARMIN_EMAIL:         ${{ secrets.GARMIN_EMAIL }}
           GARMIN_PASSWORD:      ${{ secrets.GARMIN_PASSWORD }}
         run: python running_bot/deep_dive.py
-
-      - name: Rotate Strava refresh token if needed
-        if: always()
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          if [ -f new_refresh_token.txt ]; then
-            gh secret set STRAVA_REFRESH_TOKEN \
-              --body "$(cat new_refresh_token.txt)" \
-              --repo "${{ github.repository }}"
-            rm new_refresh_token.txt
-            echo "✓ STRAVA_REFRESH_TOKEN rotated"
-          fi
 
       - name: Commit deep-dive data
         run: |

@@ -1,28 +1,25 @@
 """
 running_bot/speed_sessions.py
 
-Fetches per-second Garmin activity detail streams for speed sessions and
-detects individual intervals from the velocity signal. Produces structured
-per-effort stats that feed into both the HTML report and the Claude insights
-prompt.
+Fetches raw Strava stream data for speed sessions and detects individual
+intervals from the velocity signal. Produces structured per-effort stats
+that feed into both the HTML report and the Claude insights prompt.
 
 Speed sessions are identified as:
   - Any run on Tuesday or Thursday (MRC / interval days)
   - Any run with keywords: fartlek, interval, mrc, mikkeler, speed,
     track, tempo, sprint, intervals in the activity name
 
-Migrated from Strava streams (lost API access) to Garmin Connect's
-get_activity_details(), confirmed via a live probe call to return per-second
-samples keyed directSpeed/directHeartRate/directRunCadence/sumDistance/
-sumElapsedDuration (see garmin_activities.py's _reshape for the equivalent
-summary-level field mapping).
+API cost: one extra GET per qualifying session (up to MAX_SESSIONS).
+Strava rate limit is 100 req/15 min — a typical week with 2 sessions
+costs 2 extra calls on top of the ~3 for activity listing.
 """
 
+import os
 import time
 import statistics
+import requests
 from datetime import datetime
-
-from garmin import _get_client
 
 
 # ── Config ────────────────────────────────────────────────────────────────────
@@ -48,69 +45,28 @@ SPEED_KEYWORDS = {
 }
 
 
-# ── Garmin activity details ("streams" equivalent) ────────────────────────────
+# ── Strava streams API ────────────────────────────────────────────────────────
 
-def _fetch_streams(activity_id: int) -> dict:
+def _fetch_streams(token: str, activity_id: int) -> dict:
     """
-    Fetch velocity, HR, cadence, time, distance streams for one activity from
-    Garmin Connect. Returns a dict of equal-length lists keyed the same way
-    the rest of this module (and durability.py) expect:
-        {"velocity_smooth": [...], "heartrate": [...], "cadence": [...],
-         "time": [...], "distance": [...]}
-    Returns empty dict on error or if the activity has no detail samples.
+    Fetch velocity, HR, cadence, time, distance streams for one activity.
+    Returns dict keyed by stream type, or empty dict on error.
     """
-    client = _get_client()
-    try:
-        details = client.get_activity_details(activity_id)
-    except Exception as e:
-        print(f"    ⚠ Stream fetch failed for {activity_id}: {e}")
+    url  = f"https://www.strava.com/api/v3/activities/{activity_id}/streams"
+    resp = requests.get(
+        url,
+        headers={"Authorization": f"Bearer {token}"},
+        params={"keys": "velocity_smooth,heartrate,cadence,time,distance",
+                "key_by_type": "true"},
+        timeout=20,
+    )
+    if resp.status_code == 429:
+        print(f"    ⚠ Rate limited fetching streams for {activity_id}, skipping")
         return {}
-
-    try:
-        from garminconnect import parse_activity_detail_metrics
-        samples = parse_activity_detail_metrics(details)
-    except ImportError:
-        samples = _parse_metrics_fallback(details)
-
-    if not samples:
+    if resp.status_code != 200:
+        print(f"    ⚠ Stream fetch failed ({resp.status_code}) for {activity_id}")
         return {}
-
-    t0 = samples[0].get("sumElapsedDuration") or 0
-    velocity, hr, cadence, t, dist = [], [], [], [], []
-    for s in samples:
-        velocity.append(s.get("directSpeed") or 0.0)
-        hr.append(s.get("directHeartRate"))
-        # directRunCadence is PER-LEG steps/min (confirmed against the activity
-        # summary: maxDoubleCadence == maxRunningCadenceInStepsPerMinute, so
-        # "Double" is the full-body figure and plain directRunCadence is half
-        # of it) — same ×2 convention Strava's raw cadence stream needed.
-        cadence.append((s.get("directRunCadence") or 0.0) * 2)
-        t.append(int((s.get("sumElapsedDuration") or 0) - t0))
-        dist.append(s.get("sumDistance") or 0.0)
-
-    return {
-        "velocity_smooth": {"data": velocity},
-        "heartrate":       {"data": hr},
-        "cadence":          {"data": cadence},
-        "time":            {"data": t},
-        "distance":        {"data": dist},
-    }
-
-
-def _parse_metrics_fallback(details: dict) -> list[dict]:
-    """Hand-rolled equivalent of parse_activity_detail_metrics, in case the
-    installed garminconnect version doesn't export it."""
-    descriptors = details.get("metricDescriptors", [])
-    by_index = {d["metricsIndex"]: d["key"] for d in descriptors if d.get("metricsIndex") is not None}
-    samples = []
-    for row in details.get("activityDetailMetrics", []):
-        metrics = row.get("metrics", [])
-        sample = {}
-        for idx, key in by_index.items():
-            if idx < len(metrics) and metrics[idx] is not None:
-                sample[key] = metrics[idx]
-        samples.append(sample)
-    return samples
+    return resp.json()
 
 
 # ── Interval detection ────────────────────────────────────────────────────────
@@ -201,7 +157,7 @@ def _ms_to_pace(ms: float) -> str:
 
 # ── Per-session analysis ──────────────────────────────────────────────────────
 
-def analyse_session(activity: dict) -> dict | None:
+def analyse_session(token: str, activity: dict) -> dict | None:
     """
     Fetch streams and compute interval statistics for one activity.
     Returns None if no meaningful interval data found.
@@ -211,7 +167,7 @@ def analyse_session(activity: dict) -> dict | None:
     date = activity["start_date_local"][:10]
     print(f"  Fetching streams: {date} — {name}")
 
-    streams = _fetch_streams(aid)
+    streams = _fetch_streams(token, aid)
     if not streams:
         return None
 
@@ -240,7 +196,7 @@ def analyse_session(activity: dict) -> dict | None:
             ]
             rec_hrs  = [
                 hr[j] for j in range(len(ts))
-                if hr and gap_start <= ts[j] < gap_end and hr[j] and hr[j] > 40
+                if hr and gap_start <= ts[j] < gap_end and hr[j] > 40
             ]
             recoveries.append({
                 "duration_s": gap_end - gap_start,
@@ -253,10 +209,10 @@ def analyse_session(activity: dict) -> dict | None:
     for iv in intervals:
         iv_hrs = [
             hr[j] for j in range(len(ts))
-            if hr and iv["start_s"] <= ts[j] < iv["end_s"] and hr[j] and hr[j] > 40
+            if hr and iv["start_s"] <= ts[j] < iv["end_s"] and hr[j] > 40
         ]
         iv_cads = [
-            cad[j] for j in range(len(ts))  # already spm — see _fetch_streams
+            cad[j] * 2 for j in range(len(ts))  # per-leg → spm
             if cad and iv["start_s"] <= ts[j] < iv["end_s"] and cad[j] > 0
         ]
         enriched_intervals.append({
@@ -268,7 +224,7 @@ def analyse_session(activity: dict) -> dict | None:
         })
 
     # Whole-session stats
-    all_hr  = [h for h in hr  if h and h > 40] if hr else []
+    all_hr  = [h for h in hr  if h > 40] if hr else []
     all_vel = [v for v in vel if v > 0]
 
     # Build velocity profile for chart (sampled every 15 seconds)
@@ -350,12 +306,13 @@ def threshold_cadence(sessions: list[dict]) -> dict:
 
 # ── Main entry point ──────────────────────────────────────────────────────────
 
-def get_speed_sessions(activities: list[dict]) -> list[dict]:
+def get_speed_sessions(token: str, activities: list[dict]) -> list[dict]:
     """
     From a list of this week's activities, identify speed sessions,
     fetch their streams, and return analysed session dicts.
 
     Args:
+        token:      valid Strava access token
         activities: list of activity summary dicts from the weekly fetch
 
     Returns:
@@ -373,12 +330,12 @@ def get_speed_sessions(activities: list[dict]) -> list[dict]:
     sessions = []
     for a in candidates:
         try:
-            result = analyse_session(a)
+            result = analyse_session(token, a)
             if result and result["n_intervals"] > 0:
                 sessions.append(result)
                 print(f"    ✓ {result['date']} — {result['n_intervals']} intervals, "
                       f"best {result['best_pace']}/km")
-            # Small delay to be polite to Garmin's (undocumented) rate limits
+            # Small delay to respect rate limits
             time.sleep(1)
         except Exception as e:
             print(f"    ⚠ Error analysing session: {e}")

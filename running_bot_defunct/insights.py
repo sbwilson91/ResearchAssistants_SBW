@@ -458,7 +458,7 @@ def _garmin_plan_block(garmin: dict) -> str:
                 if act.get("description"):
                     lines.append(f"  Note: \"{act['description'][:200]}\"")
             elif w["status"] == "skipped":
-                lines.append("  → No matching run found for this date")
+                lines.append("  → No run found on Strava for this date")
 
     next_week = garmin.get("next_week", [])
     if next_week:
@@ -566,7 +566,7 @@ PARKRUNS:
 
 {sleep_block}
 
-━━━ SPEED SESSION DATA (Garmin streams) ━━━
+━━━ SPEED SESSION DATA (Strava streams) ━━━
 {speed_block}
 
 ━━━ TRAINING PLAN ━━━
@@ -596,11 +596,11 @@ Respond with a single JSON object — no markdown fences:
 
   "physiological_analysis": "2–3 paragraphs synthesising the Garmin analytics. This is the key analytical section. Discuss: what the load ratio means for this athlete RIGHT NOW, what the VO₂ trend implies about fitness trajectory, how HRV and readiness combine to paint a recovery picture, whether race predictions are moving toward or away from stated targets (sub-1:30 HM, sub-3:20 marathon). Connect dots across metrics — don't treat each one as a separate paragraph.",
 
-  "speed_analysis": "1–2 paragraphs on quality sessions from the Garmin stream data. Reference actual paces against this athlete's benchmarks (parkrun PB = 3:58/km, HM avg = 4:24/km). Discuss recovery quality between intervals and what peak HRs indicate about effort level and fitness.",
+  "speed_analysis": "1–2 paragraphs on quality sessions from the Strava stream data. Reference actual paces against this athlete's benchmarks (parkrun PB = 3:58/km, HM avg = 4:24/km). Discuss recovery quality between intervals and what peak HRs indicate about effort level and fitness.",
 
   "form_analysis": "1–2 paragraphs on running form. Cadence is measured from this week's threshold/quality efforts only (target 170–180 spm under load; easy-run cadence is intentionally lower and irrelevant here — if no quality session was detected, say so rather than implying a regression). Vertical oscillation target is <80mm (currently ~92mm, weekly average). Explain the mechanism: how do these link to each other, to economy, and to the athlete's injury history (calves). If dynamics improved or worsened this week, say why that matters.",
 
-  "plan_vs_actual": "1 paragraph comparing Garmin's scheduled workouts to what was actually run. What was planned, what was done, what was skipped. If skipped: was it appropriate given the load ratio and HRV picture? Don't moralize about missed sessions — evaluate whether the choice made physiological sense.",
+  "plan_vs_actual": "1 paragraph comparing Garmin schedule to Strava execution. What was planned, what was done, what was skipped. If skipped: was it appropriate given the load ratio and HRV picture? Don't moralize about missed sessions — evaluate whether the choice made physiological sense.",
 
   "next_week_preview": "2–3 sentences. What's on the Garmin schedule, and given this week's load ratio, HRV, and readiness trend, what should the athlete's approach be going in? Specific — name the key session and what target paces would represent appropriate effort.",
 

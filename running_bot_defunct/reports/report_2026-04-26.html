@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Weekly Run Report — 19 Apr – 26 Apr 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,300;8..60,400;8..60,600&display=swap" rel="stylesheet">
+<style>
+  :root{--o:#f97316;--a:#f59e0b;--t:#14b8a6;--r:#ef4444;--g:#22c55e;--p:#8b5cf6;
+         --bg:#080b12;--card:#141926;--bdr:#1a2035;--tx:#dde2f0;--mu:#4a5270;--dim:#1e2540;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--tx);font-family:'Source Serif 4',serif;font-weight:300;line-height:1.75;font-size:16px;}
+  .wrap{max-width:940px;margin:0 auto;padding:0 32px;}
+  @media(max-width:600px){.wrap{padding:0 16px;}}
+  .header{background:linear-gradient(180deg,#0f1520 0%,#080b12 100%);border-bottom:3px solid var(--o);padding:44px 0 36px;position:relative;overflow:hidden;}
+  .header::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 65% 30%,rgba(249,115,22,.07) 0%,transparent 70%);pointer-events:none;}
+  .header-inner{position:relative;z-index:1;}
+  .tag{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.18em;color:var(--o);text-transform:uppercase;margin-bottom:8px;}
+  .report-title{font-family:'Playfair Display',serif;font-size:clamp(28px,5vw,50px);font-weight:900;color:#fff;line-height:1;margin-bottom:6px;}
+  .report-title em{color:var(--o);font-style:italic;}
+  .report-sub{font-size:12px;color:var(--mu);font-family:'IBM Plex Mono',monospace;margin-top:6px;}
+  .ai-headline{background:linear-gradient(135deg,#0a1a0a,#0f1520);border:1px solid rgba(34,197,94,.2);border-left:4px solid var(--g);border-radius:10px;padding:20px 24px;margin:24px 0 0;}
+  .ai-hl-tag{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.16em;color:var(--g);text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+  .ai-hl-tag::before{content:'◆';font-size:8px;}
+  .ai-headline-text{font-family:'Playfair Display',serif;font-size:clamp(18px,3vw,24px);font-style:italic;color:#ccd4e8;line-height:1.4;}
+  .hero{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:10px;margin:24px 0;}
+  .hs{background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:14px 16px;}
+  .hs-l{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.12em;color:var(--mu);text-transform:uppercase;display:block;margin-bottom:4px;}
+  .hs-v{font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:500;color:var(--o);display:block;line-height:1;}
+  .hs-v.g{color:var(--g);}.hs-v.t{color:var(--t);}.hs-v.a{color:var(--a);}.hs-v.r{color:var(--r);}.hs-v.m{color:var(--mu);}
+  .hs-delta{font-family:'IBM Plex Mono',monospace;font-size:11px;margin-top:3px;display:block;}
+  .section{padding:40px 0 28px;border-top:1px solid var(--bdr);}
+  .sh{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;color:var(--o);text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+  .sh::after{content:'';flex:1;height:1px;background:var(--bdr);}
+  .ai-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:4px;padding:2px 7px;font-size:9px;color:var(--g);letter-spacing:.06em;}
+  .narrative{max-width:720px;}
+  .narrative p{color:#8090b0;font-size:15px;line-height:1.9;margin-bottom:1.3em;}
+  .narrative p strong{color:var(--tx);font-weight:600;}
+  .signals{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin:20px 0;}
+  .signal{background:var(--card);border:1px solid var(--bdr);border-radius:9px;padding:15px 17px;}
+  .signal-positive{border-left:3px solid var(--g);}.signal-warning{border-left:3px solid var(--r);}.signal-neutral{border-left:3px solid var(--t);}
+  .signal-header{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+  .signal-icon{font-size:14px;font-weight:700;}.signal-label{font-size:13px;font-weight:600;color:var(--tx);}
+  .signal-detail{font-size:13px;color:var(--mu);line-height:1.65;}
+  .next-focus{background:linear-gradient(135deg,#0f0f1a,#0f1520);border:1px solid rgba(139,92,246,.25);border-left:4px solid var(--p);border-radius:10px;padding:18px 22px;margin-top:20px;}
+  .nf-tag{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.14em;color:var(--p);text-transform:uppercase;margin-bottom:8px;}
+  .nf-body{font-size:14px;color:#8090b0;line-height:1.75;}
+  .fig{background:var(--card);border:1px solid var(--bdr);border-radius:12px;overflow:hidden;margin:18px 0;}
+  .fig-h{padding:16px 20px 0;display:flex;justify-content:space-between;}
+  .fig-title{font-size:14px;font-weight:600;color:var(--tx);}.fig-n{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--o);letter-spacing:.1em;text-transform:uppercase;}
+  .fig-body{padding:14px 20px;}.fig-cap{padding:10px 20px 14px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--mu);border-top:1px solid var(--bdr);line-height:1.6;}
+  canvas{display:block;width:100%!important;}
+  .act-grid{display:flex;flex-direction:column;gap:8px;}
+  .act-card{background:var(--bg);border:1px solid var(--bdr);border-radius:8px;padding:12px 16px;}
+  .act-meta{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--mu);}
+  .act-name{font-size:14px;font-weight:600;color:var(--tx);margin:3px 0 6px;}
+  .act-stats{display:flex;gap:14px;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--t);}
+  .act-desc{font-size:12px;color:var(--mu);font-style:italic;margin-top:8px;border-left:2px solid var(--dim);padding-left:10px;line-height:1.6;}
+  .empty{color:var(--mu);font-size:14px;padding:8px 0;}
+  .zones{display:flex;flex-direction:column;gap:9px;}
+  .zr{display:flex;align-items:center;gap:10px;}
+  .zl{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mu);width:90px;flex-shrink:0;}
+  .zb{flex:1;height:6px;background:var(--dim);border-radius:3px;overflow:hidden;}
+  .zbi{height:100%;border-radius:3px;opacity:.85;}
+  .zp{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mu);width:30px;text-align:right;}
+  /* ANALYTICS */
+  .analytics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;}
+  .analytics-card{background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:16px;}
+  .ac-wide{grid-column:1/-1;}
+  .ac-header{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+  .ac-icon{font-size:16px;}.ac-title{font-size:13px;font-weight:600;color:var(--tx);flex:1;}
+  .ac-badge{font-family:'IBM Plex Mono',monospace;font-size:10px;}
+  .ac-metrics{display:flex;flex-wrap:wrap;gap:12px;}
+  .ac-metric{display:flex;flex-direction:column;gap:2px;min-width:70px;}
+  .ac-mk{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:.08em;}
+  .ac-mv{font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:500;color:var(--tx);}
+  .pred-table{width:100%;border-collapse:collapse;font-size:12px;}
+  .pred-table th{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;color:var(--mu);text-transform:uppercase;padding:5px 8px;border-bottom:1px solid var(--bdr);text-align:left;}
+  .pred-table td{padding:7px 8px;border-bottom:1px solid var(--dim);}
+  .pred-dist{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mu);}
+  .pred-time{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;color:var(--tx);}
+  /* SPEED */
+  .speed-grid{display:flex;flex-direction:column;gap:20px;}
+  .speed-card{background:var(--card);border:1px solid var(--bdr);border-radius:12px;overflow:hidden;border-top:3px solid var(--o);}
+  .speed-card-header{padding:16px 20px;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;border-bottom:1px solid var(--bdr);}
+  .speed-date{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--mu);}
+  .speed-name{font-size:15px;font-weight:600;color:var(--tx);margin-top:3px;}
+  .speed-meta{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+  .speed-badge{font-family:'IBM Plex Mono',monospace;font-size:10px;background:rgba(249,115,22,.12);border:1px solid rgba(249,115,22,.3);color:var(--o);padding:3px 8px;border-radius:4px;}
+  .speed-best{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mu);}.speed-best strong{color:var(--g);}
+  .speed-hr{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--r);}
+  .speed-chart-wrap{padding:14px 20px 0;}
+  .speed-table-wrap{padding:14px 20px 20px;overflow-x:auto;}
+  .speed-table{width:100%;border-collapse:collapse;font-family:'IBM Plex Mono',monospace;font-size:12px;}
+  .speed-table th{color:var(--mu);text-transform:uppercase;font-size:9px;letter-spacing:.1em;padding:5px 8px;border-bottom:1px solid var(--bdr);text-align:left;}
+  .speed-table td{padding:7px 8px;border-bottom:1px solid var(--dim);}
+  .effort-row td{color:var(--tx);}.iv-label,.iv-pace{color:var(--o);font-weight:500;}.iv-peak{color:var(--g);}
+  .rec-row td{color:var(--mu);font-size:11px;}.rec-label,.rec-pace{color:var(--t);}
+  /* PLAN */
+  .plan-grid{display:flex;flex-direction:column;gap:10px;}
+  .plan-row{background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:14px 18px;}
+  .plan-completed{border-left:3px solid var(--g);}.plan-skipped{border-left:3px solid var(--r);}
+  .plan-row-header{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px;}
+  .plan-icon{font-size:14px;font-weight:700;}.plan-date{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mu);}
+  .plan-name{font-size:14px;font-weight:600;color:var(--tx);flex:1;}
+  .plan-steps{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mu);background:var(--bg);border-radius:6px;padding:10px 12px;margin:8px 0;line-height:1.7;}
+  .plan-actual{display:flex;gap:12px;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--t);margin-top:8px;}
+  .plan-note{font-size:12px;color:var(--mu);font-style:italic;margin-top:6px;border-left:2px solid var(--dim);padding-left:10px;}
+  /* UPCOMING */
+  .upcoming-grid{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+  .upcoming-card{background:var(--card);border:1px solid var(--bdr);border-left:3px solid var(--p);border-radius:8px;padding:12px 16px;}
+  .upcoming-date{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--mu);}
+  .upcoming-name{font-size:14px;font-weight:600;color:var(--tx);margin:3px 0 6px;}
+  .upcoming-steps{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mu);line-height:1.7;}
+  /* FOOTER */
+  .footer{border-top:1px solid var(--bdr);padding:32px 0 48px;margin-top:48px;}
+  .footer p{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--mu);line-height:1.9;}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="wrap header-inner">
+    <div class="tag">ResearchAssistants_SBW · Running Bot · Strava + Garmin + Claude</div>
+    <div class="report-title">Week of <em>19 Apr – 26 Apr 2026</em></div>
+    <div class="report-sub">Generated Sunday 26 April 2026, 22:12 UTC</div>
+    <div class="ai-headline">
+      <div class="ai-hl-tag">Claude · Weekly Read</div>
+      <div class="ai-headline-text">19 Apr – 26 Apr 2026 — 30.7 km</div>
+    </div>
+  </div>
+</div>
+<div class="wrap">
+  <div class="hero" style="margin-top:24px;">
+    <div class="hs"><span class="hs-l">This Week</span><span class="hs-v ">30.7 km</span><span class="hs-delta" style="color:#ef4444">-12.2 km</span></div>
+    <div class="hs"><span class="hs-l">Runs</span><span class="hs-v">3</span></div>
+    <div class="hs"><span class="hs-l">Avg Pace</span><span class="hs-v t">5:13/km</span></div>
+    <div class="hs"><span class="hs-l">Avg HR</span><span class="hs-v r">140 bpm</span></div>
+    <div class="hs"><span class="hs-l">Elevation</span><span class="hs-v a">133 m</span></div>
+    <div class="hs"><span class="hs-l">8-wk Avg</span><span class="hs-v m">42.9 km</span></div>
+    <div class="hs"><span class="hs-l">Streak</span><span class="hs-v" style="color:#f97316">1d</span></div>
+    <div class="hs"><span class="hs-l">Aero Eff.</span><span class="hs-v t">5:22/km</span><span class="hs-delta" style="color:#ef4444">↓ 0s/km vs prior 8 wks</span></div>
+  </div>
+  <div class="section">
+    <div class="sh">Weekly Analysis <span class="ai-badge">◆ Claude</span></div>
+    <div class="narrative"><p>AI insights unavailable.</p></div>
+    <div class="signals"></div>
+    <div class="next-focus"><div class="nf-tag">Focus for next week</div><div class="nf-body">Review charts manually.</div></div>
+  </div>
+  
+  <div class="section">
+    <div class="sh">Garmin Analytics <span class="ai-badge">◆ Claude</span></div>
+    <div class="analytics-grid">
+      <div class="analytics-card">
+        <div class="ac-header">
+          <span class="ac-icon">⚡</span>
+          <span class="ac-title">Training Load</span>
+          <span class="ac-badge" style="color:#4a5270">Unknown</span>
+        </div>
+        <div class="ac-metrics">
+          <div class="ac-metric">
+            <span class="ac-mk">Acute (7d)</span>
+            <span class="ac-mv">–</span>
+          </div>
+          <div class="ac-metric">
+            <span class="ac-mk">Chronic (28d)</span>
+            <span class="ac-mv">–</span>
+          </div>
+          <div class="ac-metric">
+            <span class="ac-mk">Ratio</span>
+            <span class="ac-mv" style="color:#4a5270">–</span>
+          </div>
+          <div class="ac-metric">
+            <span class="ac-mk">Zone</span>
+            <span class="ac-mv" style="color:#4a5270;font-size:11px;">–</span>
+          </div>
+        </div>
+      </div>
+      <div class="analytics-card">
+        <div class="ac-header">
+          <span class="ac-icon">❤️</span>
+          <span class="ac-title">VO₂ Max</span>
+          <span class="ac-badge" style="color:#ef4444">-0.5 (4wk)</span>
+        </div>
+        <div class="ac-metrics">
+          <div class="ac-metric">
+            <span class="ac-mk">Current</span>
+            <span class="ac-mv">55.7</span>
+          </div>
+          <div class="ac-metric">
+            <span class="ac-mk">5wk ago</span>
+            <span class="ac-mv">56.2</span>
+          </div>
+          <div class="ac-metric">
+            <span class="ac-mk">Trend</span>
+            <span class="ac-mv" style="color:#ef4444">-0.5</span>
+          </div>
+        </div>
+        <canvas id="chart-vo2" height="50" style="margin-top:10px;"></canvas>
+        <script>
+        new Chart(document.getElementById('chart-vo2'),{
+          type:'line',
+          data:{labels:["03-29", "04-12", "04-19", "04-26"],datasets:[{
+            data:[56.2, 56.0, 55.8, 55.7],borderColor:'#ef4444',
+            backgroundColor:'#ef444422',borderWidth:2,
+            pointRadius:3,tension:0.3,fill:true
+          }]},
+          options:{responsive:true,maintainAspectRatio:true,animation:false,
+            plugins:{legend:{display:false},tooltip:{enabled:false}},
+            scales:{x:{display:false},y:{display:false}}
+          }
+        });
+        </script>
+      </div>
+      <div class="analytics-card ac-wide">
+        <div class="ac-header">
+          <span class="ac-icon">🏁</span>
+          <span class="ac-title">Race Predictions</span>
+        </div>
+        <table class="pred-table">
+          <thead><tr>
+            <th>Distance</th><th>Predicted</th>
+            <th>vs PB</th><th>vs Target</th>
+          </tr></thead>
+          <tbody>
+          <tr>
+            <td class="pred-dist">5k</td>
+            <td class="pred-time">19:50</td>
+            <td style="color:#22c55e;font-family:'IBM Plex Mono',monospace;font-size:11px;">0:02</td>
+            <td style="color:#4a5270;font-family:'IBM Plex Mono',monospace;font-size:11px;">–</td>
+          </tr>
+          <tr>
+            <td class="pred-dist">10k</td>
+            <td class="pred-time">41:26</td>
+            <td style="color:#22c55e;font-family:'IBM Plex Mono',monospace;font-size:11px;">2:08</td>
+            <td style="color:#4a5270;font-family:'IBM Plex Mono',monospace;font-size:11px;">–</td>
+          </tr>
+          <tr>
+            <td class="pred-dist">Half</td>
+            <td class="pred-time">1:32:13</td>
+            <td style="color:#22c55e;font-family:'IBM Plex Mono',monospace;font-size:11px;">0:42</td>
+            <td style="color:#f97316;font-family:'IBM Plex Mono',monospace;font-size:11px;">+2:13</td>
+          </tr>
+          <tr>
+            <td class="pred-dist">Marathon</td>
+            <td class="pred-time">3:20:34</td>
+            <td style="color:#22c55e;font-family:'IBM Plex Mono',monospace;font-size:11px;">10:11</td>
+            <td style="color:#f97316;font-family:'IBM Plex Mono',monospace;font-size:11px;">+0:34</td>
+          </tr></tbody>
+        </table>
+      </div>
+      <div class="analytics-card">
+        <div class="ac-header">
+          <span class="ac-icon">🫀</span>
+          <span class="ac-title">Recovery</span>
+        </div>
+        <div class="ac-metrics">
+          <div class="ac-metric">
+            <span class="ac-mk">HRV status</span>
+            <span class="ac-mv" style="color:#22c55e;font-size:11px;">Balanced</span>
+          </div>
+          <div class="ac-metric">
+            <span class="ac-mk">7d avg HRV</span>
+            <span class="ac-mv">97 ms</span>
+          </div>
+          <div class="ac-metric">
+            <span class="ac-mk">vs baseline</span>
+            <span class="ac-mv" style="font-size:11px;color:#ef4444">–</span>
+          </div>
+          <div class="ac-metric">
+            <span class="ac-mk">Readiness</span>
+            <span class="ac-mv" style="color:#f97316">59/100</span>
+          </div>
+        </div>
+      </div>
+      <div class="analytics-card">
+        <div class="ac-header">
+          <span class="ac-icon">🦾</span>
+          <span class="ac-title">Running Form</span>
+          <span class="ac-badge" style="color:#4a5270;font-size:9px;">weekly avg</span>
+        </div>
+        <div class="ac-metrics">
+          <div class="ac-metric">
+            <span class="ac-mk">Cadence</span>
+            <span class="ac-mv" style="color:#f97316">150.1 spm</span>
+            <span class="ac-mk" style="font-size:9px;">target 170–180</span>
+          </div>
+          <div class="ac-metric">
+            <span class="ac-mk">Vert. oscillation</span>
+            <span class="ac-mv" style="color:#f97316">9.4 cm</span>
+            <span class="ac-mk" style="font-size:9px;">target &lt;8.0cm</span>
+          </div>
+          <div class="ac-metric">
+            <span class="ac-mk">Ground contact</span>
+            <span class="ac-mv">264.5 ms</span>
+          </div>
+        </div>
+      </div>
+      <div class="analytics-card">
+        <div class="ac-header">
+          <span class="ac-icon">😴</span>
+          <span class="ac-title">Sleep (7-day)</span>
+        </div>
+        <div class="ac-metrics">
+          <div class="ac-metric">
+            <span class="ac-mk">Avg duration</span>
+            <span class="ac-mv" style="color:#ef4444">4.8h</span>
+          </div>
+          <div class="ac-metric">
+            <span class="ac-mk">Worst night</span>
+            <span class="ac-mv">0.5h</span>
+          </div>
+          <div class="ac-metric">
+            <span class="ac-mk">Avg score</span>
+            <span class="ac-mv">60.4/100</span>
+          </div>
+        </div>
+      </div></div>
+    
+    
+  </div>
+  
+  <div class="section">
+    <div class="sh">Speed Sessions <span class="ai-badge">◆ Strava streams</span></div>
+    <div class="speed-grid">
+      <div class="speed-card">
+        <div class="speed-card-header">
+          <div><div class="speed-date">2026-04-21</div><div class="speed-name">MRC Tuesday</div></div>
+          <div class="speed-meta">
+            <span class="speed-badge">7 intervals</span>
+            <span class="speed-best">Best <strong>3:18/km</strong></span>
+            <span class='speed-hr'>Peak HR 179 bpm</span>
+          </div>
+        </div>
+        <div class="speed-chart-wrap"><canvas id="chart-speed-18201366876" height="160"></canvas></div>
+        <div class="speed-table-wrap">
+          <table class="speed-table"><thead><tr><th>Segment</th><th>Avg pace</th><th>Peak</th><th>Duration</th><th>HR</th><th>Cadence</th></tr></thead>
+          <tbody><tr class="effort-row"><td class="iv-label">Effort 1</td><td class="iv-pace">4:13/km</td><td class="iv-peak">3:30/km</td><td>1:44</td><td>135 bpm</td><td>178 spm</td></tr><tr class="rec-row"><td class="rec-label">Recovery</td><td class="rec-pace">4:43/km</td><td>–</td><td>0:21</td><td>152 bpm</td><td>–</td></tr><tr class="effort-row"><td class="iv-label">Effort 2</td><td class="iv-pace">4:09/km</td><td class="iv-peak">3:30/km</td><td>3:57</td><td>158 bpm</td><td>178 spm</td></tr><tr class="rec-row"><td class="rec-label">Recovery</td><td class="rec-pace">4:57/km</td><td>–</td><td>5:55</td><td>150 bpm</td><td>–</td></tr><tr class="effort-row"><td class="iv-label">Effort 3</td><td class="iv-pace">4:13/km</td><td class="iv-peak">3:18/km</td><td>5:42</td><td>161 bpm</td><td>177 spm</td></tr><tr class="rec-row"><td class="rec-label">Recovery</td><td class="rec-pace">6:04/km</td><td>–</td><td>1:43</td><td>157 bpm</td><td>–</td></tr><tr class="effort-row"><td class="iv-label">Effort 4</td><td class="iv-pace">4:19/km</td><td class="iv-peak">3:56/km</td><td>0:21</td><td>141 bpm</td><td>169 spm</td></tr><tr class="rec-row"><td class="rec-label">Recovery</td><td class="rec-pace">4:44/km</td><td>–</td><td>2:46</td><td>148 bpm</td><td>–</td></tr><tr class="effort-row"><td class="iv-label">Effort 5</td><td class="iv-pace">4:14/km</td><td class="iv-peak">3:39/km</td><td>6:28</td><td>164 bpm</td><td>175 spm</td></tr><tr class="rec-row"><td class="rec-label">Recovery</td><td class="rec-pace">7:53/km</td><td>–</td><td>6:12</td><td>134 bpm</td><td>–</td></tr><tr class="effort-row"><td class="iv-label">Effort 6</td><td class="iv-pace">4:13/km</td><td class="iv-peak">3:42/km</td><td>6:02</td><td>164 bpm</td><td>179 spm</td></tr><tr class="rec-row"><td class="rec-label">Recovery</td><td class="rec-pace">5:18/km</td><td>–</td><td>5:50</td><td>150 bpm</td><td>–</td></tr><tr class="effort-row"><td class="iv-label">Effort 7</td><td class="iv-pace">4:02/km</td><td class="iv-peak">3:22/km</td><td>6:07</td><td>168 bpm</td><td>179 spm</td></tr></tbody></table>
+        </div>
+        <script>
+        (function(){
+          const ctx=document.getElementById('chart-speed-18201366876');
+          const times=[0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 180, 195, 210, 225, 240, 255, 270, 285, 300, 315, 330, 345, 360, 375, 390, 405, 420, 435, 450, 465, 480, 495, 510, 525, 540, 555, 570, 585, 600, 615, 630, 645, 660, 675, 690, 705, 720, 735, 750, 765, 780, 795, 810, 825, 840, 855, 870, 885, 900, 915, 930, 945, 960, 975, 990, 1005, 1020, 1035, 1050, 1065, 1080, 1095, 1110, 1125, 1140, 1155, 1170, 1185, 1200, 1215, 1468, 1483, 1498, 1513, 1528, 1543, 1558, 1573, 1588, 1603, 1618, 1633, 1648, 1663, 1678, 1693, 1708, 1723, 1738, 1753, 1768, 1783, 1798, 1813, 1828, 1843, 1858, 1873, 1888, 1903, 1918, 1933, 1948, 1963, 1978, 1993, 2008, 2023, 2038, 2053, 2068, 2083, 2098, 2113, 2128, 2143, 2158, 2173, 2188, 2203, 2218, 2233, 2248, 2263, 2278, 2293, 2308, 2323, 2338, 2353, 2368, 2383, 2398, 2413, 2428, 2443, 2458, 2473, 2488, 2503, 2518, 2533, 2548, 2563, 2578, 2593, 2608, 2623, 2638, 2653, 2668, 2683, 2698, 2713, 2728, 2743, 2758, 2773, 2788, 2803, 2818, 2833, 2848, 2863, 2878, 2893, 2908, 2923, 2938, 2953, 2968, 2983, 2998, 3013, 3028, 3043, 3058, 3073, 3088, 3103, 3118, 3133, 3148, 3163, 3178, 3193, 3208, 3223, 3238, 3253, 3268, 3283, 3298, 3313, 3328, 3343, 3358, 3373, 3388, 3403, 3418, 3433, 3448, 3463, 3478, 3493, 3508, 3523, 3538, 3553, 3568, 3583, 3598, 3613, 3628, 3643, 3658, 3673, 3688, 3703, 3718, 3733, 3748, 3763, 3778, 3793, 3808, 3823, 3838, 3853, 3868, 3883, 3898, 3913, 3928, 3943, 3958, 3973, 3988, 4003, 4018, 4033, 4048, 4063, 4078, 4093, 4108, 4123, 4138, 4153, 4168, 4183, 4198, 4213, 4228, 4243, 4258, 4273, 4288, 4303, 4318, 4333, 4348, 4363, 4378, 4393, 4408, 4423, 4438, 4453, 4468, 4483, 4498, 4513, 4528, 4543, 4558, 4573, 4588, 4603, 4618, 4633, 4648, 4663, 4678, 4693, 4708, 4723, 4738, 4753, 4768, 4783, 4798, 4813, 4828, 4843, 4858, 4873, 4888, 4903, 4918, 4933, 4948, 4963, 4978, 4993, 5008, 5023, 5038, 5053, 5068, 5083, 5098, 5113, 5128, 5143, 5158, 5173, 5188, 5326, 5341, 5356, 5371, 5386, 5401, 5416, 5431, 5446, 5461, 5476, 5491, 5506, 5521, 5536, 5551, 5566, 5581, 5596, 5611, 5626, 5641, 5656, 5671, 5686, 5701, 5716, 5731, 5746, 5761, 5776, 5791, 5806, 5821, 5836, 5851, 5866, 5881, 5896, 5911, 5926, 5941, 5956, 5971, 5986, 6001, 6016, 6031, 6046, 6061, 6076, 6091, 6106, 6121, 6136, 6151, 6166, 6181, 6196, 6211, 6226, 6241],paces=[null, 5.83, 7.0, 5.41, 8.01, 5.41, 5.75, 33.33, null, 92.59, 4.53, 5.05, 5.71, 6.56, 5.59, 6.0, 5.52, 5.45, 208.33, null, 7.18, 5.14, 5.34, 5.79, 5.91, 5.75, 14.62, 59.52, 55.56, 6.31, 5.52, 5.11, 5.11, 5.08, 4.99, 4.96, 5.56, 5.34, 5.27, 5.18, 6.04, 6.08, 166.67, null, 833.33, null, 5.45, 5.45, 5.31, 16.84, 70.03, 70.03, 70.03, 4.9, 5.27, 5.38, 5.05, 5.59, 5.79, 4.87, 5.75, 5.48, 5.71, 5.05, 5.59, 5.45, 6.04, 5.21, 5.79, 5.18, 5.67, 5.59, 5.56, 6.13, 5.08, 5.34, 5.79, 5.71, 5.83, 5.11, 6.13, 6.22, 3.69, 4.05, 4.01, 4.39, 4.71, 4.23, 4.41, 4.66, 4.43, 4.15, 4.3, 4.34, 4.53, 4.21, 4.3, 3.7, 4.25, 4.01, 4.6, 4.25, 4.17, 4.25, 3.88, 3.81, 5.63, 5.71, 5.24, 5.52, 4.6, 4.68, 4.93, 5.41, 4.55, 5.05, 4.99, 5.02, 4.5, 4.84, 4.66, 4.99, 4.84, 4.71, 4.79, 5.21, 5.38, 4.96, 5.02, 4.73, 3.65, 4.43, 4.76, 4.27, 4.48, 4.6, 3.88, 4.21, 4.19, 4.39, 4.39, 4.55, 4.03, 4.46, 4.3, 3.99, 4.63, 4.23, 4.34, 4.73, 4.19, 4.21, 4.3, 4.32, 6.27, 4.82, 4.96, 4.84, 4.68, null, 10.55, 4.19, 5.14, 4.48, 4.53, 4.71, 4.99, 4.66, 4.93, 5.05, 4.73, 4.48, 5.31, 4.3, 4.73, 4.79, 4.5, 4.68, 3.95, 3.99, 4.17, 4.25, 4.53, 4.36, 4.48, 4.19, 4.41, 4.53, 4.32, 4.13, 3.95, 3.77, 4.5, 4.13, 4.05, 4.79, 4.21, 4.07, 4.71, 4.21, 4.15, 4.36, 22.52, 13.66, 37.88, 64.1, 208.33, null, 52.08, null, null, null, 5.21, 5.18, 5.11, 4.66, 4.55, 5.31, 4.9, 4.73, 5.18, 5.14, 4.93, 5.14, 4.9, 4.96, 4.53, 4.36, 4.34, 4.07, 3.7, 3.84, 4.17, 4.23, 4.13, 4.46, 4.11, 4.34, 4.3, 4.13, 4.25, 4.08, 4.05, 4.41, 4.34, 4.46, 4.07, 4.25, 4.08, 4.58, 21.93, 5.67, 5.45, 5.27, 5.31, 5.08, 5.34, 5.11, 5.48, 4.76, 5.18, 5.31, 5.05, 4.68, 4.82, 4.99, 5.34, 5.21, 5.75, 5.31, 5.38, 5.48, 5.05, 4.36, 4.34, 4.05, 4.11, 4.68, 4.36, 4.34, 4.19, 4.39, 4.34, 4.5, 4.34, 4.3, 4.15, 4.17, 4.3, 4.19, 5.02, 3.88, 3.82, 3.58, 3.86, 3.67, 3.72, 3.55, null, 26.04, 12.08, 10.82, 13.89, 20.33, 9.8, 10.55, 9.69, 6.04, 5.45, 10.55, 8.77, 277.78, 20.83, 28.74, 26.04, null, null, null, null, null, null, 17.36, 13.23, 5.63, 6.46, 5.91, 5.45, 5.56, 6.89, 7.0, 43.86, 6.56, 5.48, 5.31, 6.0, 5.63, 5.67, 5.31, 5.05, 5.27, 4.99, 5.79, 5.11, 5.02, 5.31, 15.15, null, null, 5.08, 5.31, 5.56, 5.27, 5.63, 8.96, null, 92.59, 5.87, 4.99, 5.34, 5.79, 5.59, 5.71, 5.38, 5.38, 5.59, 5.34, 5.75, 6.94, 14.12, 5.24, 5.21, 5.02, 5.18, 5.34, 5.45, 19.38, null, 5.45, 5.31, 5.75, 5.45, 6.31, 5.24, 5.41, 6.56, null, null, 5.24, 5.08, 5.34, 5.45, 5.83, 5.18],hrs=[58, 70, 93, 108, 114, 117, 117, 113, 108, 101, 108, 119, 124, 126, 125, 125, 124, 124, 122, 118, 113, 120, 122, 122, 120, 122, 121, 115, 111, 112, 120, 124, 122, 124, 124, 120, 125, 124, 122, 119, 123, 120, 117, 108, 93, 84, 87, 98, 114, 117, 115, 98, 79, 82, 91, 100, 105, 118, 123, 124, 126, 125, 126, 125, 125, 125, 125, 122, 122, 123, 127, 129, 129, 129, 128, 128, 127, 134, 134, 134, 134, 134, 92, 114, 139, 152, 146, 149, 152, 153, 151, 152, 154, 158, 159, 159, 159, 159, 159, 159, 157, 158, 159, 159, 160, 162, 163, 158, 154, 148, 137, 136, 136, 147, 150, 147, 152, 151, 150, 148, 149, 154, 155, 153, 152, 148, 154, 154, 154, 151, 152, 157, 159, 156, 157, 156, 157, 160, 160, 162, 163, 160, 161, 163, 163, 163, 164, 163, 164, 165, 165, 165, 163, 166, 164, 160, 159, 158, 157, 156, 144, 140, 141, 130, 142, 143, 143, 153, 153, 155, 158, 157, 158, 161, 161, 162, 163, 163, 162, 159, 160, 162, 160, 163, 163, 164, 164, 166, 165, 167, 165, 165, 165, 165, 164, 165, 165, 165, 166, 166, 165, 165, 163, 150, 144, 128, 116, 106, 103, 106, 101, 108, 110, 123, 131, 134, 129, 149, 149, 150, 149, 148, 149, 152, 151, 153, 155, 156, 162, 161, 159, 161, 161, 163, 162, 163, 162, 164, 165, 166, 166, 167, 167, 166, 165, 167, 166, 166, 168, 170, 167, 159, 154, 152, 139, 137, 147, 148, 148, 151, 151, 151, 152, 151, 151, 148, 147, 144, 139, 152, 155, 154, 149, 147, 158, 163, 163, 166, 167, 167, 165, 166, 166, 166, 167, 167, 168, 170, 171, 170, 170, 171, 171, 174, 176, 177, 177, 178, 176, 165, 144, 138, 127, 118, 114, 104, 116, 119, 126, 136, 133, 123, 120, 113, 109, 107, 99, 102, 102, 98, 93, 104, 104, 112, 117, 120, 127, 135, 139, 140, 137, 108, 116, 122, 130, 134, 138, 140, 140, 140, 139, 143, 144, 144, 146, 145, 139, 133, 132, 116, 122, 121, 126, 130, 138, 125, 120, 121, 127, 132, 136, 141, 142, 142, 140, 139, 139, 140, 136, 130, 131, 133, 131, 134, 141, 131, 124, 133, 135, 137, 129, 133, 132, 135, 135, 131, 129, 126, 131, 127, 126, 130, 135],bands=[{"start": 1461, "end": 1567}, {"start": 1588, "end": 1825}, {"start": 2180, "end": 2540}, {"start": 2643, "end": 2664}, {"start": 2830, "end": 3246}, {"start": 3618, "end": 3980}, {"start": 4330, "end": 4700}];
+          const ep={id:'eb',beforeDraw(chart){const{ctx:c,chartArea,scales}=chart;if(!chartArea)return;c.save();bands.forEach(b=>{const x1=scales.x.getPixelForValue(b.start),x2=scales.x.getPixelForValue(b.end);c.fillStyle='rgba(249,115,22,0.10)';c.fillRect(x1,chartArea.top,x2-x1,chartArea.height);});c.restore();}};
+          new Chart(ctx,{type:'line',plugins:[ep],data:{labels:times,datasets:[
+            {label:'Pace',data:paces,borderColor:'#f97316',backgroundColor:'rgba(249,115,22,0.06)',borderWidth:1.5,pointRadius:0,tension:0.3,fill:true,yAxisID:'y'},
+            {label:'HR',data:hrs,borderColor:'rgba(239,68,68,0.6)',borderWidth:1.2,pointRadius:0,tension:0.3,yAxisID:'y2'}
+          ]},options:{responsive:true,maintainAspectRatio:true,animation:false,
+            plugins:{legend:{labels:{color:'#4a5270',boxWidth:10,font:{size:10}}}},
+            scales:{x:{grid:{display:false},ticks:{display:false}},
+              y:{reverse:true,min:3.0,max:8.0,grid:{color:'rgba(26,32,53,.9)'},ticks:{color:'#4a5270',font:{size:10},callback:v=>Math.floor(v)+':'+(Math.round((v-Math.floor(v))*60)+'').padStart(2,'0')}},
+              y2:{position:'right',min:100,max:200,grid:{display:false},ticks:{color:'rgba(239,68,68,0.5)',font:{size:10}}}
+            }
+          }});
+        })();
+        </script>
+      </div></div>
+    
+  </div>
+  
+  
+  <div class="section">
+    <div class="sh">Volume — Last 16 Weeks</div>
+    <div class="fig">
+      <div class="fig-h"><span class="fig-title">Weekly Distance & Rolling Average</span><span class="fig-n">Fig. 1</span></div>
+      <div class="fig-body"><canvas id="chart-weekly" height="220"></canvas></div>
+      <div class="fig-cap">Weekly distance (bars). Orange = this week. Teal dashed = 8-week rolling average.</div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="sh">Notable Activities</div>
+    <div class="act-grid"><div class="act-card"><div class="act-meta">2026-04-21</div><div class="act-name">MRC Tuesday</div><div class="act-stats"><span>17.5 km</span><span>1:38:01</span><span>5:36/km</span><span>♥ 143.5 bpm</span></div></div></div>
+  </div>
+  <div class="section">
+    <div class="sh">Heart Rate</div>
+    <div class="fig">
+      <div class="fig-h"><span class="fig-title">Average HR per Week</span><span class="fig-n">Fig. 2</span></div>
+      <div class="fig-body"><canvas id="chart-hr" height="200"></canvas></div>
+      <div class="fig-cap">Sustained downward trend at maintained volume = improving aerobic fitness.</div>
+    </div>
+    <div class="fig">
+      <div class="fig-h"><span class="fig-title">HR Zone Distribution — This Week</span><span class="fig-n">Fig. 3</span></div>
+      <div class="fig-body"><div class="zones"><div class="zr"><div class="zl">Z1 Recovery</div><div class="zb"><div class="zbi" style="width:10%;background:#60a5fa;"></div></div><div class="zp">10%</div></div><div class="zr"><div class="zl">Z2 Easy</div><div class="zb"><div class="zbi" style="width:51%;background:#14b8a6;"></div></div><div class="zp">51%</div></div><div class="zr"><div class="zl">Z3 Aerobic</div><div class="zb"><div class="zbi" style="width:30%;background:#f59e0b;"></div></div><div class="zp">30%</div></div><div class="zr"><div class="zl">Z4 Threshold</div><div class="zb"><div class="zbi" style="width:9%;background:#f97316;"></div></div><div class="zp">9%</div></div><div class="zr"><div class="zl">Z5 Max</div><div class="zb"><div class="zbi" style="width:0%;background:#ef4444;"></div></div><div class="zp">0%</div></div></div></div>
+      <div class="fig-cap">Seconds per zone from Strava activity data.</div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="sh">Aerobic Efficiency</div>
+    <div class="fig">
+      <div class="fig-h"><span class="fig-title">Pace at 130–145 bpm — 8-Week Rolling</span><span class="fig-n">Fig. 4</span></div>
+      <div class="fig-body" style="padding:20px 24px;">
+        <div style="display:flex;align-items:flex-end;gap:32px;flex-wrap:wrap;">
+          <div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;">Current 8-week avg</div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:36px;font-weight:500;color:var(--t);">5:22/km</div>
+          </div>
+          <div><div style="font-family:IBM Plex Mono,monospace;font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;">vs prior 8 weeks</div><div style="font-family:IBM Plex Mono,monospace;font-size:22px;font-weight:500;color:#ef4444;">↓ 0s/km vs prior 8 wks</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="sh">Parkrun</div>
+    <div style="background:var(--card);border:1px solid rgba(245,158,11,.3);border-left:3px solid var(--a);border-radius:8px;padding:13px 16px;margin-bottom:14px;"><div style="font-family:IBM Plex Mono,monospace;font-size:9px;color:var(--a);text-transform:uppercase;letter-spacing:.12em;">All-Time PB</div><div style="font-family:IBM Plex Mono,monospace;font-size:22px;color:var(--a);margin-top:4px;">21:53 (2026-01-17)</div></div>
+    <div class="fig">
+      <div class="fig-h"><span class="fig-title">Parkrun Times & HR</span><span class="fig-n">Fig. 5</span></div>
+      <div class="fig-body"><canvas id="chart-parkrun" height="230"></canvas></div>
+      <div class="fig-cap">Finish time (bars, left). HR (line, right). Green = sub-20.</div>
+    </div>
+  </div>
+  <div class="footer">
+    <p>ResearchAssistants_SBW · running_bot · Sunday 26 April 2026, 22:12 UTC<br>
+    Strava API (streams) · Garmin Connect (analytics + calendar) · Claude (claude-sonnet-4-20250514)</p>
+  </div>
+</div>
+<script>
+const GC='rgba(26,32,53,.9)',TC='#2a3050';
+Chart.defaults.color='#4a5270';Chart.defaults.font.family="'IBM Plex Mono',monospace";Chart.defaults.font.size=11;
+const wd=[52.9, 45.0, 57.8, 49.8, 38.0, 73.0, 59.2, 29.2, 28.0, 67.4, 24.4, 60.1, 36.6, 46.4, 51.4, 30.7];
+new Chart(document.getElementById('chart-weekly'),{type:'bar',
+  data:{labels:["01-05", "01-12", "01-19", "01-26", "02-02", "02-09", "02-16", "02-23", "03-02", "03-09", "03-16", "03-23", "03-30", "04-06", "04-13", "04-20"],datasets:[
+    {label:'Weekly km',data:wd,backgroundColor:wd.map((_,i)=>i===15?'#f97316':'rgba(249,115,22,.48)'),borderRadius:4,order:2},
+    {type:'line',label:'8-wk avg',data:[42.9, 42.9, 42.9, 42.9, 42.9, 42.9, 42.9, 42.9, 42.9, 42.9, 42.9, 42.9, 42.9, 42.9, 42.9, 42.9],borderColor:'rgba(20,184,166,.65)',borderWidth:1.5,borderDash:[6,4],pointRadius:0,tension:0,order:1}
+  ]},
+  options:{responsive:true,maintainAspectRatio:true,
+    plugins:{legend:{labels:{color:'#5a6280',boxWidth:12}},tooltip:{callbacks:{label:c=>` ${c.parsed.y} km`}}},
+    scales:{x:{grid:{display:false},ticks:{color:TC,maxRotation:45,font:{size:9}}},y:{grid:{color:GC},ticks:{color:TC,callback:v=>v+'km'}}}}
+});
+const hd=[134, 135, 131, 128, 125, 134, 130, 124, 123, 131, 133, 134, 139, 133, 134, 140];
+new Chart(document.getElementById('chart-hr'),{type:'line',
+  data:{labels:["01-05", "01-12", "01-19", "01-26", "02-02", "02-09", "02-16", "02-23", "03-02", "03-09", "03-16", "03-23", "03-30", "04-06", "04-13", "04-20"],datasets:[{label:'Avg HR',data:hd,borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,.08)',borderWidth:2.5,pointRadius:4,pointBackgroundColor:hd.map(h=>h&&h<=126?'#22c55e':'#ef4444'),tension:.3,fill:true}]},
+  options:{responsive:true,maintainAspectRatio:true,
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.parsed.y} bpm`}}},
+    scales:{x:{grid:{color:GC},ticks:{color:TC,maxRotation:45,font:{size:9}}},y:{grid:{color:GC},ticks:{color:TC,callback:v=>v+' bpm'}}}}
+});
+const prt=[21.9, 22.7],prh=[171.0, 165.1];
+new Chart(document.getElementById('chart-parkrun'),{type:'bar',
+  data:{labels:["01-17", "02-21"],datasets:[
+    {type:'bar',label:'Time',data:prt,backgroundColor:prt.map(t=>t<20?'#22c55e':t<22?'#f97316':t>27?'#1e2540':'#3b82f6'),borderRadius:3,yAxisID:'y',order:2},
+    {type:'line',label:'HR',data:prh,borderColor:'rgba(239,68,68,.6)',borderWidth:1.5,pointRadius:3,tension:.3,yAxisID:'y2',order:1}
+  ]},
+  options:{responsive:true,maintainAspectRatio:true,
+    plugins:{legend:{labels:{color:'#5a6280',boxWidth:12}}},
+    scales:{x:{grid:{display:false},ticks:{color:TC,font:{size:9}}},
+      y:{grid:{color:GC},reverse:true,min:18,max:32,ticks:{color:TC,callback:v=>`${Math.floor(v)}:${String(Math.round((v-Math.floor(v))*60)).padStart(2,'0')}`}},
+      y2:{grid:{display:false},min:110,max:190,position:'right',ticks:{color:'#ef4444'}}}}
+});
+</script>
+</body>
+</html>

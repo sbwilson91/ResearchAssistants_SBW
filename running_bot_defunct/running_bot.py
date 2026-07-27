@@ -6,7 +6,7 @@ import datetime
 from pathlib import Path
 import yaml
 
-from garmin_activities import build_report_data
+from strava import refresh_access_token, build_report_data
 from speed_sessions import get_speed_sessions, threshold_cadence
 from insights import get_claude_insights
 from races import get_race_data
@@ -33,14 +33,19 @@ def run():
 
     athlete_context = load_athlete_context()
 
-    # 1. Weekly metrics (activities + parkrun/notable detection + HR zones)
-    data = build_report_data(history_weeks=history_wks)
+    # 1. Strava
+    access_token, new_refresh = refresh_access_token()
+    if new_refresh:
+        Path("new_refresh_token.txt").write_text(new_refresh)
 
-    # 2. Speed sessions (Garmin activity-detail streams)
+    # 2. Weekly metrics
+    data = build_report_data(access_token, history_weeks=history_wks)
+
+    # 3. Speed sessions (Strava stream data)
     print("\nAnalysing speed sessions…")
-    data["speed_sessions"] = get_speed_sessions(data.get("this_week_all", []))
+    data["speed_sessions"] = get_speed_sessions(access_token, data.get("this_week_all", []))
 
-    # 3. Garmin (analytics + calendar)
+    # 4. Garmin (analytics + calendar)
     garmin_data = {"available": False, "analytics": {}, "last_week": [], "next_week": []}
     if cfg.get("garmin_enabled", True) and os.environ.get("GARMIN_EMAIL"):
         try:

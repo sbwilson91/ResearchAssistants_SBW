@@ -389,7 +389,7 @@ def _speed_sessions_html(sessions: list[dict]) -> str:
 
     return f"""
   <div class="section">
-    <div class="sh">Speed Sessions <span class="ai-badge">◆ Garmin streams</span></div>
+    <div class="sh">Speed Sessions <span class="ai-badge">◆ Strava streams</span></div>
     <div class="speed-grid">{"".join(cards)}</div>
     {speed_analysis_html}
   </div>"""
@@ -418,7 +418,7 @@ def _plan_actual_html(garmin: dict, insights: dict) -> str:
             if act.get("description"):
                 actual_html += f'<div class="plan-note">&ldquo;{act["description"][:200]}&rdquo;</div>'
         elif status == "skipped":
-            actual_html = '<div style="font-family:IBM Plex Mono,monospace;font-size:11px;color:#ef4444;margin-top:6px;">No matching run found</div>'
+            actual_html = '<div style="font-family:IBM Plex Mono,monospace;font-size:11px;color:#ef4444;margin-top:6px;">No run found on Strava</div>'
 
         rows += f"""
       <div class="plan-row plan-{status}">
@@ -967,7 +967,7 @@ def generate_html(data: dict, insights: dict, history_weeks: int = 16, race_data
 <body>
 <div class="header">
   <div class="wrap header-inner">
-    <div class="tag">ResearchAssistants_SBW · Running Bot · Garmin + Claude</div>
+    <div class="tag">ResearchAssistants_SBW · Running Bot · Strava + Garmin + Claude</div>
     <div class="report-title">Week of <em>{data["week_label"].replace("w/c ","")}</em></div>
     <div class="report-sub">Generated {data["generated_at"]}</div>
     <div class="ai-headline">
@@ -1021,7 +1021,7 @@ def generate_html(data: dict, insights: dict, history_weeks: int = 16, race_data
     <div class="fig">
       <div class="fig-h"><span class="fig-title">HR Zone Distribution — This Week</span><span class="fig-n">Fig. 3</span></div>
       <div class="fig-body"><div class="zones">{zones_html}</div></div>
-      <div class="fig-cap">Seconds per zone from Garmin activity data.</div>
+      <div class="fig-cap">Seconds per zone from Strava activity data.</div>
     </div>
   </div>
   <div class="section">
@@ -1051,7 +1051,7 @@ def generate_html(data: dict, insights: dict, history_weeks: int = 16, race_data
   </div>
   <div class="footer">
     <p>ResearchAssistants_SBW · running_bot · {data["generated_at"]}<br>
-    Garmin Connect (activities + analytics + calendar) · Claude (claude-sonnet-4-6)</p>
+    Strava API (streams) · Garmin Connect (analytics + calendar) · Claude (claude-sonnet-4-6)</p>
   </div>
 </div>
 <script>
