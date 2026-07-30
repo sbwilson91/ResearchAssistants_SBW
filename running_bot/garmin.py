@@ -102,32 +102,71 @@ def _fetch_training_status(client, today: str) -> dict:
     if not raw:
         return {}
 
-    # Navigate the nested response structure
-    status_data = raw.get("trainingStatus", raw)
-    ts = {}
+    ts = {
+        "status_label": "unknown",
+        "acute_load": None,
+        "chronic_load": None,
+        "load_ratio": None,
+        "recovery_time_hours": None,
+    }
 
-    # Status label
-    ts["status_label"] = (
-        status_data.get("trainingStatusFeedback",
-        status_data.get("latestTrainingStatus",
-        status_data.get("trainingStatusPhaseType", {}))).get(
-            "trainingStatusType", "unknown")
-        if isinstance(status_data.get("trainingStatusFeedback"), dict)
-        else str(status_data.get("latestTrainingStatus", "unknown"))
-    )
+    # Garmin nests the real values per device under
+    #   mostRecentTrainingStatus.latestTrainingStatusData.{deviceId}.…
+    # so the old flat raw.get("acuteLoad") always returned None. Walk into the
+    # per-device record (pick the most recently synced one) and read the load
+    # DTO from there. Flat lookups are kept as a fallback for schema drift.
+    mrts = raw.get("mostRecentTrainingStatus", raw) or {}
+    per_device = mrts.get("latestTrainingStatusData") or {}
+    device = _latest_device_record(per_device)
 
-    # Load values
-    ts["acute_load"]   = status_data.get("acuteLoad",   status_data.get("acuteTrainingLoad"))
-    ts["chronic_load"] = status_data.get("chronicLoad",  status_data.get("chronicTrainingLoad"))
+    # Status label — prefer the descriptive feedback phrase (e.g.
+    # "PRODUCTIVE_2", "RECOVERY_1"), normalised to a lowercase word.
+    phrase = (device.get("trainingStatusFeedbackPhrase")
+              or mrts.get("trainingStatusFeedbackPhrase"))
+    if phrase:
+        ts["status_label"] = str(phrase).split("_")[0].lower()
+    elif device.get("trainingStatus") is not None:
+        ts["status_label"] = str(device.get("trainingStatus"))
 
-    if ts["acute_load"] and ts["chronic_load"] and ts["chronic_load"] > 0:
+    # Acute/chronic load + ACWR live in the acuteTrainingLoadDTO.
+    load = device.get("acuteTrainingLoadDTO") or {}
+    ts["acute_load"] = (
+        load.get("dailyTrainingLoadAcute")
+        or raw.get("acuteLoad") or raw.get("acuteTrainingLoad"))
+    ts["chronic_load"] = (
+        load.get("dailyTrainingLoadChronic")
+        or raw.get("chronicLoad") or raw.get("chronicTrainingLoad"))
+
+    # Garmin already computes the ratio; use it when present, else derive it.
+    ratio = load.get("dailyAcuteChronicWorkloadRatio")
+    if ratio:
+        ts["load_ratio"] = round(float(ratio), 2)
+    elif ts["acute_load"] and ts["chronic_load"] and ts["chronic_load"] > 0:
         ts["load_ratio"] = round(ts["acute_load"] / ts["chronic_load"], 2)
-    else:
-        ts["load_ratio"] = None
 
-    ts["recovery_time_hours"] = status_data.get("recoveryTime")
+    ts["recovery_time_hours"] = (
+        device.get("recoveryTime") or raw.get("recoveryTime"))
 
     return ts
+
+
+def _latest_device_record(per_device: dict) -> dict:
+    """Pick the most recently synced device record from a {deviceId: {...}} map.
+
+    Garmin returns one record per paired device; the freshest is the one with
+    the latest timestamp/calendar date. Falls back to any record, then {}.
+    """
+    if not isinstance(per_device, dict) or not per_device:
+        return {}
+    records = [r for r in per_device.values() if isinstance(r, dict)]
+    if not records:
+        return {}
+
+    def _recency(r: dict):
+        return (r.get("timestamp") or r.get("sinceDate")
+                or r.get("calendarDate") or "")
+
+    return max(records, key=_recency)
 
 
 def _fetch_vo2max_trend(client, today_dt: date, weeks: int = 5) -> list[dict]:
