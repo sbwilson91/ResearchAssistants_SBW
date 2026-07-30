@@ -4,7 +4,7 @@ import re
 import datetime
 from pathlib import Path
 
-import requests
+from common import http
 
 from utils.email_logic import send_email
 from utils.ai_logic import get_ai_summary
@@ -104,10 +104,9 @@ def run():
     query = f"q=single cell RNA AND publication_date:{date_range} AND type:dataset"
 
     try:
-        res = requests.get(
+        res = http.get(
             f"https://zenodo.org/api/records?{query}&sort=mostrecent&size=10", timeout=20
         )
-        res.raise_for_status()
         content_type = res.headers.get("Content-Type", "")
         if "application/json" not in content_type:
             print(f"Zenodo returned non-JSON response (Content-Type: {content_type})")

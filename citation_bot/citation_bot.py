@@ -3,7 +3,7 @@ import os
 import datetime
 from pathlib import Path
 
-import requests
+from common import http
 
 from utils.email_logic import send_email
 from utils.ai_logic import get_ai_summary
@@ -41,8 +41,7 @@ def get_author_work_ids():
         "mailto": OPENALEX_EMAIL,
     }
     try:
-        res = requests.get(f"{OPENALEX_BASE}/works", params=params, timeout=20)
-        res.raise_for_status()
+        res = http.get(f"{OPENALEX_BASE}/works", params=params, timeout=20)
         results = res.json().get("results", [])
     except Exception as e:
         print(f"OpenAlex author works query failed: {e}")
@@ -70,8 +69,7 @@ def get_recent_citations(work_ids, since_date):
         "mailto": OPENALEX_EMAIL,
     }
     try:
-        res = requests.get(f"{OPENALEX_BASE}/works", params=params, timeout=30)
-        res.raise_for_status()
+        res = http.get(f"{OPENALEX_BASE}/works", params=params, timeout=30)
         data = res.json()
         total = data.get("meta", {}).get("count", 0)
         print(f"Found {total} new citations since {since_date}")
@@ -127,8 +125,7 @@ def get_all_publications() -> list:
         "mailto": OPENALEX_EMAIL,
     }
     try:
-        res = requests.get(f"{OPENALEX_BASE}/works", params=params, timeout=20)
-        res.raise_for_status()
+        res = http.get(f"{OPENALEX_BASE}/works", params=params, timeout=20)
         return res.json().get("results", [])
     except Exception as e:
         print(f"OpenAlex publications query failed: {e}")

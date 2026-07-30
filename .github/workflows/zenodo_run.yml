@@ -19,7 +19,8 @@ jobs:
         run: pip install -r requirements.txt
       - name: Run Zenodo Bot
         env:
-          PYTHONPATH:      zenodo_bot
+          # repo root too, so `common/` resolves alongside the bot's own utils
+          PYTHONPATH:      zenodo_bot:.
           GOOGLE_API_KEY:  ${{ secrets.GOOGLE_API_KEY }}
           EMAIL_SENDER:    ${{ secrets.EMAIL_SENDER }}
           EMAIL_RECEIVER:  ${{ secrets.EMAIL_RECEIVER }}
