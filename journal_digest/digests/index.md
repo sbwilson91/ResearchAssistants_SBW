@@ -17,3 +17,4 @@
 | 2026-07-03 | 105 | [2026-07-03-weekly-digest.md](2026-07-03-weekly-digest.html) |
 | 2026-07-10 | 88 | [2026-07-10-weekly-digest.md](2026-07-10-weekly-digest.html) |
 | 2026-07-17 | 88 | [2026-07-17-weekly-digest.md](2026-07-17-weekly-digest.html) |
+| 2026-07-24 | 97 | [2026-07-24-weekly-digest.md](2026-07-24-weekly-digest.html) |

@@ -1,7 +1,7 @@
 """
 running_bot/monthly_summary.py
 
-Standalone script: fetches last month's Strava activities, computes stats,
+Standalone script: fetches last month's Garmin activities, computes stats,
 asks Claude for a narrative month-in-review, saves Markdown, emails it.
 
 Run via: python monthly_summary.py
@@ -18,6 +18,8 @@ from pathlib import Path
 
 import requests
 import yaml
+
+from garmin_activities import get_activities
 
 HERE       = Path(__file__).parent
 LOGS_DIR   = HERE / "monthly_logs"
@@ -47,40 +49,14 @@ def _pace(ms) -> str:
     return f"{int(p)}:{int((p % 1) * 60):02d}"
 
 
-# ── Strava ────────────────────────────────────────────────────────────────────
+# ── Garmin ────────────────────────────────────────────────────────────────────
 
-def _refresh_token() -> str:
-    resp = requests.post("https://www.strava.com/oauth/token", data={
-        "client_id":     os.environ["STRAVA_CLIENT_ID"],
-        "client_secret": os.environ["STRAVA_CLIENT_SECRET"],
-        "refresh_token": os.environ["STRAVA_REFRESH_TOKEN"],
-        "grant_type":    "refresh_token",
-    }, timeout=30)
-    resp.raise_for_status()
-    return resp.json()["access_token"]
-
-
-def _fetch_month(token: str, year: int, month: int) -> list:
+def _fetch_month(year: int, month: int) -> list:
     from calendar import monthrange
     _, last_day = monthrange(year, month)
-    after  = datetime(year, month, 1,  tzinfo=timezone.utc).timestamp()
-    before = datetime(year, month, last_day, 23, 59, 59, tzinfo=timezone.utc).timestamp()
-
-    acts, page = [], 1
-    while True:
-        resp = requests.get(
-            "https://www.strava.com/api/v3/athlete/activities",
-            headers={"Authorization": f"Bearer {token}"},
-            params={"after": int(after), "before": int(before), "per_page": 100, "page": page},
-            timeout=30,
-        )
-        resp.raise_for_status()
-        batch = resp.json()
-        if not batch:
-            break
-        acts.extend(batch)
-        page += 1
-    return acts
+    start = datetime(year, month, 1)
+    end   = datetime(year, month, last_day, 23, 59, 59)
+    return get_activities(start, end)
 
 
 # ── Stats ─────────────────────────────────────────────────────────────────────
@@ -305,9 +281,8 @@ def run():
 
     athlete_context = ATHLETE_MD.read_text(encoding="utf-8") if ATHLETE_MD.exists() else ""
 
-    token = _refresh_token()
     print(f"Fetching {month_label} activities…")
-    acts  = _fetch_month(token, year, month)
+    acts  = _fetch_month(year, month)
     print(f"  → {len(acts)} activities")
 
     runs = [a for a in acts if a.get("type") == "Run"]

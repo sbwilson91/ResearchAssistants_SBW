@@ -1,18 +1,18 @@
 {
   "preprint_digest": {
-    "last_run": "2026-07-19",
+    "last_run": "2026-07-29",
     "status": "success"
   },
   "running_bot": {
-    "last_run": "2026-07-19",
+    "last_run": "2026-07-27",
     "status": "success"
   },
   "zenodo_bot": {
-    "last_run": "2026-07-20",
+    "last_run": "2026-07-27",
     "status": "success"
   },
   "citation_bot": {
-    "last_run": "2026-07-15",
+    "last_run": "2026-07-29",
     "status": "success"
   }
 }
