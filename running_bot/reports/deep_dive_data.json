@@ -1589,11 +1589,11 @@
     },
     {
       "month": "2026-07",
-      "runs": 27,
-      "dist_km": 265.6,
-      "elev_m": 1195,
+      "runs": 28,
+      "dist_km": 276.9,
+      "elev_m": 1262,
       "avg_hr": 132,
-      "avg_pace": "5:56",
+      "avg_pace": "5:55",
       "longest_km": 27.3
     }
   ],
@@ -1602,14 +1602,14 @@
       "start": "2026-06-04",
       "end": "2026-07-30",
       "weeks": 8,
-      "runs": 47,
-      "total_km": 460.5,
-      "km_per_week": 57.6,
+      "runs": 48,
+      "total_km": 471.8,
+      "km_per_week": 59.0,
       "avg_hr": 135,
-      "avg_pace": "5:50",
-      "aerobic_efficiency_pace": 5.75,
+      "avg_pace": "5:49",
+      "aerobic_efficiency_pace": 5.74,
       "longest_run_km": 27.3,
-      "quality_sessions": 13,
+      "quality_sessions": 14,
       "quality_paces": [
         "4:00",
         "4:46",
@@ -1617,6 +1617,7 @@
         "5:09",
         "5:20",
         "5:26",
+        "5:29",
         "5:31",
         "5:36",
         "5:50",
@@ -1789,25 +1790,25 @@
       },
       {
         "week": "2026-07-27",
-        "dist_km": 19.3,
-        "runs": 2,
-        "avg_hr": 128,
+        "dist_km": 30.6,
+        "runs": 3,
+        "avg_hr": 131,
         "longest_km": 13.3,
-        "quality_sessions": 1
+        "quality_sessions": 2
       }
     ],
     "summary": {
       "start": "2026-04-09",
       "end": "2026-07-30",
       "weeks": 16,
-      "runs": 78,
-      "total_km": 674.0,
-      "km_per_week": 42.1,
+      "runs": 79,
+      "total_km": 685.3,
+      "km_per_week": 42.8,
       "avg_hr": 136,
       "avg_pace": "5:42",
-      "aerobic_efficiency_pace": 5.73,
+      "aerobic_efficiency_pace": 5.72,
       "longest_run_km": 27.3,
-      "quality_sessions": 19,
+      "quality_sessions": 20,
       "quality_paces": [
         "4:00",
         "4:46",
@@ -1816,6 +1817,7 @@
         "5:20",
         "5:22",
         "5:26",
+        "5:29",
         "5:31",
         "5:36",
         "5:36",
@@ -6526,14 +6528,14 @@
       "start": "2026-05-07",
       "end": "2026-07-30",
       "weeks": 12,
-      "runs": 62,
-      "total_km": 539.4,
-      "km_per_week": 45.0,
+      "runs": 63,
+      "total_km": 550.7,
+      "km_per_week": 45.9,
       "avg_hr": 137,
       "avg_pace": "5:44",
-      "aerobic_efficiency_pace": 5.81,
+      "aerobic_efficiency_pace": 5.8,
       "longest_run_km": 27.3,
-      "quality_sessions": 16,
+      "quality_sessions": 17,
       "quality_paces": [
         "4:00",
         "4:46",
@@ -6541,6 +6543,7 @@
         "5:09",
         "5:20",
         "5:26",
+        "5:29",
         "5:31",
         "5:36",
         "5:37",
@@ -6660,11 +6663,11 @@
       },
       {
         "week": "2026-07-27",
-        "dist_km": 19.3,
-        "runs": 2,
-        "avg_hr": 128,
+        "dist_km": 30.6,
+        "runs": 3,
+        "avg_hr": 131,
         "longest_km": 13.3,
-        "quality_sessions": 1
+        "quality_sessions": 2
       }
     ],
     "taper_weeks": [
@@ -6686,11 +6689,11 @@
       },
       {
         "week": "2026-07-27",
-        "dist_km": 19.3,
-        "runs": 2,
-        "avg_hr": 128,
+        "dist_km": 30.6,
+        "runs": 3,
+        "avg_hr": 131,
         "longest_km": 13.3,
-        "quality_sessions": 1
+        "quality_sessions": 2
       }
     ]
   },
@@ -6920,16 +6923,20 @@
     "error": null,
     "analytics": {
       "training_status": {
-        "status_label": "unknown",
-        "acute_load": null,
-        "chronic_load": null,
-        "load_ratio": null,
+        "status_label": "productive",
+        "acute_load": 611,
+        "chronic_load": 613,
+        "load_ratio": 0.9,
         "recovery_time_hours": null
       },
       "vo2max_trend": [
         {
           "date": "2026-07-09",
           "vo2max": 54.2
+        },
+        {
+          "date": "2026-07-30",
+          "vo2max": 55.0
         }
       ],
       "race_predictions": {
@@ -6957,8 +6964,8 @@
       },
       "running_dynamics": {
         "vert_osc_cm": 9.3,
-        "ground_contact_ms": 271.7,
-        "vert_ratio_pct": 8.09
+        "ground_contact_ms": 273.1,
+        "vert_ratio_pct": 8.12
       },
       "sleep": {
         "avg_score": 77.4,
@@ -7411,6 +7418,10 @@
       {
         "date": "2026-06-30",
         "vo2max": 54.0
+      },
+      {
+        "date": "2026-07-30",
+        "vo2max": 55.0
       }
     ]
   },
@@ -7418,7 +7429,7 @@
     "base_generated": "2026-07-20",
     "boundary": "2026-07-20",
     "garmin_fetch_start": "2026-03-12",
-    "new_garmin_activities": 8,
+    "new_garmin_activities": 9,
     "frozen_from_strava": [
       "parkruns",
       "case_studies",
