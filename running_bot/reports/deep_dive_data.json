@@ -1589,11 +1589,11 @@
     },
     {
       "month": "2026-07",
-      "runs": 28,
-      "dist_km": 276.9,
-      "elev_m": 1262,
-      "avg_hr": 132,
-      "avg_pace": "5:55",
+      "runs": 29,
+      "dist_km": 284.6,
+      "elev_m": 1280,
+      "avg_hr": 133,
+      "avg_pace": "5:52",
       "longest_km": 27.3
     }
   ],
@@ -1602,17 +1602,18 @@
       "start": "2026-06-04",
       "end": "2026-07-30",
       "weeks": 8,
-      "runs": 48,
-      "total_km": 471.8,
-      "km_per_week": 59.0,
+      "runs": 49,
+      "total_km": 479.4,
+      "km_per_week": 59.9,
       "avg_hr": 135,
-      "avg_pace": "5:49",
+      "avg_pace": "5:48",
       "aerobic_efficiency_pace": 5.74,
       "longest_run_km": 27.3,
-      "quality_sessions": 14,
+      "quality_sessions": 15,
       "quality_paces": [
         "4:00",
         "4:46",
+        "4:47",
         "5:01",
         "5:09",
         "5:20",
@@ -1790,28 +1791,29 @@
       },
       {
         "week": "2026-07-27",
-        "dist_km": 30.6,
-        "runs": 3,
-        "avg_hr": 131,
+        "dist_km": 38.2,
+        "runs": 4,
+        "avg_hr": 136,
         "longest_km": 13.3,
-        "quality_sessions": 2
+        "quality_sessions": 3
       }
     ],
     "summary": {
       "start": "2026-04-09",
       "end": "2026-07-30",
       "weeks": 16,
-      "runs": 79,
-      "total_km": 685.3,
-      "km_per_week": 42.8,
+      "runs": 80,
+      "total_km": 693.0,
+      "km_per_week": 43.3,
       "avg_hr": 136,
-      "avg_pace": "5:42",
+      "avg_pace": "5:41",
       "aerobic_efficiency_pace": 5.72,
       "longest_run_km": 27.3,
-      "quality_sessions": 20,
+      "quality_sessions": 21,
       "quality_paces": [
         "4:00",
         "4:46",
+        "4:47",
         "5:01",
         "5:09",
         "5:20",
@@ -5271,6 +5273,458 @@
         "moving_time_s": 4692
       },
       {
+        "activity_id": 23792746255,
+        "name": "Copenhagen Running",
+        "date": "2026-07-30",
+        "dist_km": 7.6,
+        "intervals": [
+          {
+            "start_s": 486,
+            "end_s": 544,
+            "duration_s": 58,
+            "mean_ms": 3.538172417673571,
+            "peak_ms": 3.555000066757202,
+            "mean_pace": "4:42",
+            "peak_pace": "4:41",
+            "mean_hr": 145,
+            "mean_cad": 168
+          },
+          {
+            "start_s": 636,
+            "end_s": 1503,
+            "duration_s": 867,
+            "mean_ms": 3.816992447231755,
+            "peak_ms": 4.375999927520752,
+            "mean_pace": "4:21",
+            "peak_pace": "3:48",
+            "mean_hr": 162,
+            "mean_cad": 174
+          },
+          {
+            "start_s": 1629,
+            "end_s": 1953,
+            "duration_s": 318,
+            "mean_ms": 3.7403769535191147,
+            "peak_ms": 3.9749999046325684,
+            "mean_pace": "4:27",
+            "peak_pace": "4:11",
+            "mean_hr": 166,
+            "mean_cad": 172
+          },
+          {
+            "start_s": 2019,
+            "end_s": 2190,
+            "duration_s": 171,
+            "mean_ms": 3.7743606762807875,
+            "peak_ms": 4.0960001945495605,
+            "mean_pace": "4:24",
+            "peak_pace": "4:04",
+            "mean_hr": 171,
+            "mean_cad": 173
+          }
+        ],
+        "recoveries": [
+          {
+            "duration_s": 92,
+            "mean_ms": 2.825102017850292,
+            "mean_hr": 144
+          },
+          {
+            "duration_s": 126,
+            "mean_ms": 3.089046159157386,
+            "mean_hr": 143
+          },
+          {
+            "duration_s": 66,
+            "mean_ms": 3.4036060535546504,
+            "mean_hr": 169
+          }
+        ],
+        "n_intervals": 4,
+        "best_pace": "3:48",
+        "avg_effort_pace": "4:28",
+        "session_avg_hr": 151,
+        "session_peak_hr": 173.0,
+        "profile": [
+          {
+            "t": 0,
+            "pace": null,
+            "hr": 91.0
+          },
+          {
+            "t": 26,
+            "pace": 5.84,
+            "hr": 103.0
+          },
+          {
+            "t": 56,
+            "pace": 5.63,
+            "hr": 109.0
+          },
+          {
+            "t": 86,
+            "pace": 5.63,
+            "hr": 123.0
+          },
+          {
+            "t": 116,
+            "pace": 5.62,
+            "hr": 128.0
+          },
+          {
+            "t": 146,
+            "pace": 5.3,
+            "hr": 120.0
+          },
+          {
+            "t": 176,
+            "pace": 5.25,
+            "hr": 117.0
+          },
+          {
+            "t": 204,
+            "pace": 5.19,
+            "hr": 122.0
+          },
+          {
+            "t": 234,
+            "pace": 5.24,
+            "hr": 123.0
+          },
+          {
+            "t": 264,
+            "pace": 5.05,
+            "hr": 129.0
+          },
+          {
+            "t": 294,
+            "pace": 4.91,
+            "hr": 133.0
+          },
+          {
+            "t": 324,
+            "pace": 4.81,
+            "hr": 135.0
+          },
+          {
+            "t": 352,
+            "pace": 4.85,
+            "hr": 140.0
+          },
+          {
+            "t": 382,
+            "pace": 4.83,
+            "hr": 139.0
+          },
+          {
+            "t": 412,
+            "pace": 4.74,
+            "hr": 135.0
+          },
+          {
+            "t": 442,
+            "pace": 5.09,
+            "hr": 129.0
+          },
+          {
+            "t": 472,
+            "pace": 4.8,
+            "hr": 134.0
+          },
+          {
+            "t": 502,
+            "pace": 4.71,
+            "hr": 144.0
+          },
+          {
+            "t": 532,
+            "pace": 4.73,
+            "hr": 146.0
+          },
+          {
+            "t": 562,
+            "pace": 4.78,
+            "hr": 146.0
+          },
+          {
+            "t": 592,
+            "pace": 4.93,
+            "hr": 148.0
+          },
+          {
+            "t": 620,
+            "pace": 11.75,
+            "hr": 139.0
+          },
+          {
+            "t": 646,
+            "pace": 4.06,
+            "hr": 143.0
+          },
+          {
+            "t": 676,
+            "pace": 4.17,
+            "hr": 147.0
+          },
+          {
+            "t": 706,
+            "pace": 4.29,
+            "hr": 150.0
+          },
+          {
+            "t": 736,
+            "pace": 4.47,
+            "hr": 152.0
+          },
+          {
+            "t": 766,
+            "pace": 4.43,
+            "hr": 152.0
+          },
+          {
+            "t": 796,
+            "pace": 4.42,
+            "hr": 157.0
+          },
+          {
+            "t": 826,
+            "pace": 4.51,
+            "hr": 157.0
+          },
+          {
+            "t": 856,
+            "pace": 4.56,
+            "hr": 159.0
+          },
+          {
+            "t": 886,
+            "pace": 4.29,
+            "hr": 163.0
+          },
+          {
+            "t": 916,
+            "pace": 4.26,
+            "hr": 162.0
+          },
+          {
+            "t": 946,
+            "pace": 4.38,
+            "hr": 161.0
+          },
+          {
+            "t": 976,
+            "pace": 4.47,
+            "hr": 162.0
+          },
+          {
+            "t": 1004,
+            "pace": 4.47,
+            "hr": 166.0
+          },
+          {
+            "t": 1034,
+            "pace": 4.48,
+            "hr": 163.0
+          },
+          {
+            "t": 1064,
+            "pace": 4.32,
+            "hr": 164.0
+          },
+          {
+            "t": 1094,
+            "pace": 4.34,
+            "hr": 162.0
+          },
+          {
+            "t": 1124,
+            "pace": 4.29,
+            "hr": 166.0
+          },
+          {
+            "t": 1154,
+            "pace": 4.32,
+            "hr": 166.0
+          },
+          {
+            "t": 1184,
+            "pace": 4.39,
+            "hr": 168.0
+          },
+          {
+            "t": 1214,
+            "pace": 4.35,
+            "hr": 168.0
+          },
+          {
+            "t": 1244,
+            "pace": 4.47,
+            "hr": 168.0
+          },
+          {
+            "t": 1274,
+            "pace": 4.44,
+            "hr": 168.0
+          },
+          {
+            "t": 1304,
+            "pace": 4.35,
+            "hr": 162.0
+          },
+          {
+            "t": 1334,
+            "pace": 4.3,
+            "hr": 169.0
+          },
+          {
+            "t": 1364,
+            "pace": 4.27,
+            "hr": 171.0
+          },
+          {
+            "t": 1394,
+            "pace": 4.44,
+            "hr": 170.0
+          },
+          {
+            "t": 1424,
+            "pace": 4.48,
+            "hr": 169.0
+          },
+          {
+            "t": 1529,
+            "pace": 5.46,
+            "hr": 134.0
+          },
+          {
+            "t": 1559,
+            "pace": 5.55,
+            "hr": 144.0
+          },
+          {
+            "t": 1587,
+            "pace": 5.51,
+            "hr": 148.0
+          },
+          {
+            "t": 1617,
+            "pace": 4.7,
+            "hr": 160.0
+          },
+          {
+            "t": 1647,
+            "pace": 4.42,
+            "hr": 162.0
+          },
+          {
+            "t": 1677,
+            "pace": 4.43,
+            "hr": 166.0
+          },
+          {
+            "t": 1709,
+            "pace": 4.25,
+            "hr": 165.0
+          },
+          {
+            "t": 1739,
+            "pace": 4.37,
+            "hr": 165.0
+          },
+          {
+            "t": 1769,
+            "pace": 4.31,
+            "hr": 168.0
+          },
+          {
+            "t": 1799,
+            "pace": 4.44,
+            "hr": 167.0
+          },
+          {
+            "t": 1829,
+            "pace": 4.47,
+            "hr": 167.0
+          },
+          {
+            "t": 1859,
+            "pace": 4.56,
+            "hr": 166.0
+          },
+          {
+            "t": 1889,
+            "pace": 4.57,
+            "hr": 167.0
+          },
+          {
+            "t": 1919,
+            "pace": 4.65,
+            "hr": 167.0
+          },
+          {
+            "t": 1949,
+            "pace": 4.7,
+            "hr": 169.0
+          },
+          {
+            "t": 1979,
+            "pace": 4.99,
+            "hr": 169.0
+          },
+          {
+            "t": 2009,
+            "pace": 4.76,
+            "hr": 170.0
+          },
+          {
+            "t": 2039,
+            "pace": 4.56,
+            "hr": 172.0
+          },
+          {
+            "t": 2069,
+            "pace": 4.42,
+            "hr": 170.0
+          },
+          {
+            "t": 2099,
+            "pace": 4.42,
+            "hr": 171.0
+          },
+          {
+            "t": 2127,
+            "pace": 4.21,
+            "hr": 171.0
+          },
+          {
+            "t": 2208,
+            "pace": 8.43,
+            "hr": 133.0
+          },
+          {
+            "t": 2238,
+            "pace": 5.86,
+            "hr": 141.0
+          },
+          {
+            "t": 2268,
+            "pace": 6.2,
+            "hr": 154.0
+          },
+          {
+            "t": 2298,
+            "pace": 5.69,
+            "hr": 154.0
+          },
+          {
+            "t": 2328,
+            "pace": 11.45,
+            "hr": 152.0
+          }
+        ],
+        "moving_time_s": 2192.5540161132812
+      },
+      {
         "activity_id": 23766135340,
         "name": "Copenhagen - ProgRun (WU to 5k)",
         "date": "2026-07-28",
@@ -6528,17 +6982,18 @@
       "start": "2026-05-07",
       "end": "2026-07-30",
       "weeks": 12,
-      "runs": 63,
-      "total_km": 550.7,
-      "km_per_week": 45.9,
+      "runs": 64,
+      "total_km": 558.3,
+      "km_per_week": 46.5,
       "avg_hr": 137,
-      "avg_pace": "5:44",
+      "avg_pace": "5:43",
       "aerobic_efficiency_pace": 5.8,
       "longest_run_km": 27.3,
-      "quality_sessions": 17,
+      "quality_sessions": 18,
       "quality_paces": [
         "4:00",
         "4:46",
+        "4:47",
         "5:01",
         "5:09",
         "5:20",
@@ -6663,11 +7118,11 @@
       },
       {
         "week": "2026-07-27",
-        "dist_km": 30.6,
-        "runs": 3,
-        "avg_hr": 131,
+        "dist_km": 38.2,
+        "runs": 4,
+        "avg_hr": 136,
         "longest_km": 13.3,
-        "quality_sessions": 2
+        "quality_sessions": 3
       }
     ],
     "taper_weeks": [
@@ -6689,11 +7144,11 @@
       },
       {
         "week": "2026-07-27",
-        "dist_km": 30.6,
-        "runs": 3,
-        "avg_hr": 131,
+        "dist_km": 38.2,
+        "runs": 4,
+        "avg_hr": 136,
         "longest_km": 13.3,
-        "quality_sessions": 2
+        "quality_sessions": 3
       }
     ]
   },
@@ -6924,9 +7379,9 @@
     "analytics": {
       "training_status": {
         "status_label": "productive",
-        "acute_load": 611,
-        "chronic_load": 613,
-        "load_ratio": 0.9,
+        "acute_load": 796,
+        "chronic_load": 646,
+        "load_ratio": 1.2,
         "recovery_time_hours": null
       },
       "vo2max_trend": [
@@ -6940,10 +7395,10 @@
         }
       ],
       "race_predictions": {
-        "5k": 1192,
-        "10k": 2519,
-        "half_marathon": 5601,
-        "marathon": 12235
+        "5k": 1191,
+        "10k": 2517,
+        "half_marathon": 5594,
+        "marathon": 12207
       },
       "hrv": {
         "weekly_avg": 94,
@@ -6964,8 +7419,8 @@
       },
       "running_dynamics": {
         "vert_osc_cm": 9.3,
-        "ground_contact_ms": 273.1,
-        "vert_ratio_pct": 8.12
+        "ground_contact_ms": 268.6,
+        "vert_ratio_pct": 7.97
       },
       "sleep": {
         "avg_score": 77.4,
@@ -7429,7 +7884,7 @@
     "base_generated": "2026-07-20",
     "boundary": "2026-07-20",
     "garmin_fetch_start": "2026-03-12",
-    "new_garmin_activities": 9,
+    "new_garmin_activities": 10,
     "frozen_from_strava": [
       "parkruns",
       "case_studies",
