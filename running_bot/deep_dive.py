@@ -36,8 +36,22 @@ HERE        = Path(__file__).parent
 REPORTS_DIR = HERE / "reports"
 OUT_PATH    = REPORTS_DIR / "deep_dive_data.json"
 
-# Lookback for the long-term trajectory (2.5 years ≈ 130 weeks).
+# Lookback for the long-term trajectory (2.5 years ≈ 130 weeks). Only used by the
+# legacy full-Garmin path; the hybrid path never re-fetches this far back.
 HISTORY_WEEKS = 130
+
+# ── Hybrid mode ────────────────────────────────────────────────────────────────
+# The frozen Strava snapshot is the immutable historical spine. Garmin lost the
+# manual run names/notes and the deep per-second stream history that Strava held,
+# so we NEVER re-fetch 2.5 years from Garmin. Instead we keep the annotation-rich,
+# deep-history sections from this base and let Garmin only "fill forward" from the
+# base's `generated` date. If the base is absent we fall back to full Garmin.
+BASE_PATH = REPORTS_DIR / "deep_dive_strava_base.json"
+
+# How much recent Garmin history the hybrid path pulls to recompute the moving
+# windows. The widest recomputed window is recent-4-months (16 wk); 20 wk gives
+# headroom past the boundary without dragging in shallow/old Garmin history.
+RECENT_FETCH_WEEKS = 20
 
 # Race anchors for the targeted training-block case studies. Each block is the
 # 12 weeks *before* the race. `approx_date` only seeds a search window — the exact
@@ -55,6 +69,14 @@ CURRENT_BUILD = {"key": "cph_half_2026_current", "name": "Copenhagen Half 2026 (
                  "approx_date": "2026-09-20", "type": "half_marathon", "outcome": "in-progress / goal"}
 
 TODAY = date.today()
+
+# Static context markers for the recent block (reused by both collection paths).
+_DISRUPTIONS = [
+    {"date": "2026-04-23", "event": "Left for Australia (holiday)"},
+    {"date": "2026-05-18", "event": "Returned from Australia"},
+    {"date": "2026-05-24", "event": "Light ligament strain — days off"},
+    {"date": "2026-03", "event": "884-day run streak ended after Barcelona Marathon"},
+]
 
 
 # ── small helpers ──────────────────────────────────────────────────────────────
@@ -287,40 +309,167 @@ def run(dry_run: bool = False):
 
     if dry_run:
         payload["note"] = "DRY RUN — Garmin not fetched; narrative artefacts only."
-        OUT_PATH.write_text(json.dumps(payload, indent=2, ensure_ascii=False))
-        print(f"✓ (dry run) wrote {OUT_PATH}")
+        _write(payload)
         return payload
 
-    # ── Garmin full history ──
+    base = _load_base()
+    if base is None:
+        print("⚠  No frozen Strava base found → full Garmin collection (legacy path).")
+        return _run_full_garmin(payload)
+    return _run_hybrid(payload, base)
+
+
+def _write(payload: dict):
+    OUT_PATH.write_text(json.dumps(payload, indent=2, ensure_ascii=False))
+    print(f"✓ wrote {OUT_PATH} ({OUT_PATH.stat().st_size // 1024} KB)")
+
+
+def _load_base() -> dict | None:
+    """Load the frozen Strava spine, or None if it's missing/unreadable."""
+    if not BASE_PATH.exists():
+        return None
+    try:
+        base = json.loads(BASE_PATH.read_text(encoding="utf-8"))
+    except Exception as e:
+        print(f"⚠  Could not read frozen base {BASE_PATH.name}: {e}")
+        return None
+    print(f"✓ Loaded frozen Strava spine {BASE_PATH.name} (generated {base.get('generated')})")
+    return base
+
+
+def _merge_longs(base_longs: list, new_longs: list, cap: int) -> list:
+    """Merge long-run durability entries, de-duped by date. Strava (base) entries
+    win on collision because they carry the manual run name. Newest first, capped."""
+    by_date = {}
+    for lr in base_longs:
+        by_date[lr.get("date")] = lr
+    for lr in new_longs:
+        by_date.setdefault(lr.get("date"), lr)   # keep the Strava-named entry on a clash
+    return sorted(by_date.values(), key=lambda x: x.get("date", ""), reverse=True)[:cap]
+
+
+def _run_hybrid(payload: dict, base: dict) -> dict:
+    """Splice: keep the annotation-rich, deep-history sections from the frozen
+    Strava spine; fetch only recent Garmin activity and let it fill forward."""
+    boundary     = date.fromisoformat(base["generated"])   # e.g. 2026-07-20
+    boundary_iso = boundary.isoformat()
+    boundary_ym  = boundary.strftime("%Y-%m")
+
+    now = datetime.now(timezone.utc)
+    start_dt = now - timedelta(weeks=RECENT_FETCH_WEEKS)
+    print(f"Hybrid: Strava spine ≤ {boundary_iso}; "
+          f"fetching Garmin {start_dt.date()} → {now.date()} to fill forward…")
+    g = get_activities(start_dt, now)
+    g_new = [a for a in g if _dt(a).date() > boundary]
+    print(f"  → {len(g)} recent Garmin activities ({len(g_new)} newer than the boundary)")
+
+    # ── Frozen from the Strava spine (Garmin can't reproduce these) ──
+    payload["parkruns"]     = base.get("parkruns", [])
+    payload["case_studies"] = base.get("case_studies", [])
+
+    # ── 2.5-yr arc: pre-boundary months from Strava; boundary month onward
+    #    (now a complete month) refreshed + extended from Garmin ──
+    g_months = _monthly_series(g)
+    payload["monthly_series"] = (
+        [m for m in base.get("monthly_series", []) if m["month"] < boundary_ym]
+        + [m for m in g_months if m["month"] >= boundary_ym]
+    )
+
+    # ── Now vs a year ago: 'now' recomputed from Garmin (aggregate only, so the
+    #    dropped names don't matter); 'year_ago' stays frozen (Garmin can't reach
+    #    2025 within the recent fetch window) ──
+    now_start = TODAY - timedelta(weeks=8)
+    payload["now_vs_year_ago"] = {
+        "now":      _window_profile(g, now_start, TODAY),
+        "year_ago": base.get("now_vs_year_ago", {}).get("year_ago"),
+    }
+
+    # ── Recent 4 months: aggregates recomputed from Garmin; the *named* speed-
+    #    session list keeps the Strava backlog and appends new Garmin sessions ──
+    four_mo_start = TODAY - timedelta(weeks=16)
+    base_ss = base.get("recent_4_months", {}).get("speed_sessions", [])
+    try:
+        new_ss = [s for s in get_speed_sessions(_in_window(g, four_mo_start, TODAY))
+                  if s.get("date", "") > boundary_iso]
+    except Exception as e:
+        print(f"⚠  speed session stream analysis failed: {e}")
+        new_ss = []
+    payload["recent_4_months"] = {
+        "window": {"start": four_mo_start.isoformat(), "end": TODAY.isoformat()},
+        "weekly_volume": _weekly_volume(g, four_mo_start, TODAY),
+        "summary": _window_profile(g, four_mo_start, TODAY),
+        "notable_disruptions": base.get("recent_4_months", {}).get("notable_disruptions", _DISRUPTIONS),
+        "speed_sessions": base_ss + new_ss,
+    }
+
+    # ── Current build: the live block sits entirely inside the Garmin window and
+    #    is aggregate-only, so recompute it wholesale from Garmin ──
+    payload["current_build"] = extract_block(g, CURRENT_BUILD)
+
+    # ── Durability: race decoupling stays frozen (old Strava streams Garmin no
+    #    longer serves); long runs keep the Strava-named backlog + new Garmin runs ──
+    base_dur  = base.get("durability", {}) or {}
+    new_longs = []
+    try:
+        from durability import get_durability
+        gd = get_durability(g, [], TODAY)   # long-run decoupling on recent Garmin efforts only
+        new_longs = [lr for lr in gd.get("long_runs", []) if lr.get("date", "") > boundary_iso]
+    except Exception as e:
+        print(f"⚠  durability (new long runs) failed: {e}")
+    payload["durability"] = {
+        "races":     base_dur.get("races", []),
+        "long_runs": _merge_longs(base_dur.get("long_runs", []), new_longs, cap=8),
+        "note":      base_dur.get("note"),
+    }
+
+    # ── Garmin current physiology (fresh) ──
+    payload["garmin"] = _collect_garmin()
+
+    # ── Provenance: tell the synthesis step exactly what came from where ──
+    payload["hybrid"] = {
+        "base_generated": base.get("generated"),
+        "boundary": boundary_iso,
+        "garmin_fetch_start": start_dt.date().isoformat(),
+        "new_garmin_activities": len(g_new),
+        "frozen_from_strava": [
+            "parkruns", "case_studies", "durability.races",
+            "now_vs_year_ago.year_ago", f"monthly_series (< {boundary_ym})",
+            "speed_sessions (≤ boundary)", "durability.long_runs (≤ boundary)",
+        ],
+        "refreshed_from_garmin": [
+            "now_vs_year_ago.now", "recent_4_months.*", "current_build",
+            f"monthly_series (≥ {boundary_ym})", "garmin",
+            "new speed_sessions / long runs",
+        ],
+    }
+    _write(payload)
+    return payload
+
+
+def _run_full_garmin(payload: dict) -> dict:
+    """Legacy path: build the whole dossier from Garmin. Used only when no frozen
+    Strava base exists — may be shallow, since Garmin lacks the deep history."""
     now = datetime.now(timezone.utc)
     start_dt = now - timedelta(weeks=HISTORY_WEEKS)
     print(f"Fetching Garmin {start_dt.date()} → {now.date()}…")
     acts = get_activities(start_dt, now)
     print(f"  → {len(acts)} activities")
 
-    # 1. Long-term trajectory
     payload["monthly_series"] = _monthly_series(acts)
     payload["parkruns"] = _parkruns(acts)
 
-    # 2. Now vs 1 year ago (matched 8-week calendar windows)
     now_start = TODAY - timedelta(weeks=8)
     payload["now_vs_year_ago"] = {
         "now":       _window_profile(acts, now_start, TODAY),
         "year_ago":  _window_profile(acts, now_start - timedelta(days=365), TODAY - timedelta(days=365)),
     }
 
-    # 3. Recent 4-month block (16 weeks) + stream-level speed sessions
     four_mo_start = TODAY - timedelta(weeks=16)
     payload["recent_4_months"] = {
         "window": {"start": four_mo_start.isoformat(), "end": TODAY.isoformat()},
         "weekly_volume": _weekly_volume(acts, four_mo_start, TODAY),
         "summary": _window_profile(acts, four_mo_start, TODAY),
-        "notable_disruptions": [
-            {"date": "2026-04-23", "event": "Left for Australia (holiday)"},
-            {"date": "2026-05-18", "event": "Returned from Australia"},
-            {"date": "2026-05-24", "event": "Light ligament strain — days off"},
-            {"date": "2026-03", "event": "884-day run streak ended after Barcelona Marathon"},
-        ],
+        "notable_disruptions": _DISRUPTIONS,
     }
     recent_acts = _in_window(acts, four_mo_start, TODAY)
     try:
@@ -329,11 +478,9 @@ def run(dry_run: bool = False):
         print(f"⚠  speed session stream analysis failed: {e}")
         payload["recent_4_months"]["speed_sessions"] = []
 
-    # 4. Targeted training-block case studies + current build (uniform metrics)
     payload["case_studies"] = [extract_block(acts, a) for a in CASE_STUDY_ANCHORS]
     payload["current_build"] = extract_block(acts, CURRENT_BUILD)
 
-    # 4b. Durability — aerobic decoupling / fade on long runs + races (stream-level)
     try:
         from durability import get_durability
         payload["durability"] = get_durability(acts, CASE_STUDY_ANCHORS, TODAY)
@@ -341,11 +488,8 @@ def run(dry_run: bool = False):
         print(f"⚠  durability analysis failed: {e}")
         payload["durability"] = {"races": [], "long_runs": [], "note": f"error: {e}"}
 
-    # 5. Garmin current physiology (+ sparse VO2 history if any)
     payload["garmin"] = _collect_garmin()
-
-    OUT_PATH.write_text(json.dumps(payload, indent=2, ensure_ascii=False))
-    print(f"✓ wrote {OUT_PATH} ({OUT_PATH.stat().st_size // 1024} KB)")
+    _write(payload)
     return payload
 
 
