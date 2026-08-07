@@ -19,3 +19,4 @@
 | 2026-07-17 | 88 | [2026-07-17-weekly-digest.md](2026-07-17-weekly-digest.html) |
 | 2026-07-24 | 97 | [2026-07-24-weekly-digest.md](2026-07-24-weekly-digest.html) |
 | 2026-07-31 | 94 | [2026-07-31-weekly-digest.md](2026-07-31-weekly-digest.html) |
+| 2026-08-07 | 88 | [2026-08-07-weekly-digest.md](2026-08-07-weekly-digest.html) |
