@@ -23,3 +23,4 @@
 | 2026-08-14 | 98 | [2026-08-14-weekly-digest.md](2026-08-14-weekly-digest.html) |
 | 2026-08-21 | 101 | [2026-08-21-weekly-digest.md](2026-08-21-weekly-digest.html) |
 | 2026-08-28 | 109 | [2026-08-28-weekly-digest.md](2026-08-28-weekly-digest.html) |
+| 2026-09-04 | 109 | [2026-09-04-weekly-digest.md](2026-09-04-weekly-digest.html) |
