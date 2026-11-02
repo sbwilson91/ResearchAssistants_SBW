@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Weekly Run Report — 26 Oct – 02 Nov 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,300;8..60,400;8..60,600&display=swap" rel="stylesheet">
+<style>
+  :root{--o:#f97316;--a:#f59e0b;--t:#14b8a6;--r:#ef4444;--g:#22c55e;--p:#8b5cf6;
+         --bg:#080b12;--card:#141926;--bdr:#1a2035;--tx:#dde2f0;--mu:#4a5270;--dim:#1e2540;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--tx);font-family:'Source Serif 4',serif;font-weight:300;line-height:1.75;font-size:16px;}
+  .wrap{max-width:940px;margin:0 auto;padding:0 32px;}
+  @media(max-width:600px){.wrap{padding:0 16px;}}
+  .header{background:linear-gradient(180deg,#0f1520 0%,#080b12 100%);border-bottom:3px solid var(--o);padding:44px 0 36px;position:relative;overflow:hidden;}
+  .header::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 65% 30%,rgba(249,115,22,.07) 0%,transparent 70%);pointer-events:none;}
+  .header-inner{position:relative;z-index:1;}
+  .tag{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.18em;color:var(--o);text-transform:uppercase;margin-bottom:8px;}
+  .report-title{font-family:'Playfair Display',serif;font-size:clamp(28px,5vw,50px);font-weight:900;color:#fff;line-height:1;margin-bottom:6px;}
+  .report-title em{color:var(--o);font-style:italic;}
+  .report-sub{font-size:12px;color:var(--mu);font-family:'IBM Plex Mono',monospace;margin-top:6px;}
+  .ai-headline{background:linear-gradient(135deg,#0a1a0a,#0f1520);border:1px solid rgba(34,197,94,.2);border-left:4px solid var(--g);border-radius:10px;padding:20px 24px;margin:24px 0 0;}
+  .ai-hl-tag{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.16em;color:var(--g);text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+  .ai-hl-tag::before{content:'◆';font-size:8px;}
+  .ai-headline-text{font-family:'Playfair Display',serif;font-size:clamp(18px,3vw,24px);font-style:italic;color:#ccd4e8;line-height:1.4;}
+  .hero{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:10px;margin:24px 0;}
+  .hs{background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:14px 16px;}
+  .hs-l{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.12em;color:var(--mu);text-transform:uppercase;display:block;margin-bottom:4px;}
+  .hs-v{font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:500;color:var(--o);display:block;line-height:1;}
+  .hs-v.g{color:var(--g);}.hs-v.t{color:var(--t);}.hs-v.a{color:var(--a);}.hs-v.r{color:var(--r);}.hs-v.m{color:var(--mu);}
+  .hs-delta{font-family:'IBM Plex Mono',monospace;font-size:11px;margin-top:3px;display:block;}
+  .section{padding:40px 0 28px;border-top:1px solid var(--bdr);}
+  .sh{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;color:var(--o);text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+  .sh::after{content:'';flex:1;height:1px;background:var(--bdr);}
+  .ai-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:4px;padding:2px 7px;font-size:9px;color:var(--g);letter-spacing:.06em;}
+  .narrative{max-width:720px;}
+  .narrative p{color:#8090b0;font-size:15px;line-height:1.9;margin-bottom:1.3em;}
+  .narrative p strong{color:var(--tx);font-weight:600;}
+  .signals{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin:20px 0;}
+  .signal{background:var(--card);border:1px solid var(--bdr);border-radius:9px;padding:15px 17px;}
+  .signal-positive{border-left:3px solid var(--g);}.signal-warning{border-left:3px solid var(--r);}.signal-neutral{border-left:3px solid var(--t);}
+  .signal-header{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+  .signal-icon{font-size:14px;font-weight:700;}.signal-label{font-size:13px;font-weight:600;color:var(--tx);}
+  .signal-detail{font-size:13px;color:var(--mu);line-height:1.65;}
+  .next-focus{background:linear-gradient(135deg,#0f0f1a,#0f1520);border:1px solid rgba(139,92,246,.25);border-left:4px solid var(--p);border-radius:10px;padding:18px 22px;margin-top:20px;}
+  .nf-tag{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.14em;color:var(--p);text-transform:uppercase;margin-bottom:8px;}
+  .nf-body{font-size:14px;color:#8090b0;line-height:1.75;}
+  .fig{background:var(--card);border:1px solid var(--bdr);border-radius:12px;overflow:hidden;margin:18px 0;}
+  .fig-h{padding:16px 20px 0;display:flex;justify-content:space-between;}
+  .fig-title{font-size:14px;font-weight:600;color:var(--tx);}.fig-n{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--o);letter-spacing:.1em;text-transform:uppercase;}
+  .fig-body{padding:14px 20px;}.fig-cap{padding:10px 20px 14px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--mu);border-top:1px solid var(--bdr);line-height:1.6;}
+  canvas{display:block;width:100%!important;}
+  .act-grid{display:flex;flex-direction:column;gap:8px;}
+  .act-card{background:var(--bg);border:1px solid var(--bdr);border-radius:8px;padding:12px 16px;}
+  .act-meta{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--mu);}
+  .act-name{font-size:14px;font-weight:600;color:var(--tx);margin:3px 0 6px;}
+  .act-stats{display:flex;gap:14px;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--t);}
+  .act-desc{font-size:12px;color:var(--mu);font-style:italic;margin-top:8px;border-left:2px solid var(--dim);padding-left:10px;line-height:1.6;}
+  .empty{color:var(--mu);font-size:14px;padding:8px 0;}
+  .zones{display:flex;flex-direction:column;gap:9px;}
+  .zr{display:flex;align-items:center;gap:10px;}
+  .zl{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mu);width:90px;flex-shrink:0;}
+  .zb{flex:1;height:6px;background:var(--dim);border-radius:3px;overflow:hidden;}
+  .zbi{height:100%;border-radius:3px;opacity:.85;}
+  .zp{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mu);width:30px;text-align:right;}
+  /* ANALYTICS */
+  .analytics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;}
+  .analytics-card{background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:16px;}
+  .ac-wide{grid-column:1/-1;}
+  .ac-header{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+  .ac-icon{font-size:16px;}.ac-title{font-size:13px;font-weight:600;color:var(--tx);flex:1;}
+  .ac-badge{font-family:'IBM Plex Mono',monospace;font-size:10px;}
+  .ac-metrics{display:flex;flex-wrap:wrap;gap:12px;}
+  .ac-metric{display:flex;flex-direction:column;gap:2px;min-width:70px;}
+  .ac-mk{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:.08em;}
+  .ac-mv{font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:500;color:var(--tx);}
+  .pred-table{width:100%;border-collapse:collapse;font-size:12px;}
+  .pred-table th{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;color:var(--mu);text-transform:uppercase;padding:5px 8px;border-bottom:1px solid var(--bdr);text-align:left;}
+  .pred-table td{padding:7px 8px;border-bottom:1px solid var(--dim);}
+  .pred-dist{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mu);}
+  .pred-time{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;color:var(--tx);}
+  /* SPEED */
+  .speed-grid{display:flex;flex-direction:column;gap:20px;}
+  .speed-card{background:var(--card);border:1px solid var(--bdr);border-radius:12px;overflow:hidden;border-top:3px solid var(--o);}
+  .speed-card-header{padding:16px 20px;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;border-bottom:1px solid var(--bdr);}
+  .speed-date{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--mu);}
+  .speed-name{font-size:15px;font-weight:600;color:var(--tx);margin-top:3px;}
+  .speed-meta{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+  .speed-badge{font-family:'IBM Plex Mono',monospace;font-size:10px;background:rgba(249,115,22,.12);border:1px solid rgba(249,115,22,.3);color:var(--o);padding:3px 8px;border-radius:4px;}
+  .speed-best{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mu);}.speed-best strong{color:var(--g);}
+  .speed-hr{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--r);}
+  .speed-chart-wrap{padding:14px 20px 0;}
+  .speed-table-wrap{padding:14px 20px 20px;overflow-x:auto;}
+  .speed-table{width:100%;border-collapse:collapse;font-family:'IBM Plex Mono',monospace;font-size:12px;}
+  .speed-table th{color:var(--mu);text-transform:uppercase;font-size:9px;letter-spacing:.1em;padding:5px 8px;border-bottom:1px solid var(--bdr);text-align:left;}
+  .speed-table td{padding:7px 8px;border-bottom:1px solid var(--dim);}
+  .effort-row td{color:var(--tx);}.iv-label,.iv-pace{color:var(--o);font-weight:500;}.iv-peak{color:var(--g);}
+  .rec-row td{color:var(--mu);font-size:11px;}.rec-label,.rec-pace{color:var(--t);}
+  /* PLAN */
+  .plan-grid{display:flex;flex-direction:column;gap:10px;}
+  .plan-row{background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:14px 18px;}
+  .plan-completed{border-left:3px solid var(--g);}.plan-skipped{border-left:3px solid var(--r);}
+  .plan-row-header{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px;}
+  .plan-icon{font-size:14px;font-weight:700;}.plan-date{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mu);}
+  .plan-name{font-size:14px;font-weight:600;color:var(--tx);flex:1;}
+  .plan-steps{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mu);background:var(--bg);border-radius:6px;padding:10px 12px;margin:8px 0;line-height:1.7;}
+  .plan-actual{display:flex;gap:12px;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--t);margin-top:8px;}
+  .plan-note{font-size:12px;color:var(--mu);font-style:italic;margin-top:6px;border-left:2px solid var(--dim);padding-left:10px;}
+  /* UPCOMING */
+  .upcoming-grid{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+  .upcoming-card{background:var(--card);border:1px solid var(--bdr);border-left:3px solid var(--p);border-radius:8px;padding:12px 16px;}
+  .upcoming-date{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--mu);}
+  .upcoming-name{font-size:14px;font-weight:600;color:var(--tx);margin:3px 0 6px;}
+  .upcoming-steps{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mu);line-height:1.7;}
+  /* FOOTER */
+  .race-card{background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:18px 20px;}
+  .footer{border-top:1px solid var(--bdr);padding:32px 0 48px;margin-top:48px;}
+  .footer p{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--mu);line-height:1.9;}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="wrap header-inner">
+    <div class="tag">ResearchAssistants_SBW · Running Bot · Garmin + Claude</div>
+    <div class="report-title">Week of <em>26 Oct – 02 Nov 2026</em></div>
+    <div class="report-sub">Generated Monday 02 November 2026, 00:28 UTC</div>
+    <div class="ai-headline">
+      <div class="ai-hl-tag">Claude · Weekly Read</div>
+      <div class="ai-headline-text">Off-season reset week: low volume, controlled effort, right instincts.</div>
+    </div>
+  </div>
+</div>
+<div class="wrap">
+  <div class="hero" style="margin-top:24px;">
+    <div class="hs"><span class="hs-l">This Week</span><span class="hs-v ">29.7 km</span><span class="hs-delta" style="color:#ef4444">-9.3 km</span></div>
+    <div class="hs"><span class="hs-l">Runs</span><span class="hs-v">6</span></div>
+    <div class="hs"><span class="hs-l">Avg Pace</span><span class="hs-v t">6:22/km</span></div>
+    <div class="hs"><span class="hs-l">Avg HR</span><span class="hs-v r">127 bpm</span></div>
+    <div class="hs"><span class="hs-l">Elevation</span><span class="hs-v a">61 m</span></div>
+    <div class="hs"><span class="hs-l">8-wk Avg</span><span class="hs-v m">39.0 km</span></div>
+    <div class="hs"><span class="hs-l">Streak</span><span class="hs-v" style="color:#f97316">1d</span></div>
+    <div class="hs"><span class="hs-l">Aero Eff.</span><span class="hs-v t">5:49/km</span><span class="hs-delta" style="color:#ef4444">↓ 3s/km vs prior 8 wks</span></div>
+  </div>
+  
+  <div class="section">
+    <div class="sh">Race Schedule
+      <span style="font-size:10px;font-family:'IBM Plex Mono',monospace;color:#4a5270;
+                   background:rgba(139,92,246,.12);padding:3px 8px;border-radius:10px;
+                   text-transform:uppercase;letter-spacing:.08em;font-weight:500;">Off-Season</span>
+    </div>
+    <div style="font-size:12px;color:#4a5270;margin-bottom:16px;">Recovery and unstructured training.</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;">
+      
+    <div class="race-card" style="">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+        <div>
+          <div style="font-family:'Source Serif 4',serif;font-size:15px;font-weight:600;color:#dde2f0;">Backyard Ultra</div>
+          <div style="font-size:10px;color:#4a5270;text-transform:uppercase;letter-spacing:.08em;margin-top:2px;">Backyard Ultra · 2026-08-29</div>
+          
+        </div>
+        <div style="text-align:right;">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:28px;font-weight:500;color:#f97316;line-height:1;">-65</div>
+          <div style="font-size:10px;color:#4a5270;text-transform:uppercase;letter-spacing:.08em;">days</div>
+        </div>
+      </div>
+      <div style="margin-bottom:8px;">
+        <div style="height:3px;background:#1a2035;border-radius:2px;">
+          <div style="height:3px;width:100%;background:#4a5270;border-radius:2px;transition:width .3s;"></div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:#4a5270;font-weight:500;">Off-Season</div>
+      <div style="font-size:11px;color:#4a5270;margin-top:2px;">Recovery and unstructured training.</div>
+    </div>
+    <div class="race-card" style="border-top:2px solid #f97316;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+        <div>
+          <div style="font-family:'Source Serif 4',serif;font-size:15px;font-weight:600;color:#dde2f0;">Copenhagen Half Marathon</div>
+          <div style="font-size:10px;color:#4a5270;text-transform:uppercase;letter-spacing:.08em;margin-top:2px;">Half Marathon · 2026-09-20</div>
+          <div style="font-size:11px;color:#f97316;margin-top:4px;">sub-1:30</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:28px;font-weight:500;color:#f97316;line-height:1;">-43</div>
+          <div style="font-size:10px;color:#4a5270;text-transform:uppercase;letter-spacing:.08em;">days</div>
+        </div>
+      </div>
+      <div style="margin-bottom:8px;">
+        <div style="height:3px;background:#1a2035;border-radius:2px;">
+          <div style="height:3px;width:100%;background:#4a5270;border-radius:2px;transition:width .3s;"></div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:#4a5270;font-weight:500;">Off-Season</div>
+      <div style="font-size:11px;color:#4a5270;margin-top:2px;">Recovery and unstructured training.</div>
+    </div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="sh">Weekly Analysis <span class="ai-badge">◆ Claude</span></div>
+    <div class="narrative"><p>This was a genuine step-back week — 29.7 km against an 8-week rolling average of 39 km, which is the appropriate move after back-to-back big weeks of 56 and 43 km. Six runs at an average HR of 127 bpm signals disciplined easy running, and the zone split (58% Z1, 20% Z2) is the cleanest aerobic discipline seen in a while, even if 22% Z3 is a fraction high for a genuine recovery week. The low elevation (61 m) and modest pace confirm this wasn't a week of hiding intensity inside easy labels. The Barcelona Running session on Thursday stands out as the only real quality stimulus — two short intervals, self-directed, which is exactly the kind of low-stakes sharpness work that fits an off-season week without accumulating meaningful fatigue debt. The fact that you're now one day into a new streak is a footnote worth keeping in proportion — don't let streak psychology pull volume decisions in the coming weeks.</p></div>
+    <div class="signals"><div class="signal signal-positive"><div class="signal-header"><span class="signal-icon" style="color:#22c55e">↑</span><span class="signal-label">Zone discipline best in weeks</span></div><div class="signal-detail">78% Z1/Z2 is the cleanest aerobic split in the recent data, which aligns with the recovery intent. The 22% Z3 is a minor flag — watch that it doesn't creep up as volume rebuilds.</div></div><div class="signal signal-neutral"><div class="signal-header"><span class="signal-icon" style="color:#14b8a6">→</span><span class="signal-label">Race predictions stagnant post-CPH</span></div><div class="signal-detail">The 1:35:17 HM prediction represents a 5:17 gap to sub-1:30. With Copenhagen Half now 6 weeks past, this is a benchmark for the next build cycle rather than an active target, but it confirms sub-90 fitness was not achieved this season.</div></div><div class="signal signal-warning"><div class="signal-header"><span class="signal-icon" style="color:#ef4444">⚠</span><span class="signal-label">Sleep still below adaptation threshold</span></div><div class="signal-detail">6.3h average with a 5.8h worst night — the pattern of sub-6.5h sleep persists unchanged. With low training load this week, the impact is muted, but this ceiling on recovery quality will matter again as volume and intensity return.</div></div><div class="signal signal-positive"><div class="signal-header"><span class="signal-icon" style="color:#22c55e">↑</span><span class="signal-label">Barcelona intervals: controlled sharpness</span></div><div class="signal-detail">4:16/km average effort at 124 bpm session HR and peak HR of only 149 bpm suggests fast-twitch fitness is being maintained without meaningful stress. The rapid HR drop to 92 bpm in recovery is a genuine positive aerobic signal.</div></div><div class="signal signal-neutral"><div class="signal-header"><span class="signal-icon" style="color:#14b8a6">→</span><span class="signal-label">VO₂ max stalled without qualifying effort</span></div><div class="signal-detail">No VO₂ update in five weeks reflects the absence of sustained, elevated-effort running that triggers Garmin's recalculation — the Barcelona session was too short to qualify. As off-season sharpens into a structured build, expect the model to update.</div></div><div class="signal signal-warning"><div class="signal-header"><span class="signal-icon" style="color:#ef4444">⚠</span><span class="signal-label">Streak restart: keep it in proportion</span></div><div class="signal-detail">One day into a new streak after the 884-day run ended. The risk is letting streak logic override recovery days when the training block demands them — worth flagging now before the psychology embeds.</div></div></div>
+    <div class="next-focus"><div class="nf-tag">Focus for next week</div><div class="nf-body">Protect aerobic efficiency by keeping every non-quality run genuinely easy — 5:15–5:45/km, HR 130–145 bpm — and add one posterior chain S&C session to start addressing the vertical oscillation and calf limiter while the training load is low enough to absorb it.</div></div>
+  </div>
+  
+  <div class="section">
+    <div class="sh">Garmin Analytics <span class="ai-badge">◆ Claude</span></div>
+    <div class="analytics-grid">
+      <div class="analytics-card">
+        <div class="ac-header">
+          <span class="ac-icon">⚡</span>
+          <span class="ac-title">Training Load</span>
+          <span class="ac-badge" style="color:#4a5270">Unknown</span>
+        </div>
+        <div class="ac-metrics">
+          <div class="ac-metric">
+            <span class="ac-mk">Acute (7d)</span>
+            <span class="ac-mv">–</span>
+          </div>
+          <div class="ac-metric">
+            <span class="ac-mk">Chronic (28d)</span>
+            <span class="ac-mv">–</span>
+          </div>
+          <div class="ac-metric">
+            <span class="ac-mk">Ratio</span>
+            <span class="ac-mv" style="color:#4a5270">–</span>
+          </div>
+          <div class="ac-metric">
+            <span class="ac-mk">Zone</span>
+            <span class="ac-mv" style="color:#4a5270;font-size:11px;">–</span>
+          </div>
+        </div>
+      </div>
+      <div class="analytics-card">
+        <div class="ac-header">
+          <span class="ac-icon">❤️</span>
+          <span class="ac-title">VO₂ Max</span>
+          <span class="ac-badge" style="color:#22c55e">+0.0 (1wk)</span>
+        </div>
+        <div class="ac-metrics">
+          <div class="ac-metric">
+            <span class="ac-mk">Current</span>
+            <span class="ac-mv">54.5</span>
+          </div>
+          <div class="ac-metric">
+            <span class="ac-mk">5wk ago</span>
+            <span class="ac-mv">54.5</span>
+          </div>
+          <div class="ac-metric">
+            <span class="ac-mk">Trend</span>
+            <span class="ac-mv" style="color:#22c55e">+0.0</span>
+          </div>
+        </div>
+        <canvas id="chart-vo2" height="50" style="margin-top:10px;"></canvas>
+        <script>
+        new Chart(document.getElementById('chart-vo2'),{
+          type:'line',
+          data:{labels:["10-05"],datasets:[{
+            data:[54.5],borderColor:'#22c55e',
+            backgroundColor:'#22c55e22',borderWidth:2,
+            pointRadius:3,tension:0.3,fill:true
+          }]},
+          options:{responsive:true,maintainAspectRatio:true,animation:false,
+            plugins:{legend:{display:false},tooltip:{enabled:false}},
+            scales:{x:{display:false},y:{display:false}}
+          }
+        });
+        </script>
+      </div>
+      <div class="analytics-card ac-wide">
+        <div class="ac-header">
+          <span class="ac-icon">🏁</span>
+          <span class="ac-title">Race Predictions</span>
+        </div>
+        <table class="pred-table">
+          <thead><tr>
+            <th>Distance</th><th>Predicted</th>
+            <th>vs PB</th><th>vs Target</th>
+          </tr></thead>
+          <tbody>
+          <tr>
+            <td class="pred-dist">5k</td>
+            <td class="pred-time">19:48</td>
+            <td style="color:#22c55e;font-family:'IBM Plex Mono',monospace;font-size:11px;">0:04</td>
+            <td style="color:#4a5270;font-family:'IBM Plex Mono',monospace;font-size:11px;">–</td>
+          </tr>
+          <tr>
+            <td class="pred-dist">10k</td>
+            <td class="pred-time">42:23</td>
+            <td style="color:#22c55e;font-family:'IBM Plex Mono',monospace;font-size:11px;">1:11</td>
+            <td style="color:#4a5270;font-family:'IBM Plex Mono',monospace;font-size:11px;">–</td>
+          </tr>
+          <tr>
+            <td class="pred-dist">Half</td>
+            <td class="pred-time">1:35:17</td>
+            <td style="color:#ef4444;font-family:'IBM Plex Mono',monospace;font-size:11px;">+2:22</td>
+            <td style="color:#f97316;font-family:'IBM Plex Mono',monospace;font-size:11px;">+5:17</td>
+          </tr>
+          <tr>
+            <td class="pred-dist">Marathon</td>
+            <td class="pred-time">3:32:05</td>
+            <td style="color:#ef4444;font-family:'IBM Plex Mono',monospace;font-size:11px;">+1:20</td>
+            <td style="color:#f97316;font-family:'IBM Plex Mono',monospace;font-size:11px;">+12:05</td>
+          </tr></tbody>
+        </table>
+      </div>
+      <div class="analytics-card">
+        <div class="ac-header">
+          <span class="ac-icon">🦾</span>
+          <span class="ac-title">Running Form</span>
+        </div>
+        <div class="ac-metrics">
+          <div class="ac-metric">
+            <span class="ac-mk">Cadence</span>
+            <span class="ac-mv" style="color:#22c55e">172.5 spm</span>
+            <span class="ac-mk" style="font-size:9px;">target 170–180 · threshold efforts</span>
+          </div>
+          <div class="ac-metric">
+            <span class="ac-mk">Vert. oscillation</span>
+            <span class="ac-mv" style="color:#4a5270">–</span>
+            <span class="ac-mk" style="font-size:9px;">target &lt;8.0cm · weekly avg</span>
+          </div>
+          <div class="ac-metric">
+            <span class="ac-mk">Ground contact</span>
+            <span class="ac-mv">–</span>
+            <span class="ac-mk" style="font-size:9px;">weekly avg</span>
+          </div>
+        </div>
+      </div>
+      <div class="analytics-card">
+        <div class="ac-header">
+          <span class="ac-icon">😴</span>
+          <span class="ac-title">Sleep (7-day)</span>
+        </div>
+        <div class="ac-metrics">
+          <div class="ac-metric">
+            <span class="ac-mk">Avg duration</span>
+            <span class="ac-mv" style="color:#ef4444">6.3h</span>
+          </div>
+          <div class="ac-metric">
+            <span class="ac-mk">Worst night</span>
+            <span class="ac-mv">5.8h</span>
+          </div>
+          <div class="ac-metric">
+            <span class="ac-mk">Avg score</span>
+            <span class="ac-mv">75.8/100</span>
+          </div>
+        </div>
+      </div></div>
+    <div class="narrative" style="margin-top:24px;"><p>The VO₂ max reading of 54.5 ml/kg/min is the only data point available across the last five weeks, which itself tells a story — Garmin hasn't updated it, likely because the recent training load hasn't produced a qualifying effort to trigger a recalculation. At 54.5, you're close to the sub-3:20 marathon threshold (~55+) but meaningfully below the ~58+ typically associated with sub-1:30 half marathon fitness. The race predictions reinforce this: 1:35:17 for the half is 5:17 outside the sub-1:30 target, and that gap didn't close this season — Copenhagen Half is now 6 weeks in the past. The honest read is that the sub-1:30 attempt came up short of the fitness required, which the Backyard Ultra sitting three weeks before it made near-inevitable. Sleep at 6.3h average and a worst night of 5.8h remains a chronic drag — not a crisis this week given the low training load, but the pattern of sitting below 6.5h is unchanged. With training load status as 'unknown' and no acute spike in volume or intensity, injury risk is low right now, but that also means there's no meaningful fitness signal being generated either — this is a maintenance week at best.</p></div>
+    <div class="narrative" style="margin-top:12px;"><p>Cadence across the two qualifying intervals landed at 172.5 spm — right at the lower boundary of the 170–180 spm target zone. Given the short duration and low-stress context of this session, that's acceptable, but it's not the 178–180+ you've been hitting during more sustained threshold work. No vertical oscillation data is available this week, but the persistent 92mm weekly average (target <80mm) is unlikely to have resolved given the absence of S&C-focused work in the data. The mechanism remains the same: posterior chain weakness allows excessive bounce, which costs energy and loads the calves — the structure that gave out at Copenhagen Marathon km 37. With an off-season phase and lower training stress, now is actually a smart window to address this with dedicated calf and glute S&C, which pays dividends when structured quality returns.</p></div>
+  </div>
+  
+  <div class="section">
+    <div class="sh">Speed Sessions <span class="ai-badge">◆ Garmin streams</span></div>
+    <div class="speed-grid">
+      <div class="speed-card">
+        <div class="speed-card-header">
+          <div><div class="speed-date">2026-10-29</div><div class="speed-name">Barcelona Running</div></div>
+          <div class="speed-meta">
+            <span class="speed-badge">2 intervals</span>
+            <span class="speed-best">Best <strong>3:56/km</strong></span>
+            <span class='speed-hr'>Peak HR 149.0 bpm</span>
+          </div>
+        </div>
+        <div class="speed-chart-wrap"><canvas id="chart-speed-24894198288" height="160"></canvas></div>
+        <div class="speed-table-wrap">
+          <table class="speed-table"><thead><tr><th>Segment</th><th>Avg pace</th><th>Peak</th><th>Duration</th><th>HR</th><th>Cadence</th></tr></thead>
+          <tbody><tr class="effort-row"><td class="iv-label">Effort 1</td><td class="iv-pace">4:25/km</td><td class="iv-peak">4:04/km</td><td>2:07</td><td>128 bpm</td><td>171 spm</td></tr><tr class="rec-row"><td class="rec-label">Recovery</td><td class="rec-pace">9:25/km</td><td>–</td><td>1:18</td><td>92 bpm</td><td>–</td></tr><tr class="effort-row"><td class="iv-label">Effort 2</td><td class="iv-pace">4:08/km</td><td class="iv-peak">3:56/km</td><td>2:59</td><td>123 bpm</td><td>174 spm</td></tr></tbody></table>
+        </div>
+        <script>
+        (function(){
+          const ctx=document.getElementById('chart-speed-24894198288');
+          const times=[0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 180, 195, 210, 225, 240, 255, 270, 285, 300, 315, 330, 345, 360, 375, 390, 405, 420, 435, 450, 465, 480, 495, 510, 525, 540, 555, 570, 585, 600, 615, 630, 645, 660, 738, 753, 768, 783, 798, 813, 828, 843, 858, 944, 959, 974, 989, 1004, 1019, 1034, 1049, 1064, 1137, 1152, 1167, 1182, 1197, 1212, 1227, 1242, 1257, 1272, 1287, 1302, 1317, 1332, 1347, 1362, 1377, 1392, 1407, 1422, 1437, 1452, 1467, 1482, 1497, 1512, 1527, 1542, 1557, 1572, 1587, 1602, 1617, 1632, 1647, 1662, 1677, 1692, 1707, 1722, 1737, 1752, 1767],paces=[11.23, 5.74, 5.24, 5.4, 5.38, 5.45, 5.5, 5.43, 5.65, 5.87, 5.82, 5.82, 5.65, 5.55, 5.53, 5.53, 5.5, 5.45, 5.4, 5.4, 5.36, 5.33, 5.32, 5.32, 5.3, 5.28, 5.25, 5.4, 5.19, 5.22, 5.32, 5.28, 5.12, 5.09, 5.15, 5.16, 5.19, 5.22, 5.74, 5.56, 3.55, 5.9, 8.59, 4.26, 5.13, 5.63, 4.27, 4.62, 4.38, 4.42, 4.43, 4.45, 4.48, 4.53, 6.87, 3.97, 4.08, 4.13, 4.1, 4.11, 4.22, 4.25, 4.28, 6.9, 5.48, 5.53, 6.57, 5.8, 4.98, 6.4, 6.57, 5.36, 5.45, 5.33, 5.28, 5.3, 5.28, 5.28, 5.45, 5.38, 5.4, 5.38, 4.98, 5.21, 5.22, 5.19, 5.22, 5.33, 5.38, 5.35, 5.35, 5.35, 5.36, 5.36, 5.35, 5.36, 5.32, 5.35, 5.36, 5.4, 5.0, 5.38, 5.27, 5.35, 5.25, 5.1],hrs=[75.0, 91.0, 107.0, 105.0, 113.0, 114.0, 116.0, 118.0, 120.0, 120.0, 121.0, 121.0, 116.0, 120.0, 120.0, 119.0, 116.0, 119.0, 120.0, 114.0, 114.0, 116.0, 123.0, 123.0, 123.0, 124.0, 126.0, 127.0, 127.0, 128.0, 128.0, 131.0, 128.0, 129.0, 124.0, 127.0, 121.0, 122.0, 133.0, 132.0, 130.0, 126.0, 125.0, 128.0, 125.0, 83.0, 110.0, 122.0, 131.0, 134.0, 135.0, 128.0, 142.0, 142.0, 84.0, 100.0, 121.0, 119.0, 123.0, 127.0, 132.0, 148.0, 149.0, 96.0, 99.0, 115.0, 114.0, 114.0, 130.0, 128.0, 126.0, 127.0, 128.0, 128.0, 129.0, 130.0, 126.0, 133.0, 133.0, 127.0, 130.0, 128.0, 130.0, 135.0, 135.0, 133.0, 132.0, 132.0, 131.0, 130.0, 132.0, 133.0, 122.0, 119.0, 125.0, 138.0, 139.0, 135.0, 134.0, 133.0, 130.0, 129.0, 129.0, 129.0, 129.0, 132.0],bands=[{"start": 740, "end": 867}, {"start": 945, "end": 1124}];
+          const ep={id:'eb',beforeDraw(chart){const{ctx:c,chartArea,scales}=chart;if(!chartArea)return;c.save();bands.forEach(b=>{const x1=scales.x.getPixelForValue(b.start),x2=scales.x.getPixelForValue(b.end);c.fillStyle='rgba(249,115,22,0.10)';c.fillRect(x1,chartArea.top,x2-x1,chartArea.height);});c.restore();}};
+          new Chart(ctx,{type:'line',plugins:[ep],data:{labels:times,datasets:[
+            {label:'Pace',data:paces,borderColor:'#f97316',backgroundColor:'rgba(249,115,22,0.06)',borderWidth:1.5,pointRadius:0,tension:0.3,fill:true,yAxisID:'y'},
+            {label:'HR',data:hrs,borderColor:'rgba(239,68,68,0.6)',borderWidth:1.2,pointRadius:0,tension:0.3,yAxisID:'y2'}
+          ]},options:{responsive:true,maintainAspectRatio:true,animation:false,
+            plugins:{legend:{labels:{color:'#4a5270',boxWidth:10,font:{size:10}}}},
+            scales:{x:{grid:{display:false},ticks:{display:false}},
+              y:{reverse:true,min:3.0,max:8.0,grid:{color:'rgba(26,32,53,.9)'},ticks:{color:'#4a5270',font:{size:10},callback:v=>Math.floor(v)+':'+(Math.round((v-Math.floor(v))*60)+'').padStart(2,'0')}},
+              y2:{position:'right',min:100,max:200,grid:{display:false},ticks:{color:'rgba(239,68,68,0.5)',font:{size:10}}}
+            }
+          }});
+        })();
+        </script>
+      </div></div>
+    <div class="narrative" style="margin-top:20px;"><p>The Barcelona session is worth examining closely. Two intervals averaging 4:16/km with a best split of 3:56/km — the second rep was sharper than the first (4:08 vs 4:25), which is the right direction and suggests you were warming into the effort rather than dying. For context, your HM race pace is 4:24/km, so averaging 4:16 across both reps with a peak of 3:56 shows the fast-twitch machinery is still there. The average HR of 124 bpm across the session — including recoveries — and a peak of only 149 bpm is notably controlled for this pace. Either the efforts were shorter than they felt, or aerobic conditioning is holding reasonably well beneath the surface. Recovery between reps (1:18 at 9:25/km, HR dropping to 92) is clean and rapid, which is a positive efficiency signal. This wasn't a structured threshold block, but it was a useful neuromuscular reminder without meaningful fatigue cost.</p></div>
+  </div>
+  
+  <div class="section">
+    <div class="sh">Plan vs Actual <span class="ai-badge">◆ Garmin + Claude</span></div>
+    <div class="plan-grid">
+      <div class="plan-row plan-completed">
+        <div class="plan-row-header">
+          <span class="plan-icon" style="color:#22c55e">✓</span>
+          <span class="plan-date">2026-10-27</span>
+          <span class="plan-name">2/2/2/1x800m hill rep</span>
+        </div>
+        <div class="plan-steps">  Warmup: lap button<br>  × 3: interval lap button @ open, rest 2 min @ open<br>  Interval: lap button<br>  Cooldown: lap button</div><div class="plan-actual"><span>10.2 km</span><span>5:27/km</span><span>♥ 135.0 bpm</span></div>
+      </div>
+      <div class="plan-row plan-completed">
+        <div class="plan-row-header">
+          <span class="plan-icon" style="color:#22c55e">✓</span>
+          <span class="plan-date">2026-10-27</span>
+          <span class="plan-name">2/2/2/1x800m hill rep</span>
+        </div>
+        <div class="plan-steps">  Warmup: lap button<br>  × 3: interval lap button @ open, rest 2 min @ open<br>  Interval: lap button<br>  Cooldown: lap button</div><div class="plan-actual"><span>10.2 km</span><span>5:27/km</span><span>♥ 135.0 bpm</span></div>
+      </div></div>
+    <div class="narrative" style="margin-top:20px;"><p>The plan data shows the 2/2/2/1×800m hill rep session appearing twice with identical actuals — almost certainly a logging duplicate. The single session was 10.2 km at 5:27/km and 135 bpm average, which fits a warm-up, hill rep block, and cooldown profile. That's appropriate quality work for an off-season week. Given the step-back volume context and no signs of acute overload, the overall execution was sensible — the hill session provided a meaningful stimulus without pushing into recovery debt.</p></div>
+  </div>
+  
+  <div class="section">
+    <div class="sh">Next Week <span class="ai-badge">◆ Garmin schedule</span></div>
+    
+    <div class="next-focus"><div class="nf-tag">Claude's read on next week</div><div class="nf-body">With the off-season phase and an 8-week rolling average of 39 km, aim to build back toward 38–42 km next week with the emphasis on aerobic quality over volume. If there's a structured session on the Garmin schedule, treat it as the anchor and keep everything around it genuinely easy — 5:15–5:45/km at 130–145 bpm. The primary goal coming into this phase is pulling aerobic efficiency back under 5:30/km, which means patience on easy paces rather than chasing feel-good faster efforts.</div></div>
+  </div>
+  
+  <div class="section">
+    <div class="sh">Training Calendar</div>
+    <div style="overflow-x:auto;padding-bottom:8px;">
+      <div style="display:flex;gap:3px;align-items:flex-start;min-width:max-content;">
+        <div style="display:flex;flex-direction:column;gap:2px;padding-top:14px;margin-right:2px;">
+          <div style="height:11px;font-family:IBM Plex Mono,monospace;font-size:8px;color:#2a3050;line-height:11px;">M</div><div style="height:11px;font-family:IBM Plex Mono,monospace;font-size:8px;color:#2a3050;line-height:11px;">T</div><div style="height:11px;font-family:IBM Plex Mono,monospace;font-size:8px;color:#2a3050;line-height:11px;">W</div><div style="height:11px;font-family:IBM Plex Mono,monospace;font-size:8px;color:#2a3050;line-height:11px;">T</div><div style="height:11px;font-family:IBM Plex Mono,monospace;font-size:8px;color:#2a3050;line-height:11px;">F</div><div style="height:11px;font-family:IBM Plex Mono,monospace;font-size:8px;color:#2a3050;line-height:11px;">S</div><div style="height:11px;font-family:IBM Plex Mono,monospace;font-size:8px;color:#2a3050;line-height:11px;">S</div>
+        </div>
+        <div>
+          <div style="display:flex;gap:3px;margin-bottom:3px;"><div style="grid-column:1;font-family:IBM Plex Mono,monospace;font-size:8px;color:#2a3050;white-space:nowrap;">Jul</div><div style="grid-column:4;font-family:IBM Plex Mono,monospace;font-size:8px;color:#2a3050;white-space:nowrap;">Aug</div><div style="grid-column:9;font-family:IBM Plex Mono,monospace;font-size:8px;color:#2a3050;white-space:nowrap;">Sep</div><div style="grid-column:13;font-family:IBM Plex Mono,monospace;font-size:8px;color:#2a3050;white-space:nowrap;">Oct</div><div style="grid-column:17;font-family:IBM Plex Mono,monospace;font-size:8px;color:#2a3050;white-space:nowrap;">Nov</div></div>
+          <div style="display:flex;gap:3px;"><div style="display:flex;flex-direction:column;gap:2px;"><div title="2026-07-13" style="width:11px;height:11px;border-radius:2px;background:#1a2035;"></div><div title="2026-07-14 — 8.2km" style="width:11px;height:11px;border-radius:2px;background:#0e7490;"></div><div title="2026-07-15 — 14.0km" style="width:11px;height:11px;border-radius:2px;background:#14b8a6;"></div><div title="2026-07-16" style="width:11px;height:11px;border-radius:2px;background:#1a2035;"></div><div title="2026-07-17 — 10.7km" style="width:11px;height:11px;border-radius:2px;background:#14b8a6;"></div><div title="2026-07-18 — 7.4km" style="width:11px;height:11px;border-radius:2px;background:#0e7490;"></div><div title="2026-07-19 — 15.6km" style="width:11px;height:11px;border-radius:2px;background:#f59e0b;"></div></div><div style="display:flex;flex-direction:column;gap:2px;"><div title="2026-07-20" style="width:11px;height:11px;border-radius:2px;background:#1a2035;"></div><div title="2026-07-21 — 12.9km" style="width:11px;height:11px;border-radius:2px;background:#14b8a6;"></div><div title="2026-07-22" style="width:11px;height:11px;border-radius:2px;background:#1a2035;"></div><div title="2026-07-23 — 8.7km" style="width:11px;height:11px;border-radius:2px;background:#0e7490;"></div><div title="2026-07-24 — 7.9km" style="width:11px;height:11px;border-radius:2px;background:#0e7490;"></div><div title="2026-07-25 — 6.699999999999999km" style="width:11px;height:11px;border-radius:2px;background:#0e7490;"></div><div title="2026-07-26 — 12.5km" style="width:11px;height:11px;border-radius:2px;background:#14b8a6;"></div></div><div style="display:flex;flex-direction:column;gap:2px;"><div title="2026-07-27 — 6.0km" style="width:11px;height:11px;border-radius:2px;background:#0e7490;"></div><div title="2026-07-28 — 13.3km" style="width:11px;height:11px;border-radius:2px;background:#14b8a6;"></div><div title="2026-07-29" style="width:11px;height:11px;border-radius:2px;background:#1a2035;"></div><div title="2026-07-30 — 18.9km" style="width:11px;height:11px;border-radius:2px;background:#f59e0b;"></div><div title="2026-07-31 — 6.1km" style="width:11px;height:11px;border-radius:2px;background:#0e7490;"></div><div title="2026-08-01 — 23.7km" style="width:11px;height:11px;border-radius:2px;background:#f59e0b;"></div><div title="2026-08-02 — 11.5km" style="width:11px;height:11px;border-radius:2px;background:#14b8a6;"></div></div><div style="display:flex;flex-direction:column;gap:2px;"><div title="2026-08-03 — 6.5km" style="width:11px;height:11px;border-radius:2px;background:#0e7490;"></div><div title="2026-08-04 — 12.7km" style="width:11px;height:11px;border-radius:2px;background:#14b8a6;"></div><div title="2026-08-05 — 8.4km" style="width:11px;height:11px;border-radius:2px;background:#0e7490;"></div><div title="2026-08-06 — 33.3km" style="width:11px;height:11px;border-radius:2px;background:#f97316;"></div><div title="2026-08-07" style="width:11px;height:11px;border-radius:2px;background:#1a2035;"></div><div title="2026-08-08 — 54.7km" style="width:11px;height:11px;border-radius:2px;background:#f97316;"></div><div title="2026-08-09 — 4.0km" style="width:11px;height:11px;border-radius:2px;background:#164e63;"></div></div><div style="display:flex;flex-direction:column;gap:2px;"><div title="2026-08-10" style="width:11px;height:11px;border-radius:2px;background:#1a2035;"></div><div title="2026-08-11 — 12.2km" style="width:11px;height:11px;border-radius:2px;background:#14b8a6;"></div><div title="2026-08-12 — 7.3km" style="width:11px;height:11px;border-radius:2px;background:#0e7490;"></div><div title="2026-08-13" style="width:11px;height:11px;border-radius:2px;background:#1a2035;"></div><div title="2026-08-14 — 8.7km" style="width:11px;height:11px;border-radius:2px;background:#0e7490;"></div><div title="2026-08-15 — 14.3km" style="width:11px;height:11px;border-radius:2px;background:#14b8a6;"></div><div title="2026-08-16 — 11.3km" style="width:11px;height:11px;border-radius:2px;background:#14b8a6;"></div></div><div style="display:flex;flex-direction:column;gap:2px;"><div title="2026-08-17" style="width:11px;height:11px;border-radius:2px;background:#242c45;"></div><div title="2026-08-18" style="width:11px;height:11px;border-radius:2px;background:#1a2035;"></div><div title="2026-08-19" style="width:11px;height:11px;border-radius:2px;background:#1a2035;"></div><div title="2026-08-20" style="width:11px;height:11px;border-radius:2px;background:#1a2035;"></div><div title="2026-08-21 — 10.7km" style="width:11px;height:11px;border-radius:2px;background:#14b8a6;"></div><div title="2026-08-22" style="width:11px;height:11px;border-radius:2px;background:#1a2035;"></div><div title="2026-08-23 — 6.0km" style="width:11px;height:11px;border-radius:2px;background:#0e7490;"></div></div><div style="display:flex;flex-direction:column;gap:2px;"><div title="2026-08-24 — 6.1km" style="width:11px;height:11px;border-radius:2px;background:#0e7490;"></div><div title="2026-08-25 — 5.1km" style="width:11px;height:11px;border-radius:2px;background:#0e7490;"></div><div title="2026-08-26" style="width:11px;height:11px;border-radius:2px;background:#1a2035;"></div><div title="2026-08-27 — 5.8km" style="width:11px;height:11px;border-radius:2px;background:#0e7490;"></div><div title="2026-08-28" style="width:11px;height:11px;border-radius:2px;background:#1a2035;"></div><div title="2026-08-29 — 67.9km" style="width:11px;height:11px;border-radius:2px;background:#f97316;"></div><div title="2026-08-30" style="width:11px;height:11px;border-radius:2px;background:#1a2035;"></div></div><div style="display:flex;flex-direction:column;gap:2px;"><div title="2026-08-31 — 2.1km" style="width:11px;height:11px;border-radius:2px;background:#164e63;"></div><div title="2026-09-01 — 5.2km" style="width:11px;height:11px;border-radius:2px;background:#0e7490;"></div><div title="2026-09-02" style="width:11px;height:11px;border-radius:2px;background:#1a2035;"></div><div title="2026-09-03" style="width:11px;height:11px;border-radius:2px;background:#1a2035;"></div><div title="2026-09-04 — 6.4km" style="width:11px;height:11px;border-radius:2px;background:#0e7490;"></div><div title="2026-09-05 — 7.3km" style="width:11px;height:11px;border-radius:2px;background:#0e7490;"></div><div title="2026-09-06 — 2.1km" style="width:11px;height:11px;border-radius:2px;background:#164e63;"></div></div><div style="display:flex;flex-direction:column;gap:2px;"><div title="2026-09-07 — 10.4km" style="width:11px;height:11px;border-radius:2px;background:#14b8a6;"></div><div title="2026-09-08 — 7.7km" style="width:11px;height:11px;border-radius:2px;background:#0e7490;"></div><div title="2026-09-09 — 2.1km" style="width:11px;height:11px;border-radius:2px;background:#164e63;"></div><div title="2026-09-10 — 9.3km" style="width:11px;height:11px;border-radius:2px;background:#0e7490;"></div><div title="2026-09-11" style="width:11px;height:11px;border-radius:2px;background:#1a2035;"></div><div title="2026-09-12" style="width:11px;height:11px;border-radius:2px;background:#1a2035;"></div><div title="2026-09-13 — 8.4km" style="width:11px;height:11px;border-radius:2px;background:#0e7490;"></div></div><div style="display:flex;flex-direction:column;gap:2px;"><div title="2026-09-14" style="width:11px;height:11px;border-radius:2px;background:#1a2035;"></div><div title="2026-09-15 — 10.8km" style="width:11px;height:11px;border-radius:2px;background:#14b8a6;"></div><div title="2026-09-16" style="width:11px;height:11px;border-radius:2px;background:#1a2035;"></div><div title="2026-09-17" style="width:11px;height:11px;border-radius:2px;background:#1a2035;"></div><div title="2026-09-18" style="width:11px;height:11px;border-radius:2px;background:#1a2035;"></div><div title="2026-09-19" style="width:11px;height:11px;border-radius:2px;background:#1a2035;"></div><div title="2026-09-20 — 21.3km" style="width:11px;height:11px;border-radius:2px;background:#f59e0b;"></div></div><div style="display:flex;flex-direction:column;gap:2px;"><div title="2026-09-21" style="width:11px;height:11px;border-radius:2px;background:#1a2035;"></div><div title="2026-09-22" style="width:11px;height:11px;border-radius:2px;background:#1a2035;"></div><div title="2026-09-23 — 4.8km" style="width:11px;height:11px;border-radius:2px;background:#164e63;"></div><div title="2026-09-24 — 5.7km" style="width:11px;height:11px;border-radius:2px;background:#0e7490;"></div><div title="2026-09-25 — 4.8km" style="width:11px;height:11px;border-radius:2px;background:#164e63;"></div><div title="2026-09-26 — 10.9km" style="width:11px;height:11px;border-radius:2px;background:#14b8a6;"></div><div title="2026-09-27 — 7.0km" style="width:11px;height:11px;border-radius:2px;background:#0e7490;"></div></div><div style="display:flex;flex-direction:column;gap:2px;"><div title="2026-09-28 — 5.0km" style="width:11px;height:11px;border-radius:2px;background:#0e7490;"></div><div title="2026-09-29 — 3.6km" style="width:11px;height:11px;border-radius:2px;background:#164e63;"></div><div title="2026-09-30 — 5.3km" style="width:11px;height:11px;border-radius:2px;background:#0e7490;"></div><div title="2026-10-01 — 4.6km" style="width:11px;height:11px;border-radius:2px;background:#164e63;"></div><div title="2026-10-02 — 6.1km" style="width:11px;height:11px;border-radius:2px;background:#0e7490;"></div><div title="2026-10-03 — 6.7km" style="width:11px;height:11px;border-radius:2px;background:#0e7490;"></div><div title="2026-10-04 — 3.3km" style="width:11px;height:11px;border-radius:2px;background:#164e63;"></div></div><div style="display:flex;flex-direction:column;gap:2px;"><div title="2026-10-05 — 10.0km" style="width:11px;height:11px;border-radius:2px;background:#14b8a6;"></div><div title="2026-10-06 — 8.8km" style="width:11px;height:11px;border-radius:2px;background:#0e7490;"></div><div title="2026-10-07 — 2.3km" style="width:11px;height:11px;border-radius:2px;background:#164e63;"></div><div title="2026-10-08 — 3.3km" style="width:11px;height:11px;border-radius:2px;background:#164e63;"></div><div title="2026-10-09 — 8.8km" style="width:11px;height:11px;border-radius:2px;background:#0e7490;"></div><div title="2026-10-10 — 3.4km" style="width:11px;height:11px;border-radius:2px;background:#164e63;"></div><div title="2026-10-11 — 15.1km" style="width:11px;height:11px;border-radius:2px;background:#f59e0b;"></div></div><div style="display:flex;flex-direction:column;gap:2px;"><div title="2026-10-12 — 3.2km" style="width:11px;height:11px;border-radius:2px;background:#164e63;"></div><div title="2026-10-13 — 11.6km" style="width:11px;height:11px;border-radius:2px;background:#14b8a6;"></div><div title="2026-10-14 — 11.0km" style="width:11px;height:11px;border-radius:2px;background:#14b8a6;"></div><div title="2026-10-15 — 2.6km" style="width:11px;height:11px;border-radius:2px;background:#164e63;"></div><div title="2026-10-16 — 4.8km" style="width:11px;height:11px;border-radius:2px;background:#164e63;"></div><div title="2026-10-17 — 7.3km" style="width:11px;height:11px;border-radius:2px;background:#0e7490;"></div><div title="2026-10-18 — 2.3km" style="width:11px;height:11px;border-radius:2px;background:#164e63;"></div></div><div style="display:flex;flex-direction:column;gap:2px;"><div title="2026-10-19 — 3.4km" style="width:11px;height:11px;border-radius:2px;background:#164e63;"></div><div title="2026-10-20 — 7.0km" style="width:11px;height:11px;border-radius:2px;background:#0e7490;"></div><div title="2026-10-21 — 10.3km" style="width:11px;height:11px;border-radius:2px;background:#14b8a6;"></div><div title="2026-10-22 — 7.9km" style="width:11px;height:11px;border-radius:2px;background:#0e7490;"></div><div title="2026-10-23 — 5.0km" style="width:11px;height:11px;border-radius:2px;background:#0e7490;"></div><div title="2026-10-24 — 3.9km" style="width:11px;height:11px;border-radius:2px;background:#164e63;"></div><div title="2026-10-25 — 18.7km" style="width:11px;height:11px;border-radius:2px;background:#f59e0b;"></div></div><div style="display:flex;flex-direction:column;gap:2px;"><div title="2026-10-26 — 3.3km" style="width:11px;height:11px;border-radius:2px;background:#164e63;"></div><div title="2026-10-27 — 10.2km" style="width:11px;height:11px;border-radius:2px;background:#14b8a6;"></div><div title="2026-10-28 — 3.5km" style="width:11px;height:11px;border-radius:2px;background:#164e63;"></div><div title="2026-10-29 — 5.0km" style="width:11px;height:11px;border-radius:2px;background:#0e7490;"></div><div title="2026-10-30 — 5.0km" style="width:11px;height:11px;border-radius:2px;background:#0e7490;"></div><div title="2026-10-31" style="width:11px;height:11px;border-radius:2px;background:#1a2035;"></div><div title="2026-11-01 — 2.6km" style="width:11px;height:11px;border-radius:2px;background:#164e63;"></div></div><div style="display:flex;flex-direction:column;gap:2px;"><div title="2026-11-02" style="width:11px;height:11px;border-radius:2px;background:#1a2035;"></div><div title="2026-11-03" style="width:11px;height:11px;border-radius:2px;background:#1a2035;opacity:.25;"></div><div title="2026-11-04" style="width:11px;height:11px;border-radius:2px;background:#1a2035;opacity:.25;"></div><div title="2026-11-05" style="width:11px;height:11px;border-radius:2px;background:#1a2035;opacity:.25;"></div><div title="2026-11-06" style="width:11px;height:11px;border-radius:2px;background:#1a2035;opacity:.25;"></div><div title="2026-11-07" style="width:11px;height:11px;border-radius:2px;background:#1a2035;opacity:.25;"></div><div title="2026-11-08" style="width:11px;height:11px;border-radius:2px;background:#1a2035;opacity:.25;"></div></div></div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:14px;margin-top:10px;flex-wrap:wrap;"><div style="display:flex;align-items:center;gap:4px;font-family:IBM Plex Mono,monospace;font-size:9px;color:#4a5270;"><div style="width:9px;height:9px;border-radius:2px;background:#1a2035;"></div>rest</div><div style="display:flex;align-items:center;gap:4px;font-family:IBM Plex Mono,monospace;font-size:9px;color:#4a5270;"><div style="width:9px;height:9px;border-radius:2px;background:#14b8a6;"></div>5–15km</div><div style="display:flex;align-items:center;gap:4px;font-family:IBM Plex Mono,monospace;font-size:9px;color:#4a5270;"><div style="width:9px;height:9px;border-radius:2px;background:#f59e0b;"></div>15–25km</div><div style="display:flex;align-items:center;gap:4px;font-family:IBM Plex Mono,monospace;font-size:9px;color:#4a5270;"><div style="width:9px;height:9px;border-radius:2px;background:#f97316;"></div>25km+</div></div>
+  </div>
+  <div class="section">
+    <div class="sh">Volume — Last 16 Weeks</div>
+    <div class="fig">
+      <div class="fig-h"><span class="fig-title">Weekly Distance & Rolling Average</span><span class="fig-n">Fig. 1</span></div>
+      <div class="fig-body"><canvas id="chart-weekly" height="220"></canvas></div>
+      <div class="fig-cap">Weekly distance (bars). Orange = this week. Teal dashed = 8-week rolling average.</div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="sh">Notable Activities</div>
+    <div class="act-grid"><p class="empty">No notable activities this week.</p></div>
+  </div>
+  <div class="section">
+    <div class="sh">Heart Rate</div>
+    <div class="fig">
+      <div class="fig-h"><span class="fig-title">Average HR per Week</span><span class="fig-n">Fig. 2</span></div>
+      <div class="fig-body"><canvas id="chart-hr" height="200"></canvas></div>
+      <div class="fig-cap">Sustained downward trend at maintained volume = improving aerobic fitness.</div>
+    </div>
+    <div class="fig">
+      <div class="fig-h"><span class="fig-title">HR Zone Distribution — This Week</span><span class="fig-n">Fig. 3</span></div>
+      <div class="fig-body"><div class="zones"><div class="zr"><div class="zl">Z1 Recovery</div><div class="zb"><div class="zbi" style="width:58%;background:#60a5fa;"></div></div><div class="zp">58%</div></div><div class="zr"><div class="zl">Z2 Easy</div><div class="zb"><div class="zbi" style="width:20%;background:#14b8a6;"></div></div><div class="zp">20%</div></div><div class="zr"><div class="zl">Z3 Aerobic</div><div class="zb"><div class="zbi" style="width:22%;background:#f59e0b;"></div></div><div class="zp">22%</div></div><div class="zr"><div class="zl">Z4 Threshold</div><div class="zb"><div class="zbi" style="width:0%;background:#f97316;"></div></div><div class="zp">0%</div></div><div class="zr"><div class="zl">Z5 Max</div><div class="zb"><div class="zbi" style="width:0%;background:#ef4444;"></div></div><div class="zp">0%</div></div></div></div>
+      <div class="fig-cap">Seconds per zone from Garmin activity data.</div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="sh">Aerobic Efficiency</div>
+    <div class="fig">
+      <div class="fig-h"><span class="fig-title">Pace at 130–145 bpm — 8-Week Rolling</span><span class="fig-n">Fig. 4</span></div>
+      <div class="fig-body" style="padding:20px 24px;">
+        <div style="display:flex;align-items:flex-end;gap:32px;flex-wrap:wrap;">
+          <div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;">Current 8-week avg</div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:36px;font-weight:500;color:var(--t);">5:49/km</div>
+          </div>
+          <div><div style="font-family:IBM Plex Mono,monospace;font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;">vs prior 8 weeks</div><div style="font-family:IBM Plex Mono,monospace;font-size:22px;font-weight:500;color:#ef4444;">↓ 3s/km vs prior 8 wks</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="sh">Parkrun</div>
+    <div style="background:var(--card);border:1px solid rgba(245,158,11,.3);border-left:3px solid var(--a);border-radius:8px;padding:13px 16px;margin-bottom:14px;"><div style="font-family:IBM Plex Mono,monospace;font-size:9px;color:var(--a);text-transform:uppercase;letter-spacing:.12em;">All-Time PB</div><div style="font-family:IBM Plex Mono,monospace;font-size:22px;color:var(--a);margin-top:4px;">21:25 (2026-07-25)</div></div>
+    
+    <div class="fig">
+      <div class="fig-h"><span class="fig-title">Parkrun Times & HR</span><span class="fig-n">Fig. 5</span></div>
+      <div class="fig-body"><canvas id="chart-parkrun" height="230"></canvas></div>
+      <div class="fig-cap">Finish time (bars, left). HR (line, right). Green = sub-20.</div>
+    </div>
+  </div>
+  <div class="footer">
+    <p>ResearchAssistants_SBW · running_bot · Monday 02 November 2026, 00:28 UTC<br>
+    Garmin Connect (activities + analytics + calendar) · Claude (claude-sonnet-4-6)</p>
+  </div>
+</div>
+<script>
+const GC='rgba(26,32,53,.9)',TC='#2a3050';
+Chart.defaults.color='#4a5270';Chart.defaults.font.family="'IBM Plex Mono',monospace";Chart.defaults.font.size=11;
+const wd=[56.0, 48.6, 79.5, 119.5, 53.8, 16.7, 85.0, 23.1, 37.9, 32.1, 33.2, 34.7, 51.9, 42.8, 56.2, 29.7];
+new Chart(document.getElementById('chart-weekly'),{type:'bar',
+  data:{labels:["07-13", "07-20", "07-27", "08-03", "08-10", "08-17", "08-24", "08-31", "09-07", "09-14", "09-21", "09-28", "10-05", "10-12", "10-19", "10-26"],datasets:[
+    {label:'Weekly km',data:wd,backgroundColor:wd.map((_,i)=>i===15?'#f97316':'rgba(249,115,22,.48)'),borderRadius:4,order:2},
+    {type:'line',label:'8-wk avg',data:[39.0, 39.0, 39.0, 39.0, 39.0, 39.0, 39.0, 39.0, 39.0, 39.0, 39.0, 39.0, 39.0, 39.0, 39.0, 39.0],borderColor:'rgba(20,184,166,.65)',borderWidth:1.5,borderDash:[6,4],pointRadius:0,tension:0,order:1}
+  ]},
+  options:{responsive:true,maintainAspectRatio:true,
+    plugins:{legend:{labels:{color:'#5a6280',boxWidth:12}},tooltip:{callbacks:{label:c=>` ${c.parsed.y} km`}}},
+    scales:{x:{grid:{display:false},ticks:{color:TC,maxRotation:45,font:{size:9}}},y:{grid:{color:GC},ticks:{color:TC,callback:v=>v+'km'}}}}
+});
+const hd=[136, 134, 132, 123, 130, 139, 140, 119, 132, 152, 138, 137, 134, 127, 129, 127];
+new Chart(document.getElementById('chart-hr'),{type:'line',
+  data:{labels:["07-13", "07-20", "07-27", "08-03", "08-10", "08-17", "08-24", "08-31", "09-07", "09-14", "09-21", "09-28", "10-05", "10-12", "10-19", "10-26"],datasets:[{label:'Avg HR',data:hd,borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,.08)',borderWidth:2.5,pointRadius:4,pointBackgroundColor:hd.map(h=>h&&h<=126?'#22c55e':'#ef4444'),tension:.3,fill:true}]},
+  options:{responsive:true,maintainAspectRatio:true,
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.parsed.y} bpm`}}},
+    scales:{x:{grid:{color:GC},ticks:{color:TC,maxRotation:45,font:{size:9}}},y:{grid:{color:GC},ticks:{color:TC,callback:v=>v+' bpm'}}}}
+});
+const prt=[21.43, 23.03],prh=[164.0, 157.0];
+new Chart(document.getElementById('chart-parkrun'),{type:'bar',
+  data:{labels:["07-25", "10-17"],datasets:[
+    {type:'bar',label:'Time',data:prt,backgroundColor:prt.map(t=>t<20?'#22c55e':t<22?'#f97316':t>27?'#1e2540':'#3b82f6'),borderRadius:3,yAxisID:'y',order:2},
+    {type:'line',label:'HR',data:prh,borderColor:'rgba(239,68,68,.6)',borderWidth:1.5,pointRadius:3,tension:.3,yAxisID:'y2',order:1}
+  ]},
+  options:{responsive:true,maintainAspectRatio:true,
+    plugins:{legend:{labels:{color:'#5a6280',boxWidth:12}}},
+    scales:{x:{grid:{display:false},ticks:{color:TC,font:{size:9}}},
+      y:{grid:{color:GC},reverse:true,min:18,max:32,ticks:{color:TC,callback:v=>`${Math.floor(v)}:${String(Math.round((v-Math.floor(v))*60)).padStart(2,'0')}`}},
+      y2:{grid:{display:false},min:110,max:190,position:'right',ticks:{color:'#ef4444'}}}}
+});
+</script>
+</body>
+</html>
