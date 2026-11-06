@@ -31,3 +31,4 @@
 | 2026-10-16 | 102 | [2026-10-16-weekly-digest.md](2026-10-16-weekly-digest.html) |
 | 2026-10-23 | 100 | [2026-10-23-weekly-digest.md](2026-10-23-weekly-digest.html) |
 | 2026-10-30 | 111 | [2026-10-30-weekly-digest.md](2026-10-30-weekly-digest.html) |
+| 2026-11-06 | 95 | [2026-11-06-weekly-digest.md](2026-11-06-weekly-digest.html) |
